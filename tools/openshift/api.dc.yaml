@@ -63,7 +63,7 @@ objects:
           volumes:
             - name: tls-certs
               secret:
-                secretName: pen-demog-api-cert
+                secretName: student-profile-api-cert
       test: false
       triggers:
         - type: ConfigChange
