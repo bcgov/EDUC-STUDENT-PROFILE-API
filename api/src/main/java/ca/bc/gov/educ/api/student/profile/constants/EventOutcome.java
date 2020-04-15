@@ -1,0 +1,6 @@
+package ca.bc.gov.educ.api.student.profile.constants;
+
+public enum EventOutcome {
+  STUDENT_PROFILE_UPDATED,
+  STUDENT_PROFILE_FOUND, STUDENT_PROFILE_NOT_FOUND, STUDENT_PROFILE_COMMENT_ADDED, STUDENT_PROFILE_COMMENT_ALREADY_EXIST
+}
