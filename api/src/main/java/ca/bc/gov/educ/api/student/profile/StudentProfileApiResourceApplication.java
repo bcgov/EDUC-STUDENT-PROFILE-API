@@ -33,7 +33,7 @@ public class StudentProfileApiResourceApplication {
     @Override
     public void configure(WebSecurity web) {
       web.ignoring().antMatchers("/v3/api-docs/**",
-              "/actuator/**",
+              "/actuator/health","/actuator/prometheus",
               "/swagger-ui/**");
     }
   }
