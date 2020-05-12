@@ -20,22 +20,22 @@ CREATE TABLE STUDENT_PROFILE_REQUEST (
   UPDATE_DATE DATE DEFAULT SYSDATE NOT NULL,
   CONSTRAINT STUDENT_PROFILE_REQUEST_PK PRIMARY KEY (STUDENT_PROFILE_REQUEST_ID)  
 );
-COMMENT ON TABLE STUDENT_PROFILE_REQUEST IS 'Profile Update Request is a transaction record of a request by a student to update their profile.';
-COMMENT ON COLUMN STUDENT_PROFILE_REQUEST.STUDENT_PROFILE_REQUEST_ID IS 'Unique surrogate key for each Profile Update request. GUID value must be provided during insert.';
+COMMENT ON TABLE STUDENT_PROFILE_REQUEST IS 'Student Profile Request is a transaction record of a request by a student to update their profile.';
+COMMENT ON COLUMN STUDENT_PROFILE_REQUEST.STUDENT_PROFILE_REQUEST_ID IS 'Unique surrogate key for each Student Profile request. GUID value must be provided during insert.';
 COMMENT ON COLUMN STUDENT_PROFILE_REQUEST.Digital_Identity_ID IS 'Foreign key to Digital Identity table identifying the Digital Identity that is was used to make this request';
-COMMENT ON COLUMN STUDENT_PROFILE_REQUEST.STUDENT_PROFILE_REQUEST_Status_Code IS 'Code indicating the status of the Student Profile Update request';
+COMMENT ON COLUMN STUDENT_PROFILE_REQUEST.STUDENT_PROFILE_REQUEST_Status_Code IS 'Code indicating the status of the Student Student Profile request';
 COMMENT ON COLUMN STUDENT_PROFILE_REQUEST.Legal_First_Name IS 'The legal first name of the student';
 COMMENT ON COLUMN STUDENT_PROFILE_REQUEST.Legal_Middle_Names IS 'The legal middle names of the student';
 COMMENT ON COLUMN STUDENT_PROFILE_REQUEST.Legal_Last_Name IS 'The legal last name of the student';
 COMMENT ON COLUMN STUDENT_PROFILE_REQUEST.DOB IS 'The date of birth of the student';
 COMMENT ON COLUMN STUDENT_PROFILE_REQUEST.Gender_Code IS 'The gender of the student';
 COMMENT ON COLUMN STUDENT_PROFILE_REQUEST.Email IS 'Email of the student';
-COMMENT ON COLUMN STUDENT_PROFILE_REQUEST.Reviewer IS 'IDIR of the staff user who is working or did work on the Profile Update Request';
+COMMENT ON COLUMN STUDENT_PROFILE_REQUEST.Reviewer IS 'IDIR of the staff user who is working or did work on the Student Profile Request';
 COMMENT ON COLUMN STUDENT_PROFILE_REQUEST.Initial_Submit_Date IS 'Date and time that the Student first fully submitted the request, which does not happen until after they submit and verify their email address.';
-COMMENT ON COLUMN STUDENT_PROFILE_REQUEST.Status_Update_Date IS 'Date and time that the status of the Profile Update Request was last updated.';
+COMMENT ON COLUMN STUDENT_PROFILE_REQUEST.Status_Update_Date IS 'Date and time that the status of the Student Profile Request was last updated.';
 COMMENT ON COLUMN STUDENT_PROFILE_REQUEST.Failure_Reason IS 'Free text reason for why Min EDUC staff could not complete the request. This is used for both Rejects and Unable to complete failures.';
 COMMENT ON COLUMN STUDENT_PROFILE_REQUEST.EMAIL_VERIFIED IS 'Short value indicating whether the email of the student has been verified.';
-COMMENT ON COLUMN STUDENT_PROFILE_REQUEST.COMPLETE_COMMENT IS 'Free text message entered by PEN Staff when completing Profile Update Requests.';
+COMMENT ON COLUMN STUDENT_PROFILE_REQUEST.COMPLETE_COMMENT IS 'Free text message entered by PEN Staff when completing Student Profile Requests.';
 
 
 CREATE TABLE STUDENT_PROFILE_REQUEST_MACRO (
@@ -49,7 +49,7 @@ CREATE TABLE STUDENT_PROFILE_REQUEST_MACRO (
   UPDATE_DATE DATE DEFAULT SYSDATE NOT NULL,
   CONSTRAINT STUDENT_PROFILE_REQUEST_MACRO_PK PRIMARY KEY (STUDENT_PROFILE_REQUEST_MACRO_ID)
 );
-COMMENT ON TABLE STUDENT_PROFILE_REQUEST_MACRO IS 'List of text macros used as standard messages by PEN Staff when completing Profile Update Requests.';
+COMMENT ON TABLE STUDENT_PROFILE_REQUEST_MACRO IS 'List of text macros used as standard messages by PEN Staff when completing Student Profile Requests.';
 COMMENT ON COLUMN STUDENT_PROFILE_REQUEST_MACRO.MACRO_CODE IS 'A short text string that identifies the macro and when identified will be replaced by the macro text.';
 COMMENT ON COLUMN STUDENT_PROFILE_REQUEST_MACRO.MACRO_TEXT IS 'A standard text string that will be substituted for the macro code by the application.';
 COMMENT ON COLUMN STUDENT_PROFILE_REQUEST_MACRO.MACRO_TYPE_CODE IS 'A code value indicating the type, or class, of the text macro.';
@@ -68,7 +68,7 @@ CREATE TABLE STUDENT_PROFILE_REQUEST_STATUS_CODE (
   UPDATE_DATE DATE DEFAULT SYSDATE NOT NULL,
   CONSTRAINT STUDENT_PROFILE_REQUEST_STATUS_CODE_PK PRIMARY KEY (STUDENT_PROFILE_REQUEST_STATUS_CODE)  
 );
-COMMENT ON TABLE STUDENT_PROFILE_REQUEST_STATUS_CODE IS 'Profile Update Request Status Code lists the transaction status values for the Profile Update Requests. Examples are Submitted, Pending Student Input, Completed, Rejected.';
+COMMENT ON TABLE STUDENT_PROFILE_REQUEST_STATUS_CODE IS 'Student Profile Request Status Code lists the transaction status values for the Student Profile Requests. Examples are Submitted, Pending Student Input, Completed, Rejected.';
 
 
 CREATE TABLE STUDENT_PROFILE_REQUEST_GENDER_CODE (
@@ -124,7 +124,7 @@ CREATE TABLE STUDENT_PROFILE_REQUEST_DOCUMENT_TYPE_CODE (
   UPDATE_DATE DATE DEFAULT SYSDATE NOT NULL,
   CONSTRAINT STUDENT_PROFILE_REQUEST_DOCUMENT_TYPE_CODE_PK PRIMARY KEY (STUDENT_PROFILE_REQUEST_DOCUMENT_TYPE_CODE)  
 );
-COMMENT ON TABLE STUDENT_PROFILE_REQUEST_DOCUMENT_TYPE_CODE IS 'Profile Update Request Document Type Code lists the semantic types of documents that are supported. Examples include Birth Certificate (image of), Passport image, Permanent Resident Card image, etc.';
+COMMENT ON TABLE STUDENT_PROFILE_REQUEST_DOCUMENT_TYPE_CODE IS 'Student Profile Request Document Type Code lists the semantic types of documents that are supported. Examples include Birth Certificate (image of), Passport image, Permanent Resident Card image, etc.';
 
 -- Table STUDENT_PROFILE_REQUEST_DOCUMENT
 CREATE TABLE STUDENT_PROFILE_REQUEST_DOCUMENT (
@@ -147,7 +147,7 @@ TABLESPACE STUDENT_PROFILE_BLOB_DATA
 COMMENT ON TABLE STUDENT_PROFILE_REQUEST_DOCUMENT IS 'Holds documents related to Students, either directly or indirectly.';
 
 COMMENT ON COLUMN STUDENT_PROFILE_REQUEST_DOCUMENT.STUDENT_PROFILE_REQUEST_DOCUMENT_ID IS 'Unique surrogate primary key for each Student Document. GUID value must be provided during insert.';
-COMMENT ON COLUMN STUDENT_PROFILE_REQUEST_DOCUMENT.STUDENT_PROFILE_REQUEST_ID IS 'Foreign key to the Profile Update Request.';
+COMMENT ON COLUMN STUDENT_PROFILE_REQUEST_DOCUMENT.STUDENT_PROFILE_REQUEST_ID IS 'Foreign key to the Student Profile Request.';
 COMMENT ON COLUMN STUDENT_PROFILE_REQUEST_DOCUMENT.STUDENT_PROFILE_REQUEST_DOCUMENT_TYPE_CODE IS 'Code indicating the type of the semantic type of the document. E.g. Birth Certificate, Passport, etc.';
 COMMENT ON COLUMN STUDENT_PROFILE_REQUEST_DOCUMENT.FILE_NAME IS 'Name of the document file, without any local file path.';
 COMMENT ON COLUMN STUDENT_PROFILE_REQUEST_DOCUMENT.FILE_EXTENSION IS 'Extension portion of the filename, if present. E.g. JPG, PNG, PDF, etc.';
@@ -180,13 +180,13 @@ create index STUDENT_PROFILE_REQUEST_COMMENT_STUDENT_PROFILE_REQUEST_ID_I on STU
 create index STUDENT_PROFILE_REQUEST_DOCUMENT_STUDENT_PROFILE_REQUEST_ID_I on STUDENT_PROFILE_REQUEST_DOCUMENT ( STUDENT_PROFILE_REQUEST_ID );
 
 
--- Profile Update Request Gender Code
+-- Student Profile Request Gender Code
 Insert into STUDENT_PROFILE_REQUEST_GENDER_CODE (GENDER_CODE,LABEL,DESCRIPTION,DISPLAY_ORDER,EFFECTIVE_DATE,EXPIRY_DATE,CREATE_USER,CREATE_DATE,UPDATE_USER,UPDATE_DATE) values ('F','Female','Persons whose current gender is female. This includes cisgender and transgender persons who are female.',1,to_date('2020-01-01','YYYY-MM-DD'),to_date('2099-12-31','YYYY-MM-DD'),'IDIR/GRCHWELO',to_date('2019-11-07','YYYY-MM-DD'),'IDIR/GRCHWELO',to_date('2019-11-07','YYYY-MM-DD'));
 Insert into STUDENT_PROFILE_REQUEST_GENDER_CODE (GENDER_CODE,LABEL,DESCRIPTION,DISPLAY_ORDER,EFFECTIVE_DATE,EXPIRY_DATE,CREATE_USER,CREATE_DATE,UPDATE_USER,UPDATE_DATE) values ('M','Male','Persons whose current gender is male. This includes cisgender and transgender persons who are male.',2,to_date('2020-01-01','YYYY-MM-DD'),to_date('2099-12-31','YYYY-MM-DD'),'IDIR/GRCHWELO',to_date('2019-11-07','YYYY-MM-DD'),'IDIR/GRCHWELO',to_date('2019-11-07','YYYY-MM-DD'));
 Insert into STUDENT_PROFILE_REQUEST_GENDER_CODE (GENDER_CODE,LABEL,DESCRIPTION,DISPLAY_ORDER,EFFECTIVE_DATE,EXPIRY_DATE,CREATE_USER,CREATE_DATE,UPDATE_USER,UPDATE_DATE) values ('X','Gender Diverse','Persons whose current gender is not exclusively as male or female. It includes people who do not have one gender, have no gender, are non-binary, or are Two-Spirit.',3,to_date('2020-01-01','YYYY-MM-DD'),to_date('2099-12-31','YYYY-MM-DD'),'IDIR/GRCHWELO',to_date('2019-11-07','YYYY-MM-DD'),'IDIR/GRCHWELO',to_date('2019-11-07','YYYY-MM-DD'));
 Insert into STUDENT_PROFILE_REQUEST_GENDER_CODE (GENDER_CODE,LABEL,DESCRIPTION,DISPLAY_ORDER,EFFECTIVE_DATE,EXPIRY_DATE,CREATE_USER,CREATE_DATE,UPDATE_USER,UPDATE_DATE) values ('U','Unknown','Persons whose gender is not known at the time of data collection. It may or may not get updated at a later point in time. X is different than U.',4,to_date('2020-01-01','YYYY-MM-DD'),to_date('2099-12-31','YYYY-MM-DD'),'IDIR/GRCHWELO',to_date('2019-11-07','YYYY-MM-DD'),'IDIR/GRCHWELO',to_date('2019-11-07','YYYY-MM-DD'));
 
--- Profile Update Request Status Code
+-- Student Profile Request Status Code
 Insert into STUDENT_PROFILE_REQUEST_STATUS_CODE (STUDENT_PROFILE_REQUEST_STATUS_CODE,LABEL,DESCRIPTION,DISPLAY_ORDER,EFFECTIVE_DATE,EXPIRY_DATE,CREATE_USER,CREATE_DATE,UPDATE_USER,UPDATE_DATE) values ('DRAFT','Draft','Request created but not yet submitted.',1,to_date('2020-01-01','YYYY-MM-DD'),to_date('2099-12-31','YYYY-MM-DD'),'IDIR/GRCHWELO',to_date('2019-11-07','YYYY-MM-DD'),'IDIR/GRCHWELO',to_date('2019-11-07','YYYY-MM-DD'));
 Insert into STUDENT_PROFILE_REQUEST_STATUS_CODE (STUDENT_PROFILE_REQUEST_STATUS_CODE,LABEL,DESCRIPTION,DISPLAY_ORDER,EFFECTIVE_DATE,EXPIRY_DATE,CREATE_USER,CREATE_DATE,UPDATE_USER,UPDATE_DATE) values ('INITREV','First Review','Request has been submitted and is now in it''s first review by staff.',2,to_date('2020-01-01','YYYY-MM-DD'),to_date('2099-12-31','YYYY-MM-DD'),'IDIR/GRCHWELO',to_date('2019-11-07','YYYY-MM-DD'),'IDIR/GRCHWELO',to_date('2019-11-07','YYYY-MM-DD'));
 Insert into STUDENT_PROFILE_REQUEST_STATUS_CODE (STUDENT_PROFILE_REQUEST_STATUS_CODE,LABEL,DESCRIPTION,DISPLAY_ORDER,EFFECTIVE_DATE,EXPIRY_DATE,CREATE_USER,CREATE_DATE,UPDATE_USER,UPDATE_DATE) values ('RETURNED','Returned for more information','Request has been returned to the submitter for more information.',3,to_date('2020-01-01','YYYY-MM-DD'),to_date('2099-12-31','YYYY-MM-DD'),'IDIR/GRCHWELO',to_date('2019-11-07','YYYY-MM-DD'),'IDIR/GRCHWELO',to_date('2019-11-07','YYYY-MM-DD'));
@@ -195,7 +195,7 @@ Insert into STUDENT_PROFILE_REQUEST_STATUS_CODE (STUDENT_PROFILE_REQUEST_STATUS_
 Insert into STUDENT_PROFILE_REQUEST_STATUS_CODE (STUDENT_PROFILE_REQUEST_STATUS_CODE,LABEL,DESCRIPTION,DISPLAY_ORDER,EFFECTIVE_DATE,EXPIRY_DATE,CREATE_USER,CREATE_DATE,UPDATE_USER,UPDATE_DATE) values ('MANUAL','Completed by manual match','Request was completed by staff determining the matching PEN.',6,to_date('2020-01-01','YYYY-MM-DD'),to_date('2099-12-31','YYYY-MM-DD'),'IDIR/GRCHWELO',to_date('2019-11-07','YYYY-MM-DD'),'IDIR/GRCHWELO',to_date('2019-11-07','YYYY-MM-DD'));
 Insert into STUDENT_PROFILE_REQUEST_STATUS_CODE (STUDENT_PROFILE_REQUEST_STATUS_CODE,LABEL,DESCRIPTION,DISPLAY_ORDER,EFFECTIVE_DATE,EXPIRY_DATE,CREATE_USER,CREATE_DATE,UPDATE_USER,UPDATE_DATE) values ('REJECTED','Could not be fulfilled','Request could not be fullfilled by staff for the reasons provided.',7,to_date('2020-01-01','YYYY-MM-DD'),to_date('2099-12-31','YYYY-MM-DD'),'IDIR/GRCHWELO',to_date('2019-11-07','YYYY-MM-DD'),'IDIR/GRCHWELO',to_date('2019-11-07','YYYY-MM-DD'));
 
--- Profile Update Request Document Type Code
+-- Student Profile Request Document Type Code
 Insert into STUDENT_PROFILE_REQUEST_DOCUMENT_TYPE_CODE (STUDENT_PROFILE_REQUEST_DOCUMENT_TYPE_CODE,LABEL,DESCRIPTION,DISPLAY_ORDER,EFFECTIVE_DATE,EXPIRY_DATE,CREATE_USER,CREATE_DATE,UPDATE_USER,UPDATE_DATE) values ('CABIRTH','Canadian Birth Certificate','Canadian Birth Certificate',10,to_date('2020-01-01 00:00:00','YYYY-MM-DD HH24:MI:SS'),to_date('2099-12-31 00:00:00','YYYY-MM-DD HH24:MI:SS'),'IDIR/GRCHWELO',to_date('2019-12-20 00:00:00','YYYY-MM-DD HH24:MI:SS'),'IDIR/GRCHWELO',to_date('2019-12-20 00:00:00','YYYY-MM-DD HH24:MI:SS'));
 Insert into STUDENT_PROFILE_REQUEST_DOCUMENT_TYPE_CODE (STUDENT_PROFILE_REQUEST_DOCUMENT_TYPE_CODE,LABEL,DESCRIPTION,DISPLAY_ORDER,EFFECTIVE_DATE,EXPIRY_DATE,CREATE_USER,CREATE_DATE,UPDATE_USER,UPDATE_DATE) values ('CAPASSPORT','Canadian Passport','Canadian Passport',20,to_date('2020-01-01 00:00:00','YYYY-MM-DD HH24:MI:SS'),to_date('2099-12-31 00:00:00','YYYY-MM-DD HH24:MI:SS'),'IDIR/GRCHWELO',to_date('2019-12-20 00:00:00','YYYY-MM-DD HH24:MI:SS'),'IDIR/GRCHWELO',to_date('2019-12-20 00:00:00','YYYY-MM-DD HH24:MI:SS'));
 Insert into STUDENT_PROFILE_REQUEST_DOCUMENT_TYPE_CODE (STUDENT_PROFILE_REQUEST_DOCUMENT_TYPE_CODE,LABEL,DESCRIPTION,DISPLAY_ORDER,EFFECTIVE_DATE,EXPIRY_DATE,CREATE_USER,CREATE_DATE,UPDATE_USER,UPDATE_DATE) values ('CADL','Canadian Driver''s Licence','Canadian Driver''s Licence',30,to_date('2020-01-01 00:00:00','YYYY-MM-DD HH24:MI:SS'),to_date('2099-12-31 00:00:00','YYYY-MM-DD HH24:MI:SS'),'IDIR/GRCHWELO',to_date('2019-12-20 00:00:00','YYYY-MM-DD HH24:MI:SS'),'IDIR/GRCHWELO',to_date('2019-12-20 00:00:00','YYYY-MM-DD HH24:MI:SS'));
@@ -214,12 +214,12 @@ Insert into STUDENT_PROFILE_REQUEST_DOCUMENT_TYPE_CODE (STUDENT_PROFILE_REQUEST_
 Insert into STUDENT_PROFILE_REQUEST_DOCUMENT_TYPE_CODE (STUDENT_PROFILE_REQUEST_DOCUMENT_TYPE_CODE,LABEL,DESCRIPTION,DISPLAY_ORDER,EFFECTIVE_DATE,EXPIRY_DATE,CREATE_USER,CREATE_DATE,UPDATE_USER,UPDATE_DATE) values ('FORBIRTH','Foreign Birth Certificate','Foreign Birth Certificate (with English translation)',160,to_date('2020-01-01 00:00:00','YYYY-MM-DD HH24:MI:SS'),to_date('2099-12-31 00:00:00','YYYY-MM-DD HH24:MI:SS'),'IDIR/GRCHWELO',to_date('2019-12-20 00:00:00','YYYY-MM-DD HH24:MI:SS'),'IDIR/GRCHWELO',to_date('2019-12-20 00:00:00','YYYY-MM-DD HH24:MI:SS'));
 Insert into STUDENT_PROFILE_REQUEST_DOCUMENT_TYPE_CODE (STUDENT_PROFILE_REQUEST_DOCUMENT_TYPE_CODE,LABEL,DESCRIPTION,DISPLAY_ORDER,EFFECTIVE_DATE,EXPIRY_DATE,CREATE_USER,CREATE_DATE,UPDATE_USER,UPDATE_DATE) values ('OTHER','Other','Other document type',170,to_date('2020-01-01 00:00:00','YYYY-MM-DD HH24:MI:SS'),to_date('2099-12-31 00:00:00','YYYY-MM-DD HH24:MI:SS'),'IDIR/GRCHWELO',to_date('2019-12-20 00:00:00','YYYY-MM-DD HH24:MI:SS'),'IDIR/GRCHWELO',to_date('2019-12-20 00:00:00','YYYY-MM-DD HH24:MI:SS'));
 
--- Profile Update Request Macro Type Code
+-- Student Profile Request Macro Type Code
 Insert into STUDENT_PROFILE_REQUEST_MACRO_TYPE_CODE (STUDENT_PROFILE_REQUEST_MACRO_TYPE_CODE,LABEL,DESCRIPTION,DISPLAY_ORDER,EFFECTIVE_DATE,EXPIRY_DATE,CREATE_USER,CREATE_DATE,UPDATE_USER,UPDATE_DATE) values ('MOREINFO','More Information Macro','Macros used when requesting that the student provide more information for a PEN Retrieval Request',1,to_date('2020-01-01 00:00:00','YYYY-MM-DD HH24:MI:SS'),to_date('2099-12-31 00:00:00','YYYY-MM-DD HH24:MI:SS'),'IDIR/JOCOX',to_date('2020-04-02 00:00:00','YYYY-MM-DD HH24:MI:SS'),'IDIR/JOCOX',to_date('2020-04-02 00:00:00','YYYY-MM-DD HH24:MI:SS'));
 Insert into STUDENT_PROFILE_REQUEST_MACRO_TYPE_CODE (STUDENT_PROFILE_REQUEST_MACRO_TYPE_CODE,LABEL,DESCRIPTION,DISPLAY_ORDER,EFFECTIVE_DATE,EXPIRY_DATE,CREATE_USER,CREATE_DATE,UPDATE_USER,UPDATE_DATE) values ('REJECT','Reject Reason Macro','Macros used when rejecting a PEN Retrieval Request',2,to_date('2020-01-01 00:00:00','YYYY-MM-DD HH24:MI:SS'),to_date('2099-12-31 00:00:00','YYYY-MM-DD HH24:MI:SS'),'IDIR/JOCOX',to_date('2020-04-02 00:00:00','YYYY-MM-DD HH24:MI:SS'),'IDIR/JOCOX',to_date('2020-04-02 00:00:00','YYYY-MM-DD HH24:MI:SS'));
 
 
--- Profile Update Request Macro
+-- Student Profile Request Macro
 Insert into STUDENT_PROFILE_REQUEST_MACRO (STUDENT_PROFILE_REQUEST_MACRO_ID,MACRO_CODE,MACRO_TEXT,MACRO_TYPE_CODE,CREATE_USER,CREATE_DATE,UPDATE_USER,UPDATE_DATE) values (sys_guid(),'PCN','A PEN number can not be located using the information in your PEN request.'|| CHR(10) || CHR(10) ||'Please provide all other given names or surnames you have previously used or advise if you have never used any other names.','MOREINFO','IDIR/JOCOX',to_date('2020-04-06 00:00:00','YYYY-MM-DD HH24:MI:SS'),'IDIR/JOCOX',to_date('2020-04-06 00:00:00','YYYY-MM-DD HH24:MI:SS'));
 Insert into STUDENT_PROFILE_REQUEST_MACRO (STUDENT_PROFILE_REQUEST_MACRO_ID,MACRO_CODE,MACRO_TEXT,MACRO_TYPE_CODE,CREATE_USER,CREATE_DATE,UPDATE_USER,UPDATE_DATE) values (sys_guid(),'PID','To continue with your PEN request upload an IMG or PDF of your current Government Issued photo Identification (ID).'|| CHR(10) || CHR(10) ||'NOTE: If the name listed on the ID you upload is different from what''s in the PEN system, we will update our data to match. ID is covered by the B.C. Freedom of Information Protection of Privacy.','MOREINFO','IDIR/JOCOX',to_date('2020-04-06 00:00:00','YYYY-MM-DD HH24:MI:SS'),'IDIR/JOCOX',to_date('2020-04-06 00:00:00','YYYY-MM-DD HH24:MI:SS'));
 Insert into STUDENT_PROFILE_REQUEST_MACRO (STUDENT_PROFILE_REQUEST_MACRO_ID,MACRO_CODE,MACRO_TEXT,MACRO_TYPE_CODE,CREATE_USER,CREATE_DATE,UPDATE_USER,UPDATE_DATE) values (sys_guid(),'SOA','To continue with your PEN request please confirm the last B.C. Schools you attended or graduated from, including any applications to B.C. Post Secondary Institutions','MOREINFO','IDIR/JOCOX',to_date('2020-04-06 00:00:00','YYYY-MM-DD HH24:MI:SS'),'IDIR/JOCOX',to_date('2020-04-06 00:00:00','YYYY-MM-DD HH24:MI:SS'));
