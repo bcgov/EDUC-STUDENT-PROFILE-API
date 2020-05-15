@@ -46,7 +46,7 @@ public class DocumentService {
    *
    * @param documentID the documentID to fetch the Document from DB
    * @return The Document {@link DocumentEntity} if found.
-   * @throws EntityNotFoundException if no document found by the ID or penRequestID does not match.
+   * @throws EntityNotFoundException if no document found by the ID or studentProfileId does not match.
    */
   public DocumentEntity retrieveDocumentMetadata(UUID studentProfileId, UUID documentID) {
     log.info("retrieving Document Metadata, documentID: " + documentID.toString());
@@ -58,7 +58,7 @@ public class DocumentService {
 
     DocumentEntity document = result.get();
 
-    if (!document.getStudentProfileEntity().getStudentProfileID().equals(studentProfileId)) {
+    if (!document.getRequest().getRequestID().equals(studentProfileId)) {
       throw new EntityNotFoundException(DocumentEntity.class, "studentProfileId", studentProfileId.toString());
     }
 
@@ -70,7 +70,7 @@ public class DocumentService {
    *
    * @param documentID the documentID to fetch the Document from DB
    * @return The Document {@link DocumentEntity} if found.
-   * @throws EntityNotFoundException if no document found by the ID or penRequestID does not match.
+   * @throws EntityNotFoundException if no document found by the ID or studentProfileId does not match.
    */
   @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
   public DocumentEntity retrieveDocument(UUID studentProfileId, UUID documentID, String includeDocData) {
@@ -95,7 +95,7 @@ public class DocumentService {
    * @return {@link List<DocumentEntity> }
    */
   public List<DocumentEntity> retrieveAllDocumentMetadata(UUID studentProfileId) {
-    return documentRepository.findByStudentProfileEntity(studentProfileId);
+    return documentRepository.findByRequestRequestID(studentProfileId);
   }
 
   /**
@@ -105,16 +105,16 @@ public class DocumentService {
    * @return saved DocumentEntity.
    * @throws EntityNotFoundException if payload contains invalid parameters
    */
-  public DocumentEntity createDocument(UUID penRequestId, DocumentEntity document) {
+  public DocumentEntity createDocument(UUID studentProfileId, DocumentEntity document) {
     log.info(
-            "creating Document, penRequestId: " + penRequestId.toString() + ", document: " + document.toString());
-    Optional<StudentProfileEntity> option = studentProfileRepository.findById(penRequestId);
+            "creating Document, requestId: " + studentProfileId.toString() + ", document: " + document.toString());
+    Optional<StudentProfileEntity> option = studentProfileRepository.findById(studentProfileId);
     if (option.isPresent()) {
       StudentProfileEntity studentProfileEntity = option.get();
-      document.setStudentProfileEntity(studentProfileEntity);
+      document.setRequest(studentProfileEntity);
       return documentRepository.save(document);
     } else {
-      throw new EntityNotFoundException(StudentProfileEntity.class, "penRequestId", penRequestId.toString());
+      throw new EntityNotFoundException(StudentProfileEntity.class, "requestId", studentProfileId.toString());
     }
   }
 
@@ -125,9 +125,9 @@ public class DocumentService {
    * @return DocumentEntity which was deleted.
    * @throws EntityNotFoundException if no entity exist by this id
    */
-  public DocumentEntity deleteDocument(UUID penRequestId, UUID documentID) {
+  public DocumentEntity deleteDocument(UUID studentProfileId, UUID documentID) {
     log.info("deleting Document, documentID: " + documentID.toString());
-    DocumentEntity document = retrieveDocumentMetadata(penRequestId, documentID);
+    DocumentEntity document = retrieveDocumentMetadata(studentProfileId, documentID);
     documentRepository.delete(document);
     return document;
   }
@@ -160,8 +160,8 @@ public class DocumentService {
     Optional<DocumentEntity> documentEntityOptional = documentRepository.findById(documentId);
     if (documentEntityOptional.isPresent()) {
       DocumentEntity documentEntity = documentEntityOptional.get();
-      StudentProfileEntity studentProfileEntity = documentEntity.getStudentProfileEntity();
-      if (!studentProfileEntity.getStudentProfileID().equals(studentProfileId)) {
+      StudentProfileEntity studentProfileEntity = documentEntity.getRequest();
+      if (!studentProfileEntity.getRequestID().equals(studentProfileId)) {
         throw new EntityNotFoundException(StudentProfileEntity.class, "studentProfileId", studentProfileId.toString());
       }
       documentEntity.setFileExtension(document.getFileExtension());

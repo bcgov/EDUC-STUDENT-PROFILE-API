@@ -17,17 +17,17 @@ import static org.springframework.http.HttpStatus.CREATED;
 public interface StudentProfileCommentEndpoint {
 
   @PreAuthorize("#oauth2.hasScope('READ_STUDENT_PROFILE')")
-  @GetMapping("/{penRequestId}/comments")
+  @GetMapping("/{requestId}/comments")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"), @ApiResponse(responseCode = "404", description = "NOT FOUND")})
   @Transactional
-  List<StudentProfileComments> retrieveComments(@PathVariable String penRequestId);
+  List<StudentProfileComments> retrieveComments(@PathVariable String requestId);
 
   @PreAuthorize("#oauth2.hasScope('WRITE_STUDENT_PROFILE')")
-  @PostMapping("/{penRequestId}/comments")
+  @PostMapping("/{requestId}/comments")
   @ApiResponses(value = {@ApiResponse(responseCode = "201", description = "CREATED"), @ApiResponse(responseCode = "400", description = "BAD REQUEST")})
   @ResponseStatus(CREATED)
   @Transactional
-  StudentProfileComments save(@PathVariable String penRequestId, @Validated @RequestBody StudentProfileComments penRequestComments);
+  StudentProfileComments save(@PathVariable String requestId, @Validated @RequestBody StudentProfileComments requestComments);
 
 
 }

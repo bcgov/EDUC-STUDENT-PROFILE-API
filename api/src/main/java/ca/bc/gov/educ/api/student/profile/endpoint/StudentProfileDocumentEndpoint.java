@@ -20,31 +20,31 @@ import static org.springframework.http.HttpStatus.CREATED;
 @RequestMapping("/")
 public interface StudentProfileDocumentEndpoint {
 
-  @GetMapping("/{studentProfileID}/documents/{documentID}")
+  @GetMapping("/{requestID}/documents/{documentID}")
   @PreAuthorize("#oauth2.hasScope('READ_DOCUMENT_STUDENT_PROFILE')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"), @ApiResponse(responseCode = "404", description = "NOT FOUND")})
-  StudentProfileDocument readDocument(@PathVariable String studentProfileID, @PathVariable String documentID, @RequestParam(value = "includeDocData", defaultValue = "Y") String includeDocData);
+  StudentProfileDocument readDocument(@PathVariable String requestID, @PathVariable String documentID, @RequestParam(value = "includeDocData", defaultValue = "Y") String includeDocData);
 
-  @PostMapping("/{studentProfileID}/documents")
+  @PostMapping("/{requestID}/documents")
   @PreAuthorize("#oauth2.hasAnyScope('WRITE_DOCUMENT_STUDENT_PROFILE')")
   @ApiResponses(value = {@ApiResponse(responseCode = "201", description = "CREATED"), @ApiResponse(responseCode = "200", description = "OK")})
   @ResponseStatus(CREATED)
-  StudentProfileDocMetadata createDocument(@PathVariable String studentProfileID, @Validated @RequestBody StudentProfileDocument penReqDocument);
+  StudentProfileDocMetadata createDocument(@PathVariable String requestID, @Validated @RequestBody StudentProfileDocument penReqDocument);
 
-  @PutMapping("/{studentProfileID}/documents/{documentID}")
+  @PutMapping("/{requestID}/documents/{documentID}")
   @PreAuthorize("#oauth2.hasScope('WRITE_DOCUMENT_STUDENT_PROFILE')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
-  StudentProfileDocMetadata updateDocument(@PathVariable UUID studentProfileID, @PathVariable UUID documentID, @Validated @RequestBody StudentProfileDocument penReqDocument);
+  StudentProfileDocMetadata updateDocument(@PathVariable UUID requestID, @PathVariable UUID documentID, @Validated @RequestBody StudentProfileDocument penReqDocument);
 
-  @DeleteMapping("/{studentProfileID}/documents/{documentID}")
-  @PreAuthorize("#oauth2.hasScope('DELETE_DOCUMENT')")
+  @DeleteMapping("/{requestID}/documents/{documentID}")
+  @PreAuthorize("#oauth2.hasScope('DELETE_DOCUMENT_STUDENT_PROFILE')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
-  StudentProfileDocMetadata deleteDocument(@PathVariable String studentProfileID, @PathVariable String documentID);
+  StudentProfileDocMetadata deleteDocument(@PathVariable String requestID, @PathVariable String documentID);
 
-  @GetMapping("/{studentProfileID}/documents")
+  @GetMapping("/{requestID}/documents")
   @PreAuthorize("#oauth2.hasScope('READ_DOCUMENT_STUDENT_PROFILE')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
-  Iterable<StudentProfileDocMetadata> readAllDocumentMetadata(@PathVariable String studentProfileID);
+  Iterable<StudentProfileDocMetadata> readAllDocumentMetadata(@PathVariable String requestID);
 
   @GetMapping("/file-requirements")
   @PreAuthorize("#oauth2.hasScope('READ_DOCUMENT_REQUIREMENTS_STUDENT_PROFILE')")

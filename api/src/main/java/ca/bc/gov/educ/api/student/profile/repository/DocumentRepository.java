@@ -8,5 +8,5 @@ import java.util.List;
 import java.util.UUID;
 
 public interface DocumentRepository extends CrudRepository<DocumentEntity, UUID> {
-  List<DocumentEntity> findByStudentProfileEntity(UUID studentProfileID);
+  List<DocumentEntity> findByRequestRequestID(UUID studentProfileID);
 }

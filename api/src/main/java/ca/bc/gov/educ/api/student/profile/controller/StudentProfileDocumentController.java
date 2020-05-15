@@ -39,32 +39,32 @@ public class StudentProfileDocumentController extends BaseController implements 
   }
 
   @Override
-  public StudentProfileDocument readDocument(String studentProfileID, String documentID, String includeDocData) {
-    return mapper.toStructure(getDocumentService().retrieveDocument(UUID.fromString(studentProfileID), UUID.fromString(documentID), includeDocData));
+  public StudentProfileDocument readDocument(String requestID, String documentID, String includeDocData) {
+    return mapper.toStructure(getDocumentService().retrieveDocument(UUID.fromString(requestID), UUID.fromString(documentID), includeDocData));
   }
 
   @Override
-  public StudentProfileDocMetadata createDocument(String studentProfileID, StudentProfileDocument penReqDocument) {
+  public StudentProfileDocMetadata createDocument(String requestID, StudentProfileDocument penReqDocument) {
     setAuditColumns(penReqDocument);
     val model = mapper.toModel(penReqDocument);
     getValidator().validateDocumentPayload(model, true);
-    return mapper.toMetadataStructure(getDocumentService().createDocument(UUID.fromString(studentProfileID), model));
+    return mapper.toMetadataStructure(getDocumentService().createDocument(UUID.fromString(requestID), model));
   }
 
   @Override
-  public StudentProfileDocMetadata updateDocument(UUID studentProfileID, UUID documentID, StudentProfileDocument penReqDocument) {
+  public StudentProfileDocMetadata updateDocument(UUID requestID, UUID documentID, StudentProfileDocument penReqDocument) {
     setAuditColumns(penReqDocument);
     val model = mapper.toModel(penReqDocument);
     getValidator().validateDocumentPayload(model, false);
-    return mapper.toMetadataStructure(getDocumentService().updateDocument(studentProfileID, documentID, model));
+    return mapper.toMetadataStructure(getDocumentService().updateDocument(requestID, documentID, model));
   }
 
-  public StudentProfileDocMetadata deleteDocument(String studentProfileID, String documentID) {
-    return mapper.toMetadataStructure(getDocumentService().deleteDocument(UUID.fromString(studentProfileID), UUID.fromString(documentID)));
+  public StudentProfileDocMetadata deleteDocument(String requestID, String documentID) {
+    return mapper.toMetadataStructure(getDocumentService().deleteDocument(UUID.fromString(requestID), UUID.fromString(documentID)));
   }
 
-  public Iterable<StudentProfileDocMetadata> readAllDocumentMetadata(String studentProfileID) {
-    return getDocumentService().retrieveAllDocumentMetadata(UUID.fromString(studentProfileID))
+  public Iterable<StudentProfileDocMetadata> readAllDocumentMetadata(String requestID) {
+    return getDocumentService().retrieveAllDocumentMetadata(UUID.fromString(requestID))
             .stream().map(mapper::toMetadataStructure).collect(Collectors.toList());
   }
 

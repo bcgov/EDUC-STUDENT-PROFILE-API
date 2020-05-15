@@ -14,7 +14,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
-@Table(name = "student_profile_document")
+@Table(name = "student_profile_request_document")
 @DynamicUpdate
 public class DocumentEntity {
 
@@ -30,14 +30,14 @@ public class DocumentEntity {
                   )
           }
   )
-  @Column(name = "pen_retrieval_request_document_id", unique = true, updatable = false, columnDefinition = "BINARY(16)")
+  @Column(name = "student_profile_request_document_id", unique = true, updatable = false, columnDefinition = "BINARY(16)")
   UUID documentID;
 
   @ManyToOne
-  @JoinColumn(name = "student_profile_id", updatable = false, columnDefinition = "BINARY(16)")
-  StudentProfileEntity studentProfileEntity;
+  @JoinColumn(name = "student_profile_request_id", updatable = false, columnDefinition = "BINARY(16)")
+  StudentProfileEntity request;
 
-  @Column(name = "student_profile_document_type_code")
+  @Column(name = "student_profile_request_document_type_code")
   String documentTypeCode;
 
   @Column(name = "file_name")
