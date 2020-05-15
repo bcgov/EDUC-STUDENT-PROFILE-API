@@ -1,12 +1,12 @@
 package ca.bc.gov.educ.api.student.profile;
 
-import net.javacrumbs.shedlock.spring.annotation.EnableSchedulerLock;
+//import net.javacrumbs.shedlock.spring.annotation.EnableSchedulerLock;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.retry.annotation.EnableRetry;
-import org.springframework.scheduling.annotation.EnableScheduling;
+//import org.springframework.retry.annotation.EnableRetry;
+//import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -14,9 +14,9 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 @SpringBootApplication
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @EnableCaching
-@EnableScheduling
-@EnableSchedulerLock(defaultLockAtMostFor = "1s")
-@EnableRetry
+//@EnableScheduling
+//@EnableSchedulerLock(defaultLockAtMostFor = "1s")
+//@EnableRetry
 public class StudentProfileApiResourceApplication {
 
   public static void main(String[] args) {
