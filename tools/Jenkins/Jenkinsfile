@@ -21,17 +21,6 @@ pipeline{
             resourceRequestMemory: 2Gi
             resourceLimitCpu: 3
             resourceLimitMemory: 2Gi
-            env:
-            - name: SONARQUBE_HOSTNAME
-              valueFrom:
-                secretKeyRef:
-                  name: 'student-profile-api-secrets'
-                  key: sonarqube-host
-            - name: SONARQUBE_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: 'student-profile-api-secrets'
-                  key: sonarqube-token
             volumeMounts:
             - mountPath: '/home/jenkins/.m2'
               name: pvc
@@ -145,15 +134,6 @@ pipeline{
           echo 'Deployment to Dev failed'
         }
       }
-    }
-    stage('Report to SonarQube') {
-        steps {
-            script{
-                dir('api'){
-                    sh '/bin/bash -c "mvn sonar:sonar -Dsonar.host.url=${SONARQUBE_HOSTNAME} -Dsonar.login=${SONARQUBE_TOKEN}"'
-                }
-            }
-        }
     }
   }
 }
