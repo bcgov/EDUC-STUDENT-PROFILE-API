@@ -11,12 +11,12 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
-@Table(name = "pen_retrieval_request_status_code")
+@Table(name = "student_profile_request_status_code")
 public class StudentProfileStatusCodeEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "pen_retrieval_request_status_code", unique = true, updatable = false)
+  @Column(name = "student_profile_request_status_code", unique = true, updatable = false)
   String studentProfileStatusCode;
 
   @NotNull(message = "label cannot be null")

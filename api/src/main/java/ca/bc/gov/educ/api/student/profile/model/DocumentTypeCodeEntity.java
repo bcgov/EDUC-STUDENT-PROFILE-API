@@ -13,11 +13,11 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
-@Table(name = "pen_retrieval_request_document_type_code")
+@Table(name = "student_profile_request_document_type_code")
 public class DocumentTypeCodeEntity {
 
     @Id
-    @Column(name = "pen_retrieval_request_document_type_code", unique = true, updatable = false)
+    @Column(name = "student_profile_request_document_type_code", unique = true, updatable = false)
     String documentTypeCode;
     
     @Column(name = "label")

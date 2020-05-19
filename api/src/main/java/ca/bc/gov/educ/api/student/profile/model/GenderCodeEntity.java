@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "pen_retrieval_request_gender_code")
+@Table(name = "student_profile_request_gender_code")
 public class GenderCodeEntity {
 
 	@Id

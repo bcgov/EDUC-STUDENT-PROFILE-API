@@ -18,16 +18,13 @@ public class ApplicationProperties {
   @Value("${file.extensions}")
   @Getter
   private List<String> fileExtensions;
-
-  @Value("${bcsc.auto.match.outcomes}")
-  @Getter
-  private List<String> bcscAutoMatchOutcomes;
-  @Value("${nats.streaming.server.url}")
-  @Getter
-  private String natsUrl;
-
-  @Value("${nats.streaming.server.clusterId}")
-  @Getter
-  private String natsClusterId;
+  
+//  @Value("${nats.streaming.server.url}")
+//  @Getter
+//  private String natsUrl;
+//
+//  @Value("${nats.streaming.server.clusterId}")
+//  @Getter
+//  private String natsClusterId;
 
 }

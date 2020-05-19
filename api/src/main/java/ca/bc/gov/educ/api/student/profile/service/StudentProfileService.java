@@ -56,7 +56,7 @@ public class StudentProfileService {
    * @return the persisted entity.
    */
   public StudentProfileEntity createStudentProfile(StudentProfileEntity studentProfile) {
-    studentProfile.setStudentProfileStatusCode("DRAFT");
+    studentProfile.setRequestStatusCode("DRAFT");
     studentProfile.setStatusUpdateDate(LocalDateTime.now());
     return getStudentProfileRepository().save(studentProfile);
   }
@@ -95,7 +95,7 @@ public class StudentProfileService {
    * @return updated object.
    */
   public StudentProfileEntity updateStudentProfile(StudentProfileEntity studentProfile) {
-    Optional<StudentProfileEntity> curStudentProfile = getStudentProfileRepository().findById(studentProfile.getStudentProfileID());
+    Optional<StudentProfileEntity> curStudentProfile = getStudentProfileRepository().findById(studentProfile.getRequestID());
 
     if (curStudentProfile.isPresent()) {
       StudentProfileEntity newStudentProfile = curStudentProfile.get();
@@ -104,7 +104,7 @@ public class StudentProfileService {
       newStudentProfile = studentProfileRepository.save(newStudentProfile);
       return newStudentProfile;
     } else {
-      throw new EntityNotFoundException(StudentProfileEntity.class, "StudentProfile", studentProfile.getStudentProfileID().toString());
+      throw new EntityNotFoundException(StudentProfileEntity.class, "StudentProfile", studentProfile.getRequestID().toString());
     }
   }
 }

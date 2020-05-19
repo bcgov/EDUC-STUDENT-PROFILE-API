@@ -21,52 +21,44 @@ public class StudentProfilePayloadValidator {
 
   public static final String GENDER_CODE = "genderCode";
   @Getter(AccessLevel.PRIVATE)
-  private final StudentProfileService penRequestService;
+  private final StudentProfileService requestService;
   @Getter
   private final ApplicationProperties applicationProperties;
 
   @Autowired
-  public StudentProfilePayloadValidator(StudentProfileService penRequestService, ApplicationProperties applicationProperties) {
-    this.penRequestService = penRequestService;
+  public StudentProfilePayloadValidator(StudentProfileService requestService, ApplicationProperties applicationProperties) {
+    this.requestService = requestService;
     this.applicationProperties = applicationProperties;
   }
 
-  public List<FieldError> validatePayload(StudentProfile penRequest, boolean isCreateOperation) {
+  public List<FieldError> validatePayload(StudentProfile request, boolean isCreateOperation) {
     final List<FieldError> apiValidationErrors = new ArrayList<>();
-    if (isCreateOperation && penRequest.getStudentProfileID() != null) {
-      apiValidationErrors.add(createFieldError("penRequestID", penRequest.getStudentProfileID(), "penRequestID should be null for post operation."));
+    if (isCreateOperation && request.getRequestID() != null) {
+      apiValidationErrors.add(createFieldError("requestID", request.getRequestID(), "requestID should be null for post operation."));
     }
 
-    if (isCreateOperation && penRequest.getInitialSubmitDate() != null) {
-      apiValidationErrors.add(createFieldError("initialSubmitDate", penRequest.getStudentProfileID(), "initialSubmitDate should be null for post operation."));
+    if (isCreateOperation && request.getInitialSubmitDate() != null) {
+      apiValidationErrors.add(createFieldError("initialSubmitDate", request.getRequestID(), "initialSubmitDate should be null for post operation."));
     }
-    validateGenderCode(penRequest, apiValidationErrors);
-    validateAutoMatchCode(penRequest, apiValidationErrors);
+    validateGenderCode(request, apiValidationErrors);
     return apiValidationErrors;
   }
 
-  private void validateAutoMatchCode(StudentProfile penRequest, List<FieldError> apiValidationErrors) {
-    if (penRequest.getBcscAutoMatchOutcome() != null
-            && !getApplicationProperties().getBcscAutoMatchOutcomes().contains(penRequest.getBcscAutoMatchOutcome())) {
-      apiValidationErrors.add(createFieldError("bcscAutoMatchOutcome", penRequest.getBcscAutoMatchOutcome(), "Invalid bcscAutoMatchOutcome. It should be one of :: " + getApplicationProperties().getBcscAutoMatchOutcomes().toString()));
-    }
-  }
-
-  protected void validateGenderCode(StudentProfile penRequest, List<FieldError> apiValidationErrors) {
-    if (penRequest.getGenderCode() != null) {
-      Optional<GenderCodeEntity> genderCodeEntity = penRequestService.findGenderCode(penRequest.getGenderCode());
+  protected void validateGenderCode(StudentProfile request, List<FieldError> apiValidationErrors) {
+    if (request.getGenderCode() != null) {
+      Optional<GenderCodeEntity> genderCodeEntity = requestService.findGenderCode(request.getGenderCode());
       if (!genderCodeEntity.isPresent()) {
-        apiValidationErrors.add(createFieldError(GENDER_CODE, penRequest.getGenderCode(), "Invalid Gender Code."));
+        apiValidationErrors.add(createFieldError(GENDER_CODE, request.getGenderCode(), "Invalid Gender Code."));
       } else if (genderCodeEntity.get().getEffectiveDate() != null && genderCodeEntity.get().getEffectiveDate().isAfter(LocalDateTime.now())) {
-        apiValidationErrors.add(createFieldError(GENDER_CODE, penRequest.getGenderCode(), "Gender Code provided is not yet effective."));
+        apiValidationErrors.add(createFieldError(GENDER_CODE, request.getGenderCode(), "Gender Code provided is not yet effective."));
       } else if (genderCodeEntity.get().getExpiryDate() != null && genderCodeEntity.get().getExpiryDate().isBefore(LocalDateTime.now())) {
-        apiValidationErrors.add(createFieldError(GENDER_CODE, penRequest.getGenderCode(), "Gender Code provided has expired."));
+        apiValidationErrors.add(createFieldError(GENDER_CODE, request.getGenderCode(), "Gender Code provided has expired."));
       }
     }
   }
 
   private FieldError createFieldError(String fieldName, Object rejectedValue, String message) {
-    return new FieldError("penRequest", fieldName, rejectedValue, false, null, null, message);
+    return new FieldError("studentProfileRequest", fieldName, rejectedValue, false, null, null, message);
   }
 
 }

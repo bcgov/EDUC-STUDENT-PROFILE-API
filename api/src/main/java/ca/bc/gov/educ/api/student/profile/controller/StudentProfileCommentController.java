@@ -16,24 +16,24 @@ import java.util.stream.Collectors;
 
 @RestController
 @EnableResourceServer
-public class StudentProfileCommentsController extends BaseController implements StudentProfileCommentEndpoint {
+public class StudentProfileCommentController extends BaseController implements StudentProfileCommentEndpoint {
 
   private static final StudentProfileCommentsMapper mapper = StudentProfileCommentsMapper.mapper;
   @Getter(AccessLevel.PRIVATE)
   private final StudentProfileCommentService studentProfileCommentService;
 
-  StudentProfileCommentsController(@Autowired final StudentProfileCommentService studentProfileCommentService) {
+  StudentProfileCommentController(@Autowired final StudentProfileCommentService studentProfileCommentService) {
     this.studentProfileCommentService = studentProfileCommentService;
   }
 
   @Override
-  public List<StudentProfileComments> retrieveComments(String studentProfileId) {
-    return getStudentProfileCommentService().retrieveComments(UUID.fromString(studentProfileId)).stream().map(mapper::toStructure).collect(Collectors.toList());
+  public List<StudentProfileComments> retrieveComments(String requestId) {
+    return getStudentProfileCommentService().retrieveComments(UUID.fromString(requestId)).stream().map(mapper::toStructure).collect(Collectors.toList());
   }
 
   @Override
-  public StudentProfileComments save(String studentProfileId, StudentProfileComments studentProfileComments) {
+  public StudentProfileComments save(String requestId, StudentProfileComments studentProfileComments) {
     setAuditColumns(studentProfileComments);
-    return mapper.toStructure(getStudentProfileCommentService().save(UUID.fromString(studentProfileId), mapper.toModel(studentProfileComments)));
+    return mapper.toStructure(getStudentProfileCommentService().save(UUID.fromString(requestId), mapper.toModel(studentProfileComments)));
   }
 }

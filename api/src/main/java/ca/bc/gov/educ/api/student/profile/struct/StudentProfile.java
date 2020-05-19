@@ -15,11 +15,11 @@ import java.io.Serializable;
 public class StudentProfile extends BaseRequest implements Serializable {
   private static final long serialVersionUID = 583620260139143932L;
 
-  private String studentProfileID;
+  private String requestID;
   @NotNull(message = "digitalID cannot be null")
   private String digitalID;
   @Size(max = 10)
-  private String studentProfileStatusCode;
+  private String requestStatusCode;
   @Size(max = 40)
   private String legalFirstName;
   @Size(max = 255)
@@ -32,25 +32,9 @@ public class StudentProfile extends BaseRequest implements Serializable {
   @NotNull(message = "genderCode cannot be null")
   @Size(max = 1)
   private String genderCode;
-  @Size(max = 40)
-  private String usualFirstName;
-  @Size(max = 255)
-  private String usualMiddleName;
-  @Size(max = 40)
-  private String usualLastName;
   @NotNull(message = "email cannot be null")
   @Size(max = 255)
   private String email;
-  @Size(max = 40)
-  private String maidenName;
-  @Size(max = 255)
-  private String pastNames;
-  @Size(max = 255)
-  private String lastBCSchool;
-  @Size(max = 12)
-  private String lastBCSchoolStudentNumber;
-  @Size(max = 255)
-  private String currentSchool;
   @Size(max = 255)
   private String reviewer;
   private String failureReason;
@@ -60,10 +44,5 @@ public class StudentProfile extends BaseRequest implements Serializable {
   @Pattern(regexp = "[YN]")
   @NotNull(message = "emailVerified cannot be null")
   private String emailVerified;
-  @Size(max = 255)
-  private String bcscAutoMatchOutcome;
-  @Size(max = 255)
-  private String bcscAutoMatchDetails;
-  @Size(max = 9)
-  private String pen;
+  private String completeComment;
 }

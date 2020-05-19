@@ -15,7 +15,7 @@ public interface DocumentMapper {
 
   StudentProfileDocument toStructure(DocumentEntity entity);
 
-  @Mapping(target = "studentProfileEntity", ignore = true)
+  @Mapping(target = "request", ignore = true)
   DocumentEntity toModel(StudentProfileDocument struct);
 
   StudentProfileDocMetadata toMetadataStructure(DocumentEntity entity);

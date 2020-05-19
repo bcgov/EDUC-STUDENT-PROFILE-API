@@ -19,9 +19,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "student_profile_macro_type_code")
+@Table(name = "student_profile_request_macro_type_code")
 public class StudentProfileMacroTypeCodeEntity {
-  @Column(name = "student_profile_MACRO_TYPE_CODE")
+  @Column(name = "student_profile_request_macro_type_code")
   @Id
   private String macroTypeCode;
 

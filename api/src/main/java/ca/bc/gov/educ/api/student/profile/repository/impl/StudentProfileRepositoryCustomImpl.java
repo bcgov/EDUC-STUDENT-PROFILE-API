@@ -34,7 +34,7 @@ public class StudentProfileRepositoryCustomImpl implements StudentProfileReposit
     final CriteriaQuery<StudentProfileEntity> criteriaQuery = criteriaBuilder.createQuery(StudentProfileEntity.class);
     Root<StudentProfileEntity> studentProfileEntityRoot = criteriaQuery.from(StudentProfileEntity.class);
     if (StringUtils.isNotBlank(status)) {
-      predicates.add(criteriaBuilder.equal(studentProfileEntityRoot.get("studentProfileStatusCode"), status));
+      predicates.add(criteriaBuilder.equal(studentProfileEntityRoot.get("requestStatusCode"), status));
     }
     if (digitalID != null) {
       predicates.add(criteriaBuilder.equal(studentProfileEntityRoot.get("digitalID"), digitalID));
