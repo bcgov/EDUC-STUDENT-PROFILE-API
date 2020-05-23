@@ -18,41 +18,64 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
-@Table(name = "student_profile_request")
+@Table(name = "STUDENT_PROFILE_REQUEST")
 @DynamicUpdate
 public class StudentProfileEntity {
   @Id
   @GeneratedValue(generator = "UUID")
   @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator", parameters = {
           @Parameter(name = "uuid_gen_strategy_class", value = "org.hibernate.id.uuid.CustomVersionOneStrategy")})
-  @Column(name = "student_profile_request_id", unique = true, updatable = false, columnDefinition = "BINARY(16)")
+  @Column(name = "STUDENT_PROFILE_REQUEST_ID", unique = true, updatable = false, columnDefinition = "BINARY(16)")
   UUID requestID;
 
   @NotNull(message = "digitalID cannot be null")
-  @Column(name = "digital_identity_id", updatable = false, columnDefinition = "BINARY(16)")
+  @Column(name = "DIGITAL_IDENTITY_ID", updatable = false, columnDefinition = "BINARY(16)")
   UUID digitalID;
 
-  @Column(name = "student_profile_request_status_code")
+  @Column(name = "STUDENT_PROFILE_REQUEST_STATUS_CODE")
   String requestStatusCode;
 
-  @Column(name = "legal_first_name")
+  @Column(name = "LEGAL_FIRST_NAME")
   String legalFirstName;
 
-  @Column(name = "legal_middle_names")
+  @Column(name = "LEGAL_MIDDLE_NAMES")
   String legalMiddleNames;
 
   @NotNull(message = "legalLastName cannot be null")
-  @Column(name = "legal_last_name")
+  @Column(name = "LEGAL_LAST_NAME")
   String legalLastName;
 
-  @Column(name = "dob")
+  @Column(name = "DOB")
   LocalDate dob;
 
-  @Column(name = "gender_code")
+  @Column(name = "GENDER_CODE")
   String genderCode;
 
-  @Column(name = "email")
+  @Column(name = "EMAIL")
   String email;
+
+  @NotNull(message = "recordedPen cannot be null")
+  @Column(name = "RECORDED_PEN")
+  String recordedPen;
+
+  @Column(name = "RECORDED_LEGAL_FIRST_NAME")
+  String recordedLegalFirstName;
+
+  @Column(name = "RECORDED_LEGAL_MIDDLE_NAMES")
+  String recordedLegalMiddleNames;
+
+  @NotNull(message = "recordedLegalLastName cannot be null")
+  @Column(name = "RECORDED_LEGAL_LAST_NAME")
+  String recordedLegalLastName;
+
+  @Column(name = "RECORDED_DOB")
+  LocalDate recordedDob;
+
+  @Column(name = "RECORDED_GENDER_CODE")
+  String recordedGenderCode;
+
+  @Column(name = "RECORDED_EMAIL")
+  String recordedEmail;
 
   @Column(name = "email_verified")
   String emailVerified;

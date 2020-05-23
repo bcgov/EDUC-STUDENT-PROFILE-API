@@ -22,6 +22,10 @@ public class RequestBuilder {
 
   String legalLastName = "Wayen";
 
+  String recordedLegalLastName = "Wayen";
+
+  String recordedPen = "123456789";
+
   String createUser = "API";
 
   Date createDate = new Date();
@@ -87,6 +91,8 @@ public class RequestBuilder {
     request.setRequestStatusCode(this.requestStatusCode);
     request.setLegalFirstName(this.legalFirstName);
     request.setLegalLastName(this.legalLastName);
+    request.setRecordedLegalLastName(this.recordedLegalLastName);
+    request.setRecordedPen(this.recordedPen);
     request.setEmailVerified(this.emailVerified);
     return request;
   }
