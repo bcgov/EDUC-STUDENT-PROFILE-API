@@ -58,6 +58,7 @@ public class StudentProfileService {
   public StudentProfileEntity createStudentProfile(StudentProfileEntity studentProfile) {
     if(studentProfile.getRecordedEmail() != null && studentProfile.getRecordedEmail().equals(studentProfile.getEmail())) {
       studentProfile.setRequestStatusCode("INITREV");
+      studentProfile.setInitialSubmitDate(LocalDateTime.now());
     } else {
       studentProfile.setRequestStatusCode("DRAFT");
     }
