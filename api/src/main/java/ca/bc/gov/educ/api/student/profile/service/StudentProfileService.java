@@ -56,7 +56,7 @@ public class StudentProfileService {
    * @return the persisted entity.
    */
   public StudentProfileEntity createStudentProfile(StudentProfileEntity studentProfile) {
-    if(studentProfile.getRecordedEmail() != null && studentProfile.getRecordedEmail() == studentProfile.getEmail()) {
+    if(studentProfile.getRecordedEmail() != null && studentProfile.getRecordedEmail().equals(studentProfile.getEmail())) {
       studentProfile.setRequestStatusCode("INITREV");
     } else {
       studentProfile.setRequestStatusCode("DRAFT");
