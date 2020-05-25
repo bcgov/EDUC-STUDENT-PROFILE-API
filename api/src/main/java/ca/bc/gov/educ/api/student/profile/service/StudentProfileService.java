@@ -56,7 +56,11 @@ public class StudentProfileService {
    * @return the persisted entity.
    */
   public StudentProfileEntity createStudentProfile(StudentProfileEntity studentProfile) {
-    studentProfile.setRequestStatusCode("DRAFT");
+    if(studentProfile.getRecordedEmail() != null && studentProfile.getRecordedEmail().equals(studentProfile.getEmail())) {
+      studentProfile.setRequestStatusCode("INITREV");
+    } else {
+      studentProfile.setRequestStatusCode("DRAFT");
+    }
     studentProfile.setStatusUpdateDate(LocalDateTime.now());
     return getStudentProfileRepository().save(studentProfile);
   }
