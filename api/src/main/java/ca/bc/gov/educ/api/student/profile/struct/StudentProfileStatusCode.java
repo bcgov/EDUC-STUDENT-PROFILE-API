@@ -17,7 +17,7 @@ public class StudentProfileStatusCode implements Serializable {
 
   private static final long serialVersionUID = -8596549361135591976L;
 
-  String studentProfileStatusCode;
+  String requestStatusCode;
 
   @NotNull(message = "label cannot be null")
   String label;

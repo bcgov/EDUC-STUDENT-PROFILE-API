@@ -167,7 +167,7 @@ public class RequestControllerTest extends BaseReqControllerTest {
 
   private StudentProfileStatusCodeEntity createPenReqStatus() {
     StudentProfileStatusCodeEntity entity = new StudentProfileStatusCodeEntity();
-    entity.setStudentProfileStatusCode("INITREV");
+    entity.setRequestStatusCode("INITREV");
     entity.setDescription("Initial Review");
     entity.setDisplayOrder(1);
     entity.setEffectiveDate(LocalDateTime.now());
