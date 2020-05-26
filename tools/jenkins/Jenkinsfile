@@ -1,0 +1,157 @@
+pipeline{
+   agent any
+   environment{
+      NAMESPACE='c2mvws'
+      TOOLS = "${NAMESPACE}-tools"
+      DEV = "${NAMESPACE}-dev"
+      TEST = "${NAMESPACE}-test"
+      PROD = "${NAMESPACE}-prod"
+
+      REPO_NAME = 'educ-student-profile-api'
+      OWNER = 'bcgov'
+      JOB_NAME = 'master'
+      TAG = 'dev'
+
+      APP_NAME = 'student-profile-api'
+      APP_DOMAIN = 'pathfinder.gov.bc.ca'
+
+      SOURCE_REPO_RAW = 'https://github.com/${OWNER}/${REPO_NAME}/master'
+      SOURCE_REPO_REF = 'master'
+      SOURCE_REPO_URL = 'https://github.com/${OWNER}/${REPO_NAME}.git'
+
+      TOOLS_HOST_ROUTE = "${APP_NAME}-${TOOLS}.${APP_DOMAIN}"
+      DEV_HOST_ROUTE = "${APP_NAME}-${DEV}.${APP_DOMAIN}"
+      TEST_HOST_ROUTE = "${APP_NAME}-${TEST}.${APP_DOMAIN}"
+      PROD_HOST_ROUTE = "${APP_NAME}-${PROD}.${APP_DOMAIN}"
+  }
+  stages{
+    stage('Build App') {
+       steps {
+        script {
+          def pom = readMavenPom file: './api/pom.xml'
+          VERSION = pom.version
+        }
+        sh '/bin/bash -c "mvn -f ./api/pom.xml -Dmaven.test.skip=true package"'
+        script {
+          openshift.withCluster() {
+            if (!openshift.selector("bc", "${REPO_NAME}-${JOB_NAME}").exists()){
+              openshift.newBuild("--name=${REPO_NAME}-${JOB_NAME}", "--image-stream=redhat-openjdk18-openshift:1.1", "--binary")
+            }
+            openshift.selector("bc", "${REPO_NAME}-${JOB_NAME}").startBuild("--from-file=./api/target/student-profile-api-${VERSION}.jar", "--wait")
+          }
+        }
+      }
+      post {
+        success {
+          echo 'Cleanup BuildConfigs'
+          script {
+              openshift.withCluster() {
+                openshift.withProject(TOOLS) {
+                  def bcApi = openshift.selector('bc', "${REPO_NAME}-${JOB_NAME}")
+
+                  if(bcApi.exists()) {
+                      echo "Removing BuildConfig ${REPO_NAME}-${JOB_NAME}"
+                      bcApi.delete()
+                  }
+                }
+              }
+            }
+        }
+        failure {
+          echo 'Build stage failed'
+        }
+      }
+    }
+	stage('Promote to DEV') {
+      steps{
+        deployStage('Dev', DEV, DEV_HOST_ROUTE, 'dev')
+      }
+      post{
+        success{
+          echo 'Deployment to Dev was successful'
+        }
+        failure{
+          echo 'Deployment to Dev failed'
+        }
+      }
+    }
+    stage('Create/Update Config Maps'){
+      environment {
+	     APP_NAME = "student-profile-api"
+      }
+      steps{
+        script{
+            dir('tools/jenkins'){
+                sh "bash ./download-kc.sh \"${NAMESPACE}\""
+            }
+        }
+        configMapSetup("${APP_NAME}","${APP_NAME}".toUpperCase(), NAMESPACE);
+        script{
+          dir('tools/jenkins'){
+            def configVars
+            sh "bash ./update-configmap.sh \"dev\" ${APP_NAME} ${NAMESPACE}"
+          }
+        }
+      }
+    }
+  }
+}
+
+def configMapSetup(String appName,String appNameUpper, String namespace){
+    script {
+	  
+      try{
+        sh( script: "oc project ${namespace}-dev", returnStdout: true)
+        sh( script: "oc describe configmaps ${appName}-dev-setup-config", returnStdout: true)
+        sh( script: "oc project ${namespace}-tools", returnStdout: true)
+        echo 'Config map already exists. Moving to next stage...'
+      } catch(e){
+          configProperties = input(
+          id: 'configProperties', message: "Please enter the required credentials to allow ${appName} to run:",
+          parameters: [
+              string(defaultValue: "",
+                      description: 'JDBC connect string for database',
+                      name: 'DB_JDBC_CONNECT_STRING'),
+              string(defaultValue: "",
+                      description: "Username for ${appName} to connect to the database",
+                      name: "DB_USER"),
+              password(defaultValue: "",
+                      description: "Password for ${appName} to connect to the database",
+                      name: "DB_PWD"),
+          ])
+		sh """
+		  set +x
+		  echo Running curl command...
+		  oc create -n ${namespace}-dev configmap ${appName}-dev-setup-config --from-literal=DB_JDBC_CONNECT_STRING=${configProperties.DB_JDBC_CONNECT_STRING} --from-literal=DB_USER_${appNameUpper}=${configProperties.DB_USER} --from-literal=DB_PWD_${appNameUpper}=${configProperties.DB_PWD} --dry-run -o yaml | oc apply -f -
+		  oc project ${namespace}-tools
+		"""
+      }
+    }
+}
+
+
+def deployStage(String stageEnv, String projectEnv, String hostRouteEnv, String tag) {
+
+  if (!stageEnv.equalsIgnoreCase('Dev')) {
+    input("Deploy to ${projectEnv}?")
+  }
+
+  openshift.withCluster() {
+    openshift.withProject(projectEnv) {
+      echo "Tagging image"
+      openshift.tag("${TOOLS}/${REPO_NAME}-${JOB_NAME}:latest", "${REPO_NAME}-${JOB_NAME}:${tag}")
+      def dcTemplate = openshift.process('-f',
+        'tools/openshift/api.dc.yaml',
+        "REPO_NAME=${REPO_NAME}",
+        "JOB_NAME=${JOB_NAME}",
+        "NAMESPACE=${projectEnv}",
+        "APP_NAME=${APP_NAME}",
+        "HOST_ROUTE=${hostRouteEnv}",
+        "TAG=${tag}"
+      )
+
+      echo "Applying Deployment ${REPO_NAME}"
+      def dc = openshift.apply(dcTemplate).narrow('dc')
+    }
+  }
+}
