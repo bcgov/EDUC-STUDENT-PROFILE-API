@@ -33,7 +33,7 @@ public class StudentProfileEntity {
   UUID digitalID;
 
   @Column(name = "STUDENT_PROFILE_REQUEST_STATUS_CODE")
-  String requestStatusCode;
+  String studentRequestStatusCode;
 
   @Column(name = "LEGAL_FIRST_NAME")
   String legalFirstName;

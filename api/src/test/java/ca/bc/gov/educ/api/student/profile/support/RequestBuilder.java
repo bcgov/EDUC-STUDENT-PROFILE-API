@@ -88,7 +88,7 @@ public class RequestBuilder {
 
     request.setRequestID(this.requestID);
     request.setDigitalID(this.digitalID);
-    request.setRequestStatusCode(this.requestStatusCode);
+    request.setStudentRequestStatusCode(this.requestStatusCode);
     request.setLegalFirstName(this.legalFirstName);
     request.setLegalLastName(this.legalLastName);
     request.setRecordedLegalLastName(this.recordedLegalLastName);
