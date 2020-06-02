@@ -2,9 +2,7 @@ package ca.bc.gov.educ.api.student.profile.validator;
 
 import ca.bc.gov.educ.api.student.profile.model.GenderCodeEntity;
 import ca.bc.gov.educ.api.student.profile.props.ApplicationProperties;
-import ca.bc.gov.educ.api.student.profile.repository.GenderCodeTableRepository;
-import ca.bc.gov.educ.api.student.profile.repository.StudentProfileRepository;
-import ca.bc.gov.educ.api.student.profile.repository.StudentProfileStatusCodeTableRepository;
+import ca.bc.gov.educ.api.student.profile.repository.*;
 import ca.bc.gov.educ.api.student.profile.service.StudentProfileService;
 import ca.bc.gov.educ.api.student.profile.struct.StudentProfile;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,9 +41,14 @@ public class RequestPayloadValidatorTest {
   @InjectMocks
   StudentProfilePayloadValidator requestPayloadValidator;
 
+  @Mock
+  private StudentProfileCommentRepository penRequestCommentRepository;
+  @Mock
+  private DocumentRepository documentRepository;
+
   @Before
   public void before() {
-    service = new StudentProfileService(repository, statusCodeTableRepo, genderCodeTableRepo);
+    service = new StudentProfileService(repository, penRequestCommentRepository, documentRepository, statusCodeTableRepo, genderCodeTableRepo);
     requestPayloadValidator = new StudentProfilePayloadValidator(service,properties);
   }
 

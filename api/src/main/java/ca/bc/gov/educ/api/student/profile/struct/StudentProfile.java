@@ -20,7 +20,7 @@ public class StudentProfile extends BaseRequest implements Serializable {
   @NotNull(message = "digitalID cannot be null")
   private String digitalID;
   @Size(max = 10)
-  private String requestStatusCode;
+  private String studentRequestStatusCode;
   @Size(max = 40)
   private String legalFirstName;
   @Size(max = 255)
@@ -37,7 +37,6 @@ public class StudentProfile extends BaseRequest implements Serializable {
   private String email;
   @NotNull(message = "recordedPen cannot be null")
   private String recordedPen;
-  @NotNull(message = "recordedLegalFirstName cannot be null")
   @Size(max = 40)
   private String recordedLegalFirstName;
   @Size(max = 255)

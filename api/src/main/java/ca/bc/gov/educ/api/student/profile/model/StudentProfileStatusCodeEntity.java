@@ -17,7 +17,7 @@ public class StudentProfileStatusCodeEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "student_profile_request_status_code", unique = true, updatable = false)
-  String requestStatusCode;
+  String studentRequestStatusCode;
 
   @NotNull(message = "label cannot be null")
   @Column(name = "label")

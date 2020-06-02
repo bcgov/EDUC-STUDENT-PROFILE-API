@@ -1,18 +1,20 @@
 package ca.bc.gov.educ.api.student.profile.controller;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
+import ca.bc.gov.educ.api.student.profile.model.*;
+import ca.bc.gov.educ.api.student.profile.support.DocumentBuilder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,19 +25,27 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import ca.bc.gov.educ.api.student.profile.exception.RestExceptionHandler;
 import ca.bc.gov.educ.api.student.profile.mappers.StudentProfileEntityMapper;
-import ca.bc.gov.educ.api.student.profile.model.GenderCodeEntity;
 import ca.bc.gov.educ.api.student.profile.repository.DocumentRepository;
 import ca.bc.gov.educ.api.student.profile.repository.GenderCodeTableRepository;
 import ca.bc.gov.educ.api.student.profile.repository.StudentProfileRepository;
 import ca.bc.gov.educ.api.student.profile.repository.StudentProfileStatusCodeTableRepository;
 import ca.bc.gov.educ.api.student.profile.support.WithMockOAuth2Scope;
-import ca.bc.gov.educ.api.student.profile.model.StudentProfileStatusCodeEntity;
-import ca.bc.gov.educ.api.student.profile.model.StudentProfileEntity;
+
+import ca.bc.gov.educ.api.student.profile.filter.FilterOperation;
+import ca.bc.gov.educ.api.student.profile.struct.StudentProfile;
+import ca.bc.gov.educ.api.student.profile.struct.SearchCriteria;
+import ca.bc.gov.educ.api.student.profile.struct.ValueType;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 @RunWith(SpringRunner.class)
@@ -165,9 +175,216 @@ public class RequestControllerTest extends BaseReqControllerTest {
 //            .andExpect(content().string(containsString("OK")));
 //  }
 
+  @Test
+  @WithMockOAuth2Scope(scope = "DELETE_STUDENT_PROFILE")
+  public void testDeleteRequest_GivenInvalidId_ShouldReturn404() throws Exception {
+    this.mockMvc.perform(delete("/" + UUID.randomUUID().toString()).contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isNotFound());
+  }
+
+  @Test
+  @WithMockOAuth2Scope(scope = "DELETE_STUDENT_PROFILE")
+  public void testDeleteRequest_GivenValidId_ShouldReturn204() throws Exception {
+    StudentProfileEntity entity = repository.save(mapper.toModel(getStudentProfileEntityFromJsonString()));
+    String reqId = entity.getRequestID().toString();
+    this.mockMvc.perform(delete("/" + reqId).contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isNoContent());
+  }
+
+  @Test
+  @WithMockOAuth2Scope(scope = "DELETE_STUDENT_PROFILE")
+  public void testDeleteRequest_GivenValidIdWithAssociations_ShouldReturn204() throws Exception {
+    StudentProfileEntity requestEntity = mapper.toModel(getStudentProfileEntityFromJsonString());
+    requestEntity.setStudentProfileComments(createComments(requestEntity));
+    StudentProfileEntity entity = repository.save(requestEntity);
+    DocumentEntity document = new DocumentBuilder()
+            .withoutDocumentID()
+            //.withoutCreateAndUpdateUser()
+            .withRequest(entity)
+            .withTypeCode("CAPASSPORT")
+            .build();
+    this.documentRepository.save(document);
+    String reqId = entity.getRequestID().toString();
+    this.mockMvc.perform(delete("/" + reqId).contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isNoContent());
+  }
+
+  private Set<StudentProfileCommentsEntity> createComments(StudentProfileEntity studentProfileEntity) {
+    Set<StudentProfileCommentsEntity> commentsEntitySet = new HashSet<>();
+    StudentProfileCommentsEntity commentsEntity = new StudentProfileCommentsEntity();
+    commentsEntity.setStudentProfileEntity(studentProfileEntity);
+    commentsEntity.setCommentContent("hi");
+    commentsEntity.setCommentTimestamp(LocalDateTime.now());
+    commentsEntitySet.add(commentsEntity);
+    return commentsEntitySet;
+  }
+
+  @Test
+  @WithMockOAuth2Scope(scope = "READ_STUDENT_PROFILE")
+  public void testReadPenRequestPaginated_Always_ShouldReturnStatusOk() throws Exception {
+    final File file = new File(
+            Objects.requireNonNull(getClass().getClassLoader().getResource("mock_student_profiles.json")).getFile()
+    );
+    List<StudentProfile> entities = new ObjectMapper().readValue(file, new TypeReference<List<StudentProfile>>() {
+    });
+    repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
+    MvcResult result = mockMvc
+            .perform(get("/paginated?pageSize=2")
+                    .contentType(APPLICATION_JSON))
+            .andReturn();
+    this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(2)));
+  }
+
+  @Test
+  @WithMockOAuth2Scope(scope = "READ_STUDENT_PROFILE")
+  public void testReadPenRequestPaginated_whenNoDataInDB_ShouldReturnStatusOk() throws Exception {
+    MvcResult result = mockMvc
+            .perform(get("/paginated")
+                    .contentType(APPLICATION_JSON))
+            .andReturn();
+    this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(0)));
+  }
+  @Test
+  @WithMockOAuth2Scope(scope = "READ_STUDENT_PROFILE")
+  public void testReadPenRequestPaginatedWithSorting_Always_ShouldReturnStatusOk() throws Exception {
+    final File file = new File(
+            Objects.requireNonNull(getClass().getClassLoader().getResource("mock_student_profiles.json")).getFile()
+    );
+    List<StudentProfile> entities = new ObjectMapper().readValue(file, new TypeReference<List<StudentProfile>>() {
+    });
+    repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
+    Map<String, String> sortMap = new HashMap<>();
+    sortMap.put("legalLastName", "ASC");
+    sortMap.put("legalFirstName", "DESC");
+    String sort = new ObjectMapper().writeValueAsString(sortMap);
+    MvcResult result = mockMvc
+            .perform(get("/paginated").param("pageNumber","1").param("pageSize", "5").param("sort", sort)
+                    .contentType(APPLICATION_JSON))
+            .andReturn();
+    this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(5)));
+  }
+
+  @Test
+  @WithMockOAuth2Scope(scope = "READ_STUDENT_PROFILE")
+  public void testReadPenRequestPaginated_GivenFirstNameFilter_ShouldReturnStatusOk() throws Exception {
+    final File file = new File(
+            Objects.requireNonNull(getClass().getClassLoader().getResource("mock_student_profiles.json")).getFile()
+    );
+    List<StudentProfile> entities = new ObjectMapper().readValue(file, new TypeReference<List<StudentProfile>>() {
+    });
+    SearchCriteria criteria = SearchCriteria.builder().key("legalFirstName").operation(FilterOperation.EQUAL).value("Katina").valueType(ValueType.STRING).build();
+    List<SearchCriteria> criteriaList = new ArrayList<>();
+    criteriaList.add(criteria);
+    ObjectMapper objectMapper = new ObjectMapper();
+    String criteriaJSON = objectMapper.writeValueAsString(criteriaList);
+    System.out.println(criteriaJSON);
+    repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
+    MvcResult result = mockMvc
+            .perform(get("/paginated").param("searchCriteriaList", criteriaJSON)
+                    .contentType(APPLICATION_JSON))
+            .andReturn();
+    this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(1)));
+  }
+
+  @Test
+  @WithMockOAuth2Scope(scope = "READ_STUDENT_PROFILE")
+  public void testReadPenRequestPaginated_GivenLastNameFilter_ShouldReturnStatusOk() throws Exception {
+    final File file = new File(
+            Objects.requireNonNull(getClass().getClassLoader().getResource("mock_student_profiles.json")).getFile()
+    );
+    List<StudentProfile> entities = new ObjectMapper().readValue(file, new TypeReference<List<StudentProfile>>() {
+    });
+    SearchCriteria criteria = SearchCriteria.builder().key("legalLastName").operation(FilterOperation.EQUAL).value("Medling").valueType(ValueType.STRING).build();
+    List<SearchCriteria> criteriaList = new ArrayList<>();
+    criteriaList.add(criteria);
+    ObjectMapper objectMapper = new ObjectMapper();
+    String criteriaJSON = objectMapper.writeValueAsString(criteriaList);
+    System.out.println(criteriaJSON);
+    repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
+    MvcResult result = mockMvc
+            .perform(get("/paginated").param("searchCriteriaList", criteriaJSON)
+                    .contentType(APPLICATION_JSON))
+            .andReturn();
+    this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(1)));
+  }
+
+  @Test
+  @WithMockOAuth2Scope(scope = "READ_STUDENT_PROFILE")
+  public void testReadPenRequestPaginated_GivenSubmitDateBetween_ShouldReturnStatusOk() throws Exception {
+    final File file = new File(
+            Objects.requireNonNull(getClass().getClassLoader().getResource("mock_student_profiles.json")).getFile()
+    );
+    List<StudentProfile> entities = new ObjectMapper().readValue(file, new TypeReference<List<StudentProfile>>() {
+    });
+    String fromDate = "2020-04-01T00:00:01";
+    String toDate = "2020-04-15T00:00:01";
+    SearchCriteria criteria = SearchCriteria.builder().key("initialSubmitDate").operation(FilterOperation.BETWEEN).value(fromDate + "," + toDate).valueType(ValueType.DATE_TIME).build();
+    List<SearchCriteria> criteriaList = new ArrayList<>();
+    criteriaList.add(criteria);
+    ObjectMapper objectMapper = new ObjectMapper();
+    String criteriaJSON = objectMapper.writeValueAsString(criteriaList);
+    System.out.println(criteriaJSON);
+    repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
+    MvcResult result = mockMvc
+            .perform(get("/paginated").param("searchCriteriaList", criteriaJSON)
+                    .contentType(APPLICATION_JSON))
+            .andReturn();
+    this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(2)));
+  }
+
+  @Test
+  @WithMockOAuth2Scope(scope = "READ_STUDENT_PROFILE")
+  public void testReadPenRequestPaginated_GivenFirstAndLast_ShouldReturnStatusOk() throws Exception {
+    final File file = new File(
+            Objects.requireNonNull(getClass().getClassLoader().getResource("mock_student_profiles.json")).getFile()
+    );
+    List<StudentProfile> entities = new ObjectMapper().readValue(file, new TypeReference<List<StudentProfile>>() {
+    });
+    String fromDate = "2020-04-01T00:00:01";
+    String toDate = "2020-04-15T00:00:01";
+    SearchCriteria criteria = SearchCriteria.builder().key("initialSubmitDate").operation(FilterOperation.BETWEEN).value(fromDate + "," + toDate).valueType(ValueType.DATE_TIME).build();
+    SearchCriteria criteriaFirstName = SearchCriteria.builder().key("legalFirstName").operation(FilterOperation.CONTAINS).value("a").valueType(ValueType.STRING).build();
+    SearchCriteria criteriaLastName = SearchCriteria.builder().key("legalLastName").operation(FilterOperation.CONTAINS).value("o").valueType(ValueType.STRING).build();
+    List<SearchCriteria> criteriaList = new ArrayList<>();
+    criteriaList.add(criteria);
+    criteriaList.add(criteriaFirstName);
+    criteriaList.add(criteriaLastName);
+    ObjectMapper objectMapper = new ObjectMapper();
+    String criteriaJSON = objectMapper.writeValueAsString(criteriaList);
+    System.out.println(criteriaJSON);
+    repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
+    MvcResult result = mockMvc
+            .perform(get("/paginated").param("searchCriteriaList", criteriaJSON)
+                    .contentType(APPLICATION_JSON))
+            .andReturn();
+    this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(1)));
+  }
+
+  @Test
+  @WithMockOAuth2Scope(scope = "READ_STUDENT_PROFILE")
+  public void testReadPenRequestPaginated_LegalLastNameFilterIgnoreCase_ShouldReturnStatusOk() throws Exception {
+    final File file = new File(
+            Objects.requireNonNull(getClass().getClassLoader().getResource("mock_student_profiles.json")).getFile()
+    );
+    List<StudentProfile> entities = new ObjectMapper().readValue(file, new TypeReference<List<StudentProfile>>() {
+    });
+    SearchCriteria criteria = SearchCriteria.builder().key("legalLastName").operation(FilterOperation.CONTAINS_IGNORE_CASE).value("j").valueType(ValueType.STRING).build();
+    List<SearchCriteria> criteriaList = new ArrayList<>();
+    criteriaList.add(criteria);
+    ObjectMapper objectMapper = new ObjectMapper();
+    String criteriaJSON = objectMapper.writeValueAsString(criteriaList);
+    System.out.println(criteriaJSON);
+    repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
+    MvcResult result = mockMvc
+            .perform(get("/paginated").param("searchCriteriaList", criteriaJSON)
+                    .contentType(APPLICATION_JSON))
+            .andReturn();
+    this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(1)));
+  }
+
   private StudentProfileStatusCodeEntity createPenReqStatus() {
     StudentProfileStatusCodeEntity entity = new StudentProfileStatusCodeEntity();
-    entity.setRequestStatusCode("INITREV");
+    entity.setStudentRequestStatusCode("INITREV");
     entity.setDescription("Initial Review");
     entity.setDisplayOrder(1);
     entity.setEffectiveDate(LocalDateTime.now());
