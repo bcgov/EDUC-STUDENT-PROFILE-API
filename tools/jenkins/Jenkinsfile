@@ -2,7 +2,7 @@ pipeline{
    agent any
    environment{
       DEBUG_OUTPUT = 'false'
-      NAMESPACE='c2mvws'
+      NAMESPACE='mvubjx'
       TOOLS = "${NAMESPACE}-tools"
       DEV = "${NAMESPACE}-dev"
       TEST = "${NAMESPACE}-test"
