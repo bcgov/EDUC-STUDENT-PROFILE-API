@@ -26,7 +26,7 @@ public class StudentProfileEntity {
   @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator", parameters = {
           @Parameter(name = "uuid_gen_strategy_class", value = "org.hibernate.id.uuid.CustomVersionOneStrategy")})
   @Column(name = "STUDENT_PROFILE_REQUEST_ID", unique = true, updatable = false, columnDefinition = "BINARY(16)")
-  UUID requestID;
+  UUID studentRequestID;
 
   @NotNull(message = "digitalID cannot be null")
   @Column(name = "DIGITAL_IDENTITY_ID", updatable = false, columnDefinition = "BINARY(16)")

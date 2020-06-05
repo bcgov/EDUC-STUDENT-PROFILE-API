@@ -116,7 +116,7 @@ public class StudentProfileService {
    * @return updated object.
    */
   public StudentProfileEntity updateStudentProfile(StudentProfileEntity studentProfile) {
-    Optional<StudentProfileEntity> curStudentProfile = getStudentProfileRepository().findById(studentProfile.getRequestID());
+    Optional<StudentProfileEntity> curStudentProfile = getStudentProfileRepository().findById(studentProfile.getStudentRequestID());
 
     if (curStudentProfile.isPresent()) {
       StudentProfileEntity newStudentProfile = curStudentProfile.get();
@@ -125,7 +125,7 @@ public class StudentProfileService {
       newStudentProfile = studentProfileRepository.save(newStudentProfile);
       return newStudentProfile;
     } else {
-      throw new EntityNotFoundException(StudentProfileEntity.class, "StudentProfile", studentProfile.getRequestID().toString());
+      throw new EntityNotFoundException(StudentProfileEntity.class, "StudentProfile", studentProfile.getStudentRequestID().toString());
     }
   }
 
@@ -139,7 +139,7 @@ public class StudentProfileService {
   }
 
   private void deleteAssociatedDocumentsAndComments(StudentProfileEntity entity) {
-    val documents = getDocumentRepository().findByRequestRequestID(entity.getRequestID());
+    val documents = getDocumentRepository().findByRequestStudentRequestID(entity.getStudentRequestID());
     if (documents != null && !documents.isEmpty()) {
       getDocumentRepository().deleteAll(documents);
     }

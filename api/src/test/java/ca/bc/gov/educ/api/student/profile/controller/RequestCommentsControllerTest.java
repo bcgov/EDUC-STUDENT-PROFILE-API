@@ -65,7 +65,7 @@ public class RequestCommentsControllerTest extends BaseReqControllerTest {
   @WithMockOAuth2Scope(scope = "READ_STUDENT_PROFILE")
   public void testRetrieveRequestComments_GivenValidPenReqID_ShouldReturnStatusOk() throws Exception {
     StudentProfileEntity entity = requestRepository.save(mapper.toModel(getStudentProfileEntityFromJsonString()));
-    String penReqId = entity.getRequestID().toString();
+    String penReqId = entity.getStudentRequestID().toString();
     this.mockMvc.perform(get("/" + penReqId + "/comments")).andDo(print()).andExpect(status().isOk());
   }
 
@@ -73,7 +73,7 @@ public class RequestCommentsControllerTest extends BaseReqControllerTest {
   @WithMockOAuth2Scope(scope = "WRITE_STUDENT_PROFILE")
   public void testCreateRequestComments_GivenValidPayload_ShouldReturnStatusCreated() throws Exception {
     StudentProfileEntity entity = requestRepository.save(mapper.toModel(getStudentProfileEntityFromJsonString()));
-    String penReqId = entity.getRequestID().toString();
+    String penReqId = entity.getStudentRequestID().toString();
     this.mockMvc.perform(post("/" + penReqId + "/comments").contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON).content(dummyRequestCommentsJsonWithValidPenReqID(penReqId))).andDo(print()).andExpect(status().isCreated());
   }
@@ -88,7 +88,7 @@ public class RequestCommentsControllerTest extends BaseReqControllerTest {
 
   private String dummyRequestCommentsJsonWithValidPenReqID(String reqId) {
     return "{\n" +
-            "  \"requestID\": \"" + reqId + "\",\n" +
+            "  \"studentRequestID\": \"" + reqId + "\",\n" +
             "  \"commentContent\": \"" + "comment1" + "\",\n" +
             "  \"commentTimestamp\": \"2020-02-09T00:00:00\"\n" +
             "}";

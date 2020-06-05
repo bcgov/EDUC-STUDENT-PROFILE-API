@@ -58,7 +58,7 @@ public class DocumentService {
 
     DocumentEntity document = result.get();
 
-    if (!document.getRequest().getRequestID().equals(studentProfileId)) {
+    if (!document.getRequest().getStudentRequestID().equals(studentProfileId)) {
       throw new EntityNotFoundException(DocumentEntity.class, "studentProfileId", studentProfileId.toString());
     }
 
@@ -95,7 +95,7 @@ public class DocumentService {
    * @return {@link List<DocumentEntity> }
    */
   public List<DocumentEntity> retrieveAllDocumentMetadata(UUID studentProfileId) {
-    return documentRepository.findByRequestRequestID(studentProfileId);
+    return documentRepository.findByRequestStudentRequestID(studentProfileId);
   }
 
   /**
@@ -161,7 +161,7 @@ public class DocumentService {
     if (documentEntityOptional.isPresent()) {
       DocumentEntity documentEntity = documentEntityOptional.get();
       StudentProfileEntity studentProfileEntity = documentEntity.getRequest();
-      if (!studentProfileEntity.getRequestID().equals(studentProfileId)) {
+      if (!studentProfileEntity.getStudentRequestID().equals(studentProfileId)) {
         throw new EntityNotFoundException(StudentProfileEntity.class, "studentProfileId", studentProfileId.toString());
       }
       documentEntity.setFileExtension(document.getFileExtension());

@@ -76,7 +76,7 @@ public class ReqDocumentControllerTest {
             .build();
     studentProfile = this.studentProfileRepository.save(studentProfile);
     document = this.repository.save(document);
-    this.reqID = studentProfile.getRequestID();
+    this.reqID = studentProfile.getStudentRequestID();
     this.documentID = document.getDocumentID();
   }
 
@@ -105,7 +105,7 @@ public class ReqDocumentControllerTest {
             .andExpect(jsonPath("$.documentID", not(is(this.documentID.toString()))))
             .andExpect(jsonPath("$.documentTypeCode", is("BCSCPHOTO")))
             .andExpect(jsonPath("$.documentData").doesNotExist())
-            .andExpect(jsonPath("$.requestID").doesNotExist());
+            .andExpect(jsonPath("$.studentRequestID").doesNotExist());
   }
 
   @Test

@@ -23,7 +23,7 @@ public class StudentProfileCommentsEntity {
   @Column(name = "student_profile_request_comment_id", unique = true, updatable = false, columnDefinition = "BINARY(16)")
   UUID studentProfileCommentID;
   @Column(name = "student_profile_request_id")
-  UUID requestID;
+  UUID studentRequestID;
   @Column(name = "staff_member_idir_guid")
   String staffMemberIDIRGUID;
 

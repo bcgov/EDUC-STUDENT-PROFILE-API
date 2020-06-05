@@ -33,12 +33,12 @@ public class StudentProfilePayloadValidator {
 
   public List<FieldError> validatePayload(StudentProfile request, boolean isCreateOperation) {
     final List<FieldError> apiValidationErrors = new ArrayList<>();
-    if (isCreateOperation && request.getRequestID() != null) {
-      apiValidationErrors.add(createFieldError("requestID", request.getRequestID(), "requestID should be null for post operation."));
+    if (isCreateOperation && request.getStudentRequestID() != null) {
+      apiValidationErrors.add(createFieldError("requestID", request.getStudentRequestID(), "requestID should be null for post operation."));
     }
 
     if (isCreateOperation && request.getInitialSubmitDate() != null) {
-      apiValidationErrors.add(createFieldError("initialSubmitDate", request.getRequestID(), "initialSubmitDate should be null for post operation."));
+      apiValidationErrors.add(createFieldError("initialSubmitDate", request.getStudentRequestID(), "initialSubmitDate should be null for post operation."));
     }
     validateGenderCode(request, apiValidationErrors);
     return apiValidationErrors;
