@@ -100,7 +100,7 @@ public class RequestPayloadValidatorTest {
     genderCodeEntities.add(createGenderCodeData());
     when(service.getGenderCodesList()).thenReturn(genderCodeEntities);
     StudentProfile request = getRequestEntityFromJsonString();
-    request.setRequestID(UUID.randomUUID().toString());
+    request.setStudentRequestID(UUID.randomUUID().toString());
     List<FieldError> errorList = requestPayloadValidator.validatePayload(request,true);
     assertEquals(1, errorList.size());
     assertEquals("requestID should be null for post operation.",errorList.get(0).getDefaultMessage());

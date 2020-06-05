@@ -86,7 +86,7 @@ public class RequestBuilder {
     request.setUpdateUser(this.updateUser);
     request.setUpdateDate(LocalDateTime.now());
 
-    request.setRequestID(this.requestID);
+    request.setStudentRequestID(this.requestID);
     request.setDigitalID(this.digitalID);
     request.setStudentRequestStatusCode(this.requestStatusCode);
     request.setLegalFirstName(this.legalFirstName);

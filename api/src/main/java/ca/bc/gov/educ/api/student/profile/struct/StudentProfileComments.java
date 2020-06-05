@@ -13,7 +13,7 @@ public class StudentProfileComments extends BaseRequest implements Serializable 
   private static final long serialVersionUID = -6904836038828419985L;
 
   String studentProfileCommentID;
-  String studentProfileID;
+  String studentRequestID;
   @Size(max = 50)
   String staffMemberIDIRGUID;
   @Size(max = 255)

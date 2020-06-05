@@ -72,7 +72,7 @@ public class ReqDocumentJpaTests {
         DocumentEntity savedDocument = this.repository.save(myDocument);
         assertThat(savedDocument.getDocumentID()).isNotEqualTo(this.document.getDocumentID());
 
-        assertThat(this.repository.findByRequestRequestID(this.request.getRequestID()).size()).isEqualTo(2);
+        assertThat(this.repository.findByRequestStudentRequestID(this.request.getStudentRequestID()).size()).isEqualTo(2);
     }
 
     @Test

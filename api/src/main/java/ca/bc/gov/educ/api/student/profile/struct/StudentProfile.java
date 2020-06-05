@@ -16,7 +16,7 @@ import java.io.Serializable;
 public class StudentProfile extends BaseRequest implements Serializable {
   private static final long serialVersionUID = 583620260139143932L;
 
-  private String requestID;
+  private String studentRequestID;
   @NotNull(message = "digitalID cannot be null")
   private String digitalID;
   @Size(max = 10)

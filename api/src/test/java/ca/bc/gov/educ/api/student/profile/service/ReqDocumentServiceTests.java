@@ -59,7 +59,7 @@ public class ReqDocumentServiceTests {
             .build();
     this.request = this.requestRepository.save(this.request);
     this.bcscPhoto = this.repository.save(this.bcscPhoto);
-    this.requestID = this.request.getRequestID();
+    this.requestID = this.request.getStudentRequestID();
   }
 
   @Test
@@ -72,7 +72,7 @@ public class ReqDocumentServiceTests {
 
     assertThat(document).isNotNull();
     assertThat(document.getDocumentID()).isNotNull();
-    assertThat(document.getRequest().getRequestID()).isEqualTo(requestID);
+    assertThat(document.getRequest().getStudentRequestID()).isEqualTo(requestID);
   }
 
   @Test
@@ -81,7 +81,7 @@ public class ReqDocumentServiceTests {
     assertThat(retrievedDocument).isNotNull();
     assertThat(retrievedDocument.getDocumentTypeCode()).isEqualTo("BCSCPHOTO");
 
-    assertThat(retrievedDocument.getRequest().getRequestID()).isEqualTo(this.requestID);
+    assertThat(retrievedDocument.getRequest().getStudentRequestID()).isEqualTo(this.requestID);
   }
 
   @Test

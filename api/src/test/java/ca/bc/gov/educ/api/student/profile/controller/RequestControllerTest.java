@@ -8,7 +8,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.File;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -29,7 +28,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import ca.bc.gov.educ.api.student.profile.exception.RestExceptionHandler;
 import ca.bc.gov.educ.api.student.profile.mappers.StudentProfileEntityMapper;
@@ -101,7 +99,7 @@ public class RequestControllerTest extends BaseReqControllerTest {
   @WithMockOAuth2Scope(scope = "READ_STUDENT_PROFILE")
   public void testRetrieveRequest_GivenValidID_ShouldReturnOkStatus() throws Exception {
     StudentProfileEntity entity = repository.save(mapper.toModel(getStudentProfileEntityFromJsonString()));
-    this.mockMvc.perform(get("/" + entity.getRequestID())).andDo(print()).andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("$.requestID").value(entity.getRequestID().toString()));
+    this.mockMvc.perform(get("/" + entity.getStudentRequestID())).andDo(print()).andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("$.studentRequestID").value(entity.getStudentRequestID().toString()));
   }
 
 //  @Test
@@ -156,7 +154,7 @@ public class RequestControllerTest extends BaseReqControllerTest {
   @WithMockOAuth2Scope(scope = "WRITE_STUDENT_PROFILE")
   public void testUpdateRequest_GivenValidPenReqIDInPayload_ShouldReturnStatusOk() throws Exception {
     StudentProfileEntity entity = repository.save(mapper.toModel(getStudentProfileEntityFromJsonString()));
-    String penReqId = entity.getRequestID().toString();
+    String penReqId = entity.getStudentRequestID().toString();
     this.mockMvc.perform(put("/").contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON).content(dummyStudentProfileJsonWithValidReqID(penReqId))).andDo(print()).andExpect(status().isOk());
   }
@@ -186,7 +184,7 @@ public class RequestControllerTest extends BaseReqControllerTest {
   @WithMockOAuth2Scope(scope = "DELETE_STUDENT_PROFILE")
   public void testDeleteRequest_GivenValidId_ShouldReturn204() throws Exception {
     StudentProfileEntity entity = repository.save(mapper.toModel(getStudentProfileEntityFromJsonString()));
-    String reqId = entity.getRequestID().toString();
+    String reqId = entity.getStudentRequestID().toString();
     this.mockMvc.perform(delete("/" + reqId).contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isNoContent());
   }
@@ -204,7 +202,7 @@ public class RequestControllerTest extends BaseReqControllerTest {
             .withTypeCode("CAPASSPORT")
             .build();
     this.documentRepository.save(document);
-    String reqId = entity.getRequestID().toString();
+    String reqId = entity.getStudentRequestID().toString();
     this.mockMvc.perform(delete("/" + reqId).contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isNoContent());
   }

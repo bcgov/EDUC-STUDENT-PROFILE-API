@@ -30,10 +30,10 @@ public class RequestJpaTests {
     @Test
     public void saveDocumentTest() {
         StudentProfileEntity savedRequest = this.repository.save(this.request);
-        assertThat(savedRequest.getRequestID()).isNotNull();
+        assertThat(savedRequest.getStudentRequestID()).isNotNull();
         assertThat(savedRequest.getInitialSubmitDate()).isNull();
 
-        assertThat(this.repository.findById(savedRequest.getRequestID()).isPresent()).isTrue();
+        assertThat(this.repository.findById(savedRequest.getStudentRequestID()).isPresent()).isTrue();
     }
    
 }
