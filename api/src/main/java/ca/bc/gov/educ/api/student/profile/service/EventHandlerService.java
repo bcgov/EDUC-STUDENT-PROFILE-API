@@ -62,17 +62,17 @@ public class EventHandlerService {
           handleOutboxProcess(event.getEventPayload());
           break;
         case UPDATE_STUDENT_PROFILE:
-          log.info("received UPDATE_PEN_REQUEST event :: ");
+          log.info("received UPDATE_STUDENT_PROFILE event :: ");
           log.trace(PAYLOAD_LOG, event.getEventPayload());
           handleUpdate(event);
           break;
         case GET_STUDENT_PROFILE:
-          log.info("received GET_PEN_REQUEST event :: ");
+          log.info("received GET_STUDENT_PROFILE event :: ");
           log.trace(PAYLOAD_LOG, event.getEventPayload());
           handleGet(event);
           break;
         case ADD_STUDENT_PROFILE_COMMENT:
-          log.info("received ADD_PEN_REQUEST_COMMENT event :: ");
+          log.info("received ADD_STUDENT_PROFILE_COMMENT event :: ");
           log.trace(PAYLOAD_LOG, event.getEventPayload());
           handleAddComment(event);
           break;
@@ -86,9 +86,9 @@ public class EventHandlerService {
   }
 
   private void handleAddComment(Event event) throws JsonProcessingException {
-    var penRequestEventOptional = getStudentProfileRequestEventRepository().findBySagaIdAndEventType(event.getSagaId(), event.getEventType().toString());
+    var eventOptional = getStudentProfileRequestEventRepository().findBySagaIdAndEventType(event.getSagaId(), event.getEventType().toString());
     StudentProfileRequestEvent requestEvent;
-    if (penRequestEventOptional.isEmpty()) {
+    if (eventOptional.isEmpty()) {
       log.info(NO_RECORD_SAGA_ID_EVENT_TYPE);
       log.trace(EVENT_PAYLOAD, event);
       var entity = commentsMapper.toModel(JsonUtil.getJsonObjectFromString(StudentProfileComments.class, event.getEventPayload()));
@@ -111,7 +111,7 @@ public class EventHandlerService {
     } else {
       log.info(RECORD_FOUND_FOR_SAGA_ID_EVENT_TYPE);
       log.trace(EVENT_PAYLOAD, event);
-      requestEvent = penRequestEventOptional.get();
+      requestEvent = eventOptional.get();
       requestEvent.setEventStatus(DB_COMMITTED.toString());
     }
     getStudentProfileRequestEventRepository().save(requestEvent);
@@ -123,7 +123,7 @@ public class EventHandlerService {
     if (eventOptional.isEmpty()) {
       log.info(NO_RECORD_SAGA_ID_EVENT_TYPE);
       log.trace(EVENT_PAYLOAD, event);
-      var entityOptional = getRepository().findById(UUID.fromString(event.getEventPayload())); // expect the payload contains the pen request id.
+      var entityOptional = getRepository().findById(UUID.fromString(event.getEventPayload())); // expect the payload contains the student profile request id.
       if (entityOptional.isPresent()) {
         var attachedEntity = entityOptional.get();
         event.setEventPayload(JsonUtil.getJsonStringFromObject(mapper.toStructure(attachedEntity)));// need to convert to structure MANDATORY otherwise jackson will break.
