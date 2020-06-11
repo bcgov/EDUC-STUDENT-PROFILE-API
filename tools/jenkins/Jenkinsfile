@@ -118,6 +118,38 @@ pipeline{
         }
       }
     }
+	stage('Promote to TEST') {
+      steps{
+        deployStage('Test', TEST, TEST_HOST_ROUTE, 'test')
+      }
+      post{
+        success{
+          echo 'Deployment to Test was successful'
+        }
+        failure{
+          echo 'Deployment to Test failed'
+        }
+      }
+    }
+    stage('Create/Update Config Maps'){
+      environment {
+	     APP_NAME = "student-profile-api"
+      }
+      steps{
+        script{
+            dir('tools/jenkins'){
+                sh "bash ./download-kc.sh \"${NAMESPACE}\""
+            }
+        }
+        configMapSetup("${APP_NAME}","${APP_NAME}".toUpperCase(), NAMESPACE);
+        script{
+          dir('tools/jenkins'){
+            def configVars
+            sh "bash ./update-configmap.sh \"test\" ${APP_NAME} ${NAMESPACE}"
+          }
+        }
+      }
+    }
   }
 }
 
