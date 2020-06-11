@@ -99,7 +99,7 @@ pipeline{
         }
       }
     }
-    stage('Create/Update Config Maps'){
+    stage('Create/Update Config Maps Dev'){
       environment {
 	     APP_NAME = "student-profile-api"
       }
@@ -131,7 +131,7 @@ pipeline{
         }
       }
     }
-    stage('Create/Update Config Maps'){
+    stage('Create/Update Config Maps Test'){
       environment {
 	     APP_NAME = "student-profile-api"
       }
