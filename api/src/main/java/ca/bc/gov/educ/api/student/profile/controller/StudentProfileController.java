@@ -193,6 +193,9 @@ public class StudentProfileController extends BaseController implements StudentP
       case DATE:
         studentProfileSpecs = studentProfileFilterSpecs.getDateTypeSpecification(key, value, filterOperation);
         break;
+      case UUID:
+        studentProfileSpecs = studentProfileFilterSpecs.getUUIDTypeSpecification(key, value, filterOperation);
+        break;
       default:
         break;
     }
