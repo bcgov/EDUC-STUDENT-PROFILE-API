@@ -9,6 +9,7 @@ import java.time.chrono.ChronoLocalDate;
 import java.time.chrono.ChronoLocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 /**
@@ -26,6 +27,7 @@ public class Converters {
 		map.put(Integer.class, Integer::valueOf);
 		map.put(ChronoLocalDate.class, LocalDate::parse);
 		map.put(ChronoLocalDateTime.class, LocalDateTime::parse);
+    map.put(UUID.class, UUID::fromString);
 	}
 
 	@SuppressWarnings("unchecked")

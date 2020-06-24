@@ -1,19 +1,20 @@
 package ca.bc.gov.educ.api.student.profile.controller;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.io.File;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
-
+import ca.bc.gov.educ.api.student.profile.exception.RestExceptionHandler;
+import ca.bc.gov.educ.api.student.profile.filter.FilterOperation;
+import ca.bc.gov.educ.api.student.profile.mappers.StudentProfileEntityMapper;
 import ca.bc.gov.educ.api.student.profile.model.*;
+import ca.bc.gov.educ.api.student.profile.repository.DocumentRepository;
+import ca.bc.gov.educ.api.student.profile.repository.GenderCodeTableRepository;
+import ca.bc.gov.educ.api.student.profile.repository.StudentProfileRepository;
+import ca.bc.gov.educ.api.student.profile.repository.StudentProfileStatusCodeTableRepository;
+import ca.bc.gov.educ.api.student.profile.struct.SearchCriteria;
+import ca.bc.gov.educ.api.student.profile.struct.StudentProfile;
+import ca.bc.gov.educ.api.student.profile.struct.ValueType;
 import ca.bc.gov.educ.api.student.profile.support.DocumentBuilder;
+import ca.bc.gov.educ.api.student.profile.support.WithMockOAuth2Scope;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,23 +29,18 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import java.io.File;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-
-import ca.bc.gov.educ.api.student.profile.exception.RestExceptionHandler;
-import ca.bc.gov.educ.api.student.profile.mappers.StudentProfileEntityMapper;
-import ca.bc.gov.educ.api.student.profile.repository.DocumentRepository;
-import ca.bc.gov.educ.api.student.profile.repository.GenderCodeTableRepository;
-import ca.bc.gov.educ.api.student.profile.repository.StudentProfileRepository;
-import ca.bc.gov.educ.api.student.profile.repository.StudentProfileStatusCodeTableRepository;
-import ca.bc.gov.educ.api.student.profile.support.WithMockOAuth2Scope;
-
-import ca.bc.gov.educ.api.student.profile.filter.FilterOperation;
-import ca.bc.gov.educ.api.student.profile.struct.StudentProfile;
-import ca.bc.gov.educ.api.student.profile.struct.SearchCriteria;
-import ca.bc.gov.educ.api.student.profile.struct.ValueType;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 @RunWith(SpringRunner.class)
@@ -381,7 +377,27 @@ public class RequestControllerTest extends BaseReqControllerTest {
             .andReturn();
     this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(1)));
   }
-
+  @Test
+  @WithMockOAuth2Scope(scope = "READ_STUDENT_PROFILE")
+  public void testReadPenRequestPaginated_digitalIdFilter_ShouldReturnStatusOk() throws Exception {
+    final File file = new File(
+        Objects.requireNonNull(getClass().getClassLoader().getResource("mock_student_profiles.json")).getFile()
+    );
+    List<StudentProfile> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
+    });
+    SearchCriteria criteria = SearchCriteria.builder().key("digitalID").operation(FilterOperation.EQUAL).value("fdf94a22-51e3-4816-8665-9f8571af1be4").valueType(ValueType.UUID).build();
+    List<SearchCriteria> criteriaList = new ArrayList<>();
+    criteriaList.add(criteria);
+    ObjectMapper objectMapper = new ObjectMapper();
+    String criteriaJSON = objectMapper.writeValueAsString(criteriaList);
+    System.out.println(criteriaJSON);
+    repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
+    MvcResult result = mockMvc
+        .perform(get("/paginated").param("searchCriteriaList", criteriaJSON)
+            .contentType(APPLICATION_JSON))
+        .andReturn();
+    this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(1)));
+  }
   private StudentProfileStatusCodeEntity createPenReqStatus() {
     StudentProfileStatusCodeEntity entity = new StudentProfileStatusCodeEntity();
     entity.setStudentRequestStatusCode("INITREV");
