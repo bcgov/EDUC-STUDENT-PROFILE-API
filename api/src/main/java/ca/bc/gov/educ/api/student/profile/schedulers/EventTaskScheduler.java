@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -37,7 +38,7 @@ public class EventTaskScheduler {
     this.eventRepository = eventRepository;
   }
 
-  //@Scheduled(cron = "0/1 * * * * *")
+  @Scheduled(cron = "0/1 * * * * *")
   @SchedulerLock(name = "EventTablePoller",
       lockAtLeastFor = "900ms", lockAtMostFor = "950ms")
   public void pollEventTableAndPublish() throws InterruptedException, IOException, TimeoutException {
