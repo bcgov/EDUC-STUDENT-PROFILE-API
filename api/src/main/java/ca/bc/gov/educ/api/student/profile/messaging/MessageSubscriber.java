@@ -48,7 +48,7 @@ public class MessageSubscriber implements Closeable {
     Options options = new Options.Builder()
         .natsUrl(applicationProperties.getNatsUrl())
         .clusterId(applicationProperties.getNatsClusterId())
-        .clientId("pen-request-api-subscriber" + UUID.randomUUID().toString())
+        .clientId("student-profile-api-subscriber" + UUID.randomUUID().toString())
         .connectionLostHandler(this::connectionLostHandler).build();
     connectionFactory = new StreamingConnectionFactory(options);
     connection = connectionFactory.createConnection();
