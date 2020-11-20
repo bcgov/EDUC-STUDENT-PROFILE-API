@@ -27,10 +27,6 @@ public class MessageSubscriber extends MessagePubSub {
     super.connection = con;
   }
 
-  /**
-   * This subscription will makes sure the messages are required to acknowledge manually to STAN.
-   * Subscribe.
-   */
   @PostConstruct
   public void subscribe() {
     String queue = STUDENT_PROFILE_API_TOPIC.toString().replace("_", "-");
