@@ -20,6 +20,6 @@ public class StudentProfileMVCConfig implements WebMvcConfigurer {
 
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
-    registry.addInterceptor(studentProfileInterceptor).addPathPatterns("/**/**/");
+    registry.addInterceptor(studentProfileInterceptor).addPathPatterns("/**");
   }
 }
