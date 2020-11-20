@@ -37,6 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
+@SuppressWarnings("java:S2699")
 public class ReqMacroControllerTest extends BaseReqControllerTest {
 
   private static final StudentProfileMacroMapper mapper = StudentProfileMacroMapper.mapper;
@@ -56,7 +57,7 @@ public class ReqMacroControllerTest extends BaseReqControllerTest {
 
   @Before
   public void setUp() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
     mockMvc = MockMvcBuilders.standaloneSetup(controller)
             .setControllerAdvice(new RestExceptionHandler()).build();
     macroTypeCodeRepository.save(createReqMacroTypeCode());

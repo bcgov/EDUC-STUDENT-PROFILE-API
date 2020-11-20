@@ -18,10 +18,4 @@ public class ApplicationProperties {
   @Value("${file.extensions}")
   private List<String> fileExtensions;
 
-  @Value("${nats.streaming.server.url}")
-  private String natsUrl;
-
-  @Value("${nats.streaming.server.clusterId}")
-  private String natsClusterId;
-
 }

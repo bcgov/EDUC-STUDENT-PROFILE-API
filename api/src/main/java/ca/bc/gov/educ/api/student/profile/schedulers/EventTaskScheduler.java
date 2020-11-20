@@ -16,7 +16,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.concurrent.TimeoutException;
 
 import static ca.bc.gov.educ.api.student.profile.constants.EventStatus.DB_COMMITTED;
 import static ca.bc.gov.educ.api.student.profile.constants.EventType.STUDENT_PROFILE_EVENT_OUTBOX_PROCESSED;
@@ -41,7 +40,7 @@ public class EventTaskScheduler {
   @Scheduled(cron = "0/1 * * * * *")
   @SchedulerLock(name = "EventTablePoller",
       lockAtLeastFor = "900ms", lockAtMostFor = "950ms")
-  public void pollEventTableAndPublish() throws InterruptedException, IOException, TimeoutException {
+  public void pollEventTableAndPublish() throws IOException {
     var events = getEventRepository().findByEventStatus(DB_COMMITTED.toString());
     if (!events.isEmpty()) {
       for (var event : events) {
@@ -50,7 +49,7 @@ public class EventTaskScheduler {
             getMessagePubSub().dispatchMessage(event.getReplyChannel(), eventProcessed(event));
           }
           getMessagePubSub().dispatchMessage(STUDENT_PROFILE_API_TOPIC.toString(), createOutboxEvent(event));
-        } catch (InterruptedException | TimeoutException | IOException e) {
+        } catch (IOException e) {
           log.error("exception occurred", e);
           throw e;
         }

@@ -67,7 +67,7 @@ public class RequestControllerTest extends BaseReqControllerTest {
 
   @Before
   public void setUp() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
     mockMvc = MockMvcBuilders.standaloneSetup(controller)
             .setControllerAdvice(new RestExceptionHandler()).build();
     genderRepo.save(createGenderCodeData());
