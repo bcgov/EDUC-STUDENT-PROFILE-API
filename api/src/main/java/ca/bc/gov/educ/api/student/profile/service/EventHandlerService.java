@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.student.profile.service;
 
 import ca.bc.gov.educ.api.student.profile.constants.EventOutcome;
+import ca.bc.gov.educ.api.student.profile.constants.EventType;
 import ca.bc.gov.educ.api.student.profile.mappers.StudentProfileCommentsMapper;
 import ca.bc.gov.educ.api.student.profile.mappers.StudentProfileEntityMapper;
 import ca.bc.gov.educ.api.student.profile.model.StudentProfileRequestEvent;
@@ -24,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import static ca.bc.gov.educ.api.student.profile.constants.EventStatus.DB_COMMITTED;
 import static ca.bc.gov.educ.api.student.profile.constants.EventStatus.MESSAGE_PUBLISHED;
 import static lombok.AccessLevel.PRIVATE;
 
@@ -33,8 +33,7 @@ import static lombok.AccessLevel.PRIVATE;
 public class EventHandlerService {
   public static final String NO_RECORD_SAGA_ID_EVENT_TYPE = "no record found for the saga id and event type combination, processing";
   public static final String RECORD_FOUND_FOR_SAGA_ID_EVENT_TYPE = "record found for the saga id and event type combination, might be a duplicate or replay," +
-      " just updating the db status so that it will be polled and sent back again.";
-  public static final String PAYLOAD_LOG = "payload is :: {}";
+    " just updating the db status so that it will be polled and sent back again.";
   public static final String EVENT_PAYLOAD = "event is :: {}";
   @Getter(PRIVATE)
   private final StudentProfileRepository repository;
@@ -53,39 +52,7 @@ public class EventHandlerService {
   }
 
   @Transactional(propagation = Propagation.REQUIRES_NEW)
-  public void handleEvent(Event event) {
-    try {
-      switch (event.getEventType()) {
-        case STUDENT_PROFILE_EVENT_OUTBOX_PROCESSED:
-          log.info("received outbox processed event :: ");
-          log.trace(PAYLOAD_LOG, event.getEventPayload());
-          handleOutboxProcess(event.getEventPayload());
-          break;
-        case UPDATE_STUDENT_PROFILE:
-          log.info("received UPDATE_STUDENT_PROFILE event :: ");
-          log.trace(PAYLOAD_LOG, event.getEventPayload());
-          handleUpdate(event);
-          break;
-        case GET_STUDENT_PROFILE:
-          log.info("received GET_STUDENT_PROFILE event :: ");
-          log.trace(PAYLOAD_LOG, event.getEventPayload());
-          handleGet(event);
-          break;
-        case ADD_STUDENT_PROFILE_COMMENT:
-          log.info("received ADD_STUDENT_PROFILE_COMMENT event :: ");
-          log.trace(PAYLOAD_LOG, event.getEventPayload());
-          handleAddComment(event);
-          break;
-        default:
-          log.info("silently ignoring other events.");
-          break;
-      }
-    } catch (final Exception e) {
-      log.error("Exception", e);
-    }
-  }
-
-  private void handleAddComment(Event event) throws JsonProcessingException {
+  public byte[] handleAddComment(Event event) throws JsonProcessingException {
     var eventOptional = getStudentProfileRequestEventRepository().findBySagaIdAndEventType(event.getSagaId(), event.getEventType().toString());
     StudentProfileRequestEvent requestEvent;
     if (eventOptional.isEmpty()) {
@@ -112,12 +79,14 @@ public class EventHandlerService {
       log.info(RECORD_FOUND_FOR_SAGA_ID_EVENT_TYPE);
       log.trace(EVENT_PAYLOAD, event);
       requestEvent = eventOptional.get();
-      requestEvent.setEventStatus(DB_COMMITTED.toString());
+      requestEvent.setEventStatus(MESSAGE_PUBLISHED.toString());
     }
     getStudentProfileRequestEventRepository().save(requestEvent);
+    return eventProcessed(requestEvent);
   }
 
-  private void handleGet(Event event) throws JsonProcessingException {
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  public byte[] handleGet(Event event) throws JsonProcessingException {
     val eventOptional = getStudentProfileRequestEventRepository().findBySagaIdAndEventType(event.getSagaId(), event.getEventType().toString());
     StudentProfileRequestEvent requestEvent;
     if (eventOptional.isEmpty()) {
@@ -136,12 +105,14 @@ public class EventHandlerService {
       log.info(RECORD_FOUND_FOR_SAGA_ID_EVENT_TYPE);
       log.trace(EVENT_PAYLOAD, event);
       requestEvent = eventOptional.get();
-      requestEvent.setEventStatus(DB_COMMITTED.toString());
+      requestEvent.setEventStatus(MESSAGE_PUBLISHED.toString());
     }
     getStudentProfileRequestEventRepository().save(requestEvent);
+    return eventProcessed(requestEvent);
   }
 
-  private void handleUpdate(Event event) throws JsonProcessingException {
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  public byte[] handleUpdate(Event event) throws JsonProcessingException {
     val eventOptional = getStudentProfileRequestEventRepository().findBySagaIdAndEventType(event.getSagaId(), event.getEventType().toString());
     StudentProfileRequestEvent requestEvent;
     if (eventOptional.isEmpty()) {
@@ -165,33 +136,34 @@ public class EventHandlerService {
       log.info(RECORD_FOUND_FOR_SAGA_ID_EVENT_TYPE);
       log.trace(EVENT_PAYLOAD, event);
       requestEvent = eventOptional.get();
-      requestEvent.setEventStatus(DB_COMMITTED.toString());
+      requestEvent.setEventStatus(MESSAGE_PUBLISHED.toString());
     }
     getStudentProfileRequestEventRepository().save(requestEvent);
-  }
-
-  private void handleOutboxProcess(String eventId) {
-    var eventOptional = getStudentProfileRequestEventRepository().findById(UUID.fromString(eventId));
-    if (eventOptional.isPresent()) {
-      var event = eventOptional.get();
-      event.setEventStatus(MESSAGE_PUBLISHED.toString());
-      getStudentProfileRequestEventRepository().save(event);
-    }
+    return eventProcessed(requestEvent);
   }
 
 
   private StudentProfileRequestEvent createEvent(final Event event) {
     return StudentProfileRequestEvent.builder()
-        .createDate(LocalDateTime.now())
-        .updateDate(LocalDateTime.now())
-        .createUser(event.getEventType().toString()) //need to discuss what to put here.
-        .updateUser(event.getEventType().toString())
-        .eventPayload(event.getEventPayload())
-        .eventType(event.getEventType().toString())
-        .sagaId(event.getSagaId())
-        .eventStatus(DB_COMMITTED.toString())
-        .eventOutcome(event.getEventOutcome().toString())
-        .replyChannel(event.getReplyTo())
-        .build();
+      .createDate(LocalDateTime.now())
+      .updateDate(LocalDateTime.now())
+      .createUser(event.getEventType().toString()) //need to discuss what to put here.
+      .updateUser(event.getEventType().toString())
+      .eventPayload(event.getEventPayload())
+      .eventType(event.getEventType().toString())
+      .sagaId(event.getSagaId())
+      .eventStatus(MESSAGE_PUBLISHED.toString())
+      .eventOutcome(event.getEventOutcome().toString())
+      .replyChannel(event.getReplyTo())
+      .build();
+  }
+
+  private byte[] eventProcessed(StudentProfileRequestEvent requestEvent) throws JsonProcessingException {
+    var event = Event.builder()
+      .sagaId(requestEvent.getSagaId())
+      .eventType(EventType.valueOf(requestEvent.getEventType()))
+      .eventOutcome(EventOutcome.valueOf(requestEvent.getEventOutcome()))
+      .eventPayload(requestEvent.getEventPayload()).build();
+    return JsonUtil.getJsonStringFromObject(event).getBytes();
   }
 }

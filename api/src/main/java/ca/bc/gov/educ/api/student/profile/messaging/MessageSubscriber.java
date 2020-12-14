@@ -1,6 +1,6 @@
 package ca.bc.gov.educ.api.student.profile.messaging;
 
-import ca.bc.gov.educ.api.student.profile.service.EventHandlerService;
+import ca.bc.gov.educ.api.student.profile.service.EventHandlerDelegatorService;
 import ca.bc.gov.educ.api.student.profile.struct.Event;
 import ca.bc.gov.educ.api.student.profile.utils.JsonUtil;
 import io.nats.client.Connection;
@@ -19,11 +19,11 @@ import static ca.bc.gov.educ.api.student.profile.constants.Topics.STUDENT_PROFIL
 @Slf4j
 public class MessageSubscriber extends MessagePubSub {
 
-  private final EventHandlerService eventHandlerService;
+  private final EventHandlerDelegatorService eventHandlerDelegatorService;
 
   @Autowired
-  public MessageSubscriber(final Connection con, EventHandlerService eventHandlerService) {
-    this.eventHandlerService = eventHandlerService;
+  public MessageSubscriber(final Connection con, EventHandlerDelegatorService eventHandlerDelegatorService) {
+    this.eventHandlerDelegatorService = eventHandlerDelegatorService;
     super.connection = con;
   }
 
@@ -46,7 +46,7 @@ public class MessageSubscriber extends MessagePubSub {
         try {
           var eventString = new String(message.getData());
           var event = JsonUtil.getJsonObjectFromString(Event.class, eventString);
-          eventHandlerService.handleEvent(event);
+          eventHandlerDelegatorService.handleEvent(event);
           log.debug("Event is :: {}", event);
         } catch (final Exception e) {
           log.error("Exception ", e);
