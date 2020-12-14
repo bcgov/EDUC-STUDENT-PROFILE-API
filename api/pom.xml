@@ -18,6 +18,7 @@
       src/main/java/ca/bc/gov/educ/api/student/profile/messaging/**,
       src/main/java/ca/bc/gov/educ/api/student/profile/endpoint/**,
       src/main/java/ca/bc/gov/educ/api/student/profile/service/EventHandlerDelegatorService.java,
+      src/main/java/ca/bc/gov/educ/api/student/profile/service/EventHandlerService.java,
       src/main/java/ca/bc/gov/educ/api/student/profile/schedulers/**
     </sonar.exclusions>
     <java.version>11</java.version>
