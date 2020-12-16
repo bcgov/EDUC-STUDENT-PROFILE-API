@@ -10,6 +10,7 @@ import org.hibernate.annotations.Parameter;
 
 import javax.persistence.*;
 import javax.validation.constraints.PastOrPresent;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -28,8 +29,9 @@ public class StudentProfileRequestEvent {
   @Column(name = "EVENT_ID", unique = true, updatable = false, columnDefinition = "BINARY(16)")
   private UUID eventId;
 
-  @Column(name = "EVENT_PAYLOAD", length = 4000)
-  private String eventPayload;
+  @Lob
+  @Column(name = "EVENT_PAYLOAD")
+  private byte[] eventPayloadBytes;
 
   @Column(name = "EVENT_STATUS")
   private String eventStatus;
@@ -59,4 +61,21 @@ public class StudentProfileRequestEvent {
 
   @Column(name = "REPLY_CHANNEL")
   private String replyChannel;
+
+  public String getEventPayload() {
+    return new String(getEventPayloadBytes(), StandardCharsets.UTF_8);
+  }
+
+  public void setEventPayload(String eventPayload) {
+    setEventPayloadBytes(eventPayload.getBytes(StandardCharsets.UTF_8));
+  }
+
+  public static class StudentProfileRequestEventBuilder {
+    byte[] eventPayloadBytes;
+
+    public StudentProfileRequestEvent.StudentProfileRequestEventBuilder eventPayload(String eventPayload) {
+      this.eventPayloadBytes = eventPayload.getBytes(StandardCharsets.UTF_8);
+      return this;
+    }
+  }
 }
