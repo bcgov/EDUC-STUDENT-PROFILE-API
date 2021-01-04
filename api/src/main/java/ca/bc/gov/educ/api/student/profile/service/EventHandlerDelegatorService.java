@@ -25,21 +25,21 @@ public class EventHandlerDelegatorService {
     try {
       switch (event.getEventType()) {
         case UPDATE_STUDENT_PROFILE:
-          log.info("received UPDATE_STUDENT_PROFILE event :: ");
+          log.info("received UPDATE_STUDENT_PROFILE event :: {}", event.getSagaId());
           log.trace(PAYLOAD_LOG, event.getEventPayload());
           response = eventHandlerService.handleUpdate(event);
           log.info(RESPONDING_BACK_TO_NATS_ON_CHANNEL, event.getReplyTo());
           messagePublisher.dispatchMessage(event.getReplyTo(), response);
           break;
         case GET_STUDENT_PROFILE:
-          log.info("received GET_STUDENT_PROFILE event :: ");
+          log.info("received GET_STUDENT_PROFILE event :: {}", event.getSagaId());
           log.trace(PAYLOAD_LOG, event.getEventPayload());
           response = eventHandlerService.handleGet(event);
           log.info(RESPONDING_BACK_TO_NATS_ON_CHANNEL, event.getReplyTo());
           messagePublisher.dispatchMessage(event.getReplyTo(), response);
           break;
         case ADD_STUDENT_PROFILE_COMMENT:
-          log.info("received ADD_STUDENT_PROFILE_COMMENT event :: ");
+          log.info("received ADD_STUDENT_PROFILE_COMMENT event :: {}", event.getSagaId());
           log.trace(PAYLOAD_LOG, event.getEventPayload());
           response = eventHandlerService.handleAddComment(event);
           log.info(RESPONDING_BACK_TO_NATS_ON_CHANNEL, event.getReplyTo());
