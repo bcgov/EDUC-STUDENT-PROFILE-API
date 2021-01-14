@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.student.profile.model;
 
+import ca.bc.gov.educ.api.student.profile.utils.UpperCase;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.DynamicUpdate;
@@ -36,13 +37,16 @@ public class StudentProfileEntity {
   String studentRequestStatusCode;
 
   @Column(name = "LEGAL_FIRST_NAME")
+  @UpperCase
   String legalFirstName;
 
   @Column(name = "LEGAL_MIDDLE_NAMES")
+  @UpperCase
   String legalMiddleNames;
 
   @NotNull(message = "legalLastName cannot be null")
   @Column(name = "LEGAL_LAST_NAME")
+  @UpperCase
   String legalLastName;
 
   @Column(name = "DOB")
@@ -52,6 +56,7 @@ public class StudentProfileEntity {
   String genderCode;
 
   @Column(name = "EMAIL")
+  @UpperCase
   String email;
 
   @NotNull(message = "recordedPen cannot be null")
@@ -59,12 +64,15 @@ public class StudentProfileEntity {
   String recordedPen;
 
   @Column(name = "RECORDED_LEGAL_FIRST_NAME")
+  @UpperCase
   String recordedLegalFirstName;
 
   @Column(name = "RECORDED_LEGAL_MIDDLE_NAMES")
+  @UpperCase
   String recordedLegalMiddleNames;
 
   @NotNull(message = "recordedLegalLastName cannot be null")
+  @UpperCase
   @Column(name = "RECORDED_LEGAL_LAST_NAME")
   String recordedLegalLastName;
 
@@ -75,6 +83,7 @@ public class StudentProfileEntity {
   String recordedGenderCode;
 
   @Column(name = "RECORDED_EMAIL")
+  @UpperCase
   String recordedEmail;
 
   @Column(name = "email_verified")
