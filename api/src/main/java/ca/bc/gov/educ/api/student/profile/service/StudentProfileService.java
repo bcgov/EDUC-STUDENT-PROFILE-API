@@ -5,6 +5,7 @@ import ca.bc.gov.educ.api.student.profile.model.GenderCodeEntity;
 import ca.bc.gov.educ.api.student.profile.model.StudentProfileEntity;
 import ca.bc.gov.educ.api.student.profile.model.StudentProfileStatusCodeEntity;
 import ca.bc.gov.educ.api.student.profile.repository.*;
+import ca.bc.gov.educ.api.student.profile.utils.TransformUtil;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.val;
@@ -79,6 +80,7 @@ public class StudentProfileService {
       studentProfile.setStudentRequestStatusCode("DRAFT");
     }
     studentProfile.setStatusUpdateDate(LocalDateTime.now());
+    TransformUtil.uppercaseFields(studentProfile);
     return getStudentProfileRepository().save(studentProfile);
   }
 
@@ -122,6 +124,7 @@ public class StudentProfileService {
       StudentProfileEntity newStudentProfile = curStudentProfile.get();
       studentProfile.setStudentProfileComments(newStudentProfile.getStudentProfileComments());
       BeanUtils.copyProperties(studentProfile, newStudentProfile);
+      TransformUtil.uppercaseFields(newStudentProfile);
       newStudentProfile = studentProfileRepository.save(newStudentProfile);
       return newStudentProfile;
     } else {
