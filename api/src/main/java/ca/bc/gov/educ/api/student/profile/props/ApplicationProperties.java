@@ -18,4 +18,13 @@ public class ApplicationProperties {
   @Value("${file.extensions}")
   private List<String> fileExtensions;
 
+  @Value("${nats.server}")
+  private String server;
+
+  @Value("${nats.maxReconnect}")
+  private int maxReconnect;
+
+  @Value("${nats.connectionName}")
+  private String connectionName;
+
 }
