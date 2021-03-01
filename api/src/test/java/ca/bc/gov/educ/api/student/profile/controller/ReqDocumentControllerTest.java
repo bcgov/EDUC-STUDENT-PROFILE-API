@@ -10,13 +10,13 @@ import ca.bc.gov.educ.api.student.profile.repository.StudentProfileRepository;
 import ca.bc.gov.educ.api.student.profile.support.DocumentBuilder;
 import ca.bc.gov.educ.api.student.profile.support.DocumentTypeCodeBuilder;
 import ca.bc.gov.educ.api.student.profile.support.RequestBuilder;
-import ca.bc.gov.educ.api.student.profile.support.WithMockOAuth2Scope;
 import ca.bc.gov.educ.api.student.profile.struct.StudentProfileDocument;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
@@ -30,6 +30,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -38,8 +39,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
+@AutoConfigureMockMvc
 @ActiveProfiles("test")
 public class ReqDocumentControllerTest {
+  @Autowired
   private MockMvc mvc;
 
   @Autowired
@@ -65,9 +68,6 @@ public class ReqDocumentControllerTest {
   public void setUp() {
 
     DocumentTypeCodeBuilder.setUpDocumentTypeCodes(documentTypeCodeRepository);
-    mvc = MockMvcBuilders.standaloneSetup(documentController)
-            .setControllerAdvice(new RestExceptionHandler()).build();
-
     StudentProfileEntity studentProfile = new RequestBuilder()
             .withoutRequestID().build();
     DocumentEntity document = new DocumentBuilder()
@@ -83,9 +83,9 @@ public class ReqDocumentControllerTest {
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_DOCUMENT_STUDENT_PROFILE")
   public void readDocumentTest() throws Exception {
     this.mvc.perform(get("/" + this.reqID.toString() + "/documents/" + this.documentID.toString())
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_DOCUMENT_STUDENT_PROFILE")))
             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -95,9 +95,9 @@ public class ReqDocumentControllerTest {
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "WRITE_DOCUMENT_STUDENT_PROFILE")
   public void createDocumentTest() throws Exception {
     this.mvc.perform(post("/" + this.reqID.toString() + "/documents")
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_DOCUMENT_STUDENT_PROFILE")))
             .contentType(MediaType.APPLICATION_JSON)
             .content(Files.readAllBytes(new ClassPathResource(
                     "../model/document-req.json", ReqDocumentControllerTest.class).getFile().toPath()))
@@ -111,9 +111,9 @@ public class ReqDocumentControllerTest {
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "WRITE_DOCUMENT_STUDENT_PROFILE")
   public void testCreateDocument_GivenMandatoryFieldsNullValues_ShouldReturnStatusBadRequest() throws Exception {
     this.mvc.perform(post("/" + this.reqID.toString() + "/documents")
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_DOCUMENT_STUDENT_PROFILE")))
             .contentType(MediaType.APPLICATION_JSON)
             .content(geNullDocumentJsonAsString())
             .accept(MediaType.APPLICATION_JSON))
@@ -123,10 +123,10 @@ public class ReqDocumentControllerTest {
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "WRITE_DOCUMENT_STUDENT_PROFILE")
   public void testCreateDocument_GivenDocumentIdInPayload_ShouldReturnStatusBadRequest() throws Exception {
     StudentProfileDocument document = getDummyDocument(UUID.randomUUID().toString());
     this.mvc.perform(post("/" + this.reqID.toString() + "/documents")
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_DOCUMENT_STUDENT_PROFILE")))
             .contentType(MediaType.APPLICATION_JSON)
             .content(getDummyDocJsonString(document))
             .accept(MediaType.APPLICATION_JSON))
@@ -136,11 +136,11 @@ public class ReqDocumentControllerTest {
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "WRITE_DOCUMENT_STUDENT_PROFILE")
   public void testCreateDocument_GivenInvalidFileExtension_ShouldReturnStatusBadRequest() throws Exception {
     StudentProfileDocument document = getDummyDocument(null);
     document.setFileExtension("exe");
     this.mvc.perform(post("/" + this.reqID.toString() + "/documents")
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_DOCUMENT_STUDENT_PROFILE")))
             .contentType(MediaType.APPLICATION_JSON)
             .content(getDummyDocJsonString(document))
             .accept(MediaType.APPLICATION_JSON))
@@ -150,11 +150,11 @@ public class ReqDocumentControllerTest {
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "WRITE_DOCUMENT_STUDENT_PROFILE")
   public void testCreateDocument_GivenInvalidDocumentTypeCode_ShouldReturnStatusBadRequest() throws Exception {
     StudentProfileDocument document = getDummyDocument(null);
     document.setDocumentTypeCode("doc");
     this.mvc.perform(post("/" + this.reqID.toString() + "/documents")
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_DOCUMENT_STUDENT_PROFILE")))
             .contentType(MediaType.APPLICATION_JSON)
             .content(getDummyDocJsonString(document))
             .accept(MediaType.APPLICATION_JSON))
@@ -164,11 +164,11 @@ public class ReqDocumentControllerTest {
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "WRITE_DOCUMENT_STUDENT_PROFILE")
   public void testCreateDocument_GivenFileSizeIsMore_ShouldReturnStatusBadRequest() throws Exception {
     StudentProfileDocument document = getDummyDocument(null);
     document.setFileSize(99999999);
     this.mvc.perform(post("/" + this.reqID.toString() + "/documents")
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_DOCUMENT_STUDENT_PROFILE")))
             .contentType(MediaType.APPLICATION_JSON)
             .content(getDummyDocJsonString(document))
             .accept(MediaType.APPLICATION_JSON))
@@ -178,11 +178,11 @@ public class ReqDocumentControllerTest {
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "WRITE_DOCUMENT_STUDENT_PROFILE")
   public void testCreateDocument_GivenDocTypeNotEffective_ShouldReturnStatusBadRequest() throws Exception {
     StudentProfileDocument document = getDummyDocument(null);
     document.setDocumentTypeCode("BCeIdPHOTO");
     this.mvc.perform(post("/" + this.reqID.toString() + "/documents")
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_DOCUMENT_STUDENT_PROFILE")))
             .contentType(MediaType.APPLICATION_JSON)
             .content(getDummyDocJsonString(document))
             .accept(MediaType.APPLICATION_JSON))
@@ -192,11 +192,11 @@ public class ReqDocumentControllerTest {
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "WRITE_DOCUMENT_STUDENT_PROFILE")
   public void testCreateDocument_GivenDocTypeExpired_ShouldReturnStatusBadRequest() throws Exception {
     StudentProfileDocument document = getDummyDocument(null);
     document.setDocumentTypeCode("dl");
     this.mvc.perform(post("/" + this.reqID.toString() + "/documents")
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_DOCUMENT_STUDENT_PROFILE")))
             .contentType(MediaType.APPLICATION_JSON)
             .content(getDummyDocJsonString(document))
             .accept(MediaType.APPLICATION_JSON))
@@ -206,9 +206,9 @@ public class ReqDocumentControllerTest {
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "WRITE_DOCUMENT_STUDENT_PROFILE")
   public void createDocumentWithInvalidFileSizeTest() throws Exception {
     this.mvc.perform(post("/" + this.reqID.toString() + "/documents")
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_DOCUMENT_STUDENT_PROFILE")))
             .contentType(MediaType.APPLICATION_JSON)
             .content(Files.readAllBytes(new ClassPathResource(
                     "../model/document-req-invalid-filesize.json", ReqDocumentControllerTest.class).getFile().toPath()))
@@ -219,9 +219,9 @@ public class ReqDocumentControllerTest {
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "WRITE_DOCUMENT_STUDENT_PROFILE")
   public void createDocumentWithoutDocumentDataTest() throws Exception {
     this.mvc.perform(post("/" + this.reqID.toString() + "/documents")
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_DOCUMENT_STUDENT_PROFILE")))
             .contentType(MediaType.APPLICATION_JSON)
             .content(Files.readAllBytes(new ClassPathResource(
                     "../model/document-req-without-doc-data.json", ReqDocumentControllerTest.class).getFile().toPath()))
@@ -231,9 +231,9 @@ public class ReqDocumentControllerTest {
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "DELETE_DOCUMENT_STUDENT_PROFILE")
   public void deleteDocumentTest() throws Exception {
     this.mvc.perform(delete("/" + this.reqID.toString() + "/documents/" + this.documentID.toString())
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "DELETE_DOCUMENT_STUDENT_PROFILE")))
             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -246,9 +246,9 @@ public class ReqDocumentControllerTest {
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_DOCUMENT_STUDENT_PROFILE")
   public void readAllDocumentMetadataTest() throws Exception {
     this.mvc.perform(get("/" + this.reqID.toString() + "/documents")
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_DOCUMENT_STUDENT_PROFILE")))
             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -259,9 +259,9 @@ public class ReqDocumentControllerTest {
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_DOCUMENT_REQUIREMENTS_STUDENT_PROFILE")
   public void getDocumentRequirementsTest() throws Exception {
     this.mvc.perform(get("/file-requirements")
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_DOCUMENT_REQUIREMENTS_STUDENT_PROFILE")))
             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -271,9 +271,9 @@ public class ReqDocumentControllerTest {
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_DOCUMENT_TYPES_STUDENT_PROFILE")
   public void getDocumentTypesTest() throws Exception {
     this.mvc.perform(get("/document-types")
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_DOCUMENT_TYPES_STUDENT_PROFILE")))
             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())

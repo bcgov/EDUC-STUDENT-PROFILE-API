@@ -16,23 +16,23 @@ import static org.springframework.http.HttpStatus.CREATED;
 public interface StudentProfileMacroEndpoint {
 
   @GetMapping
-  @PreAuthorize("#oauth2.hasScope('READ_STUDENT_PROFILE_MACRO')")
+  @PreAuthorize("hasAuthority('SCOPE_READ_STUDENT_PROFILE_MACRO')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
   List<StudentProfileMacro> findPenReqMacros(@RequestParam(value = "macroTypeCode", required = false) String macroTypeCode);
 
   @GetMapping("/{macroId}")
-  @PreAuthorize("#oauth2.hasScope('READ_STUDENT_PROFILE_MACRO')")
+  @PreAuthorize("hasAuthority('SCOPE_READ_STUDENT_PROFILE_MACRO')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"), @ApiResponse(responseCode = "404", description = "NOT FOUND")})
   StudentProfileMacro findPenReqMacroById(@PathVariable UUID macroId);
 
   @PostMapping
-  @PreAuthorize("#oauth2.hasAnyScope('WRITE_STUDENT_PROFILE_MACRO')")
+  @PreAuthorize("hasAuthority('SCOPE_WRITE_STUDENT_PROFILE_MACRO')")
   @ApiResponses(value = {@ApiResponse(responseCode = "201", description = "CREATED")})
   @ResponseStatus(CREATED)
   StudentProfileMacro createPenReqMacro(@Validated @RequestBody StudentProfileMacro studentProfileMacro);
 
   @PutMapping("/{macroId}")
-  @PreAuthorize("#oauth2.hasAnyScope('WRITE_STUDENT_PROFILE_MACRO')")
+  @PreAuthorize("hasAuthority('SCOPE_WRITE_STUDENT_PROFILE_MACRO')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"), @ApiResponse(responseCode = "404", description = "NOT FOUND")})
   StudentProfileMacro updatePenReqMacro(@PathVariable UUID macroId, @Validated @RequestBody StudentProfileMacro studentProfileMacro);
 }

@@ -7,7 +7,6 @@ import ca.bc.gov.educ.api.student.profile.struct.StudentProfileComments;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -15,7 +14,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
-@EnableResourceServer
 public class StudentProfileCommentController extends BaseController implements StudentProfileCommentEndpoint {
 
   private static final StudentProfileCommentsMapper mapper = StudentProfileCommentsMapper.mapper;

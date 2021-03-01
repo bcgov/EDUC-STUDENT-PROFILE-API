@@ -1,6 +1,5 @@
 package ca.bc.gov.educ.api.student.profile.controller;
 
-import ca.bc.gov.educ.api.student.profile.exception.RestExceptionHandler;
 import ca.bc.gov.educ.api.student.profile.filter.FilterOperation;
 import ca.bc.gov.educ.api.student.profile.mappers.StudentProfileEntityMapper;
 import ca.bc.gov.educ.api.student.profile.model.*;
@@ -12,7 +11,6 @@ import ca.bc.gov.educ.api.student.profile.struct.SearchCriteria;
 import ca.bc.gov.educ.api.student.profile.struct.StudentProfile;
 import ca.bc.gov.educ.api.student.profile.struct.ValueType;
 import ca.bc.gov.educ.api.student.profile.support.DocumentBuilder;
-import ca.bc.gov.educ.api.student.profile.support.WithMockOAuth2Scope;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.After;
@@ -21,6 +19,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
@@ -37,6 +36,7 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -45,10 +45,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
+@AutoConfigureMockMvc
 @ActiveProfiles("test")
 public class RequestControllerTest extends BaseReqControllerTest {
 
   private static final StudentProfileEntityMapper mapper = StudentProfileEntityMapper.mapper;
+
+  @Autowired
   private MockMvc mockMvc;
   @Autowired
   StudentProfileController controller;
@@ -68,8 +71,6 @@ public class RequestControllerTest extends BaseReqControllerTest {
   @Before
   public void setUp() {
     MockitoAnnotations.openMocks(this);
-    mockMvc = MockMvcBuilders.standaloneSetup(controller)
-            .setControllerAdvice(new RestExceptionHandler()).build();
     genderRepo.save(createGenderCodeData());
   }
 
@@ -88,16 +89,18 @@ public class RequestControllerTest extends BaseReqControllerTest {
   
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_STUDENT_PROFILE")
   public void testRetrieveRequest_GivenRandomID_ShouldThrowEntityNotFoundException() throws Exception {
-    this.mockMvc.perform(get("/" + UUID.randomUUID())).andDo(print()).andExpect(status().isNotFound());
+    this.mockMvc.perform(get("/" + UUID.randomUUID())
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE"))))
+            .andDo(print()).andExpect(status().isNotFound());
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_STUDENT_PROFILE")
   public void testRetrieveRequest_GivenValidID_ShouldReturnOkStatus() throws Exception {
     StudentProfileEntity entity = repository.save(mapper.toModel(getStudentProfileEntityFromJsonString()));
-    this.mockMvc.perform(get("/" + entity.getStudentRequestID())).andDo(print()).andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("$.studentRequestID").value(entity.getStudentRequestID().toString()));
+    this.mockMvc.perform(get("/" + entity.getStudentRequestID())
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE"))))
+            .andDo(print()).andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("$.studentRequestID").value(entity.getStudentRequestID().toString()));
   }
 
 //  @Test
@@ -108,60 +111,68 @@ public class RequestControllerTest extends BaseReqControllerTest {
 //  }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_STUDENT_PROFILE")
   public void testRetrieveRequest_GivenRandomDigitalIdAndStatusCode_ShouldReturnOkStatus() throws Exception {
-    this.mockMvc.perform(get("/?digitalID=" + UUID.randomUUID() + "&status=" + "INT")).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(0)));
+    this.mockMvc.perform(get("/?digitalID=" + UUID.randomUUID() + "&status=" + "INT")
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE"))))
+            .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(0)));
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "WRITE_STUDENT_PROFILE")
   public void testCreateRequest_GivenValidPayload_ShouldReturnStatusCreated() throws Exception {
-    this.mockMvc.perform(post("/").contentType(MediaType.APPLICATION_JSON)
+    this.mockMvc.perform(post("/")
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_STUDENT_PROFILE")))
+            .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON).content(dummyStudentProfileJson())).andDo(print()).andExpect(status().isCreated());
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "WRITE_STUDENT_PROFILE")
   public void testCreateRequest_GivenInitialSubmitDateInPayload_ShouldReturnStatusBadRequest() throws Exception {
-    this.mockMvc.perform(post("/").contentType(MediaType.APPLICATION_JSON)
+    this.mockMvc.perform(post("/")
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_STUDENT_PROFILE")))
+            .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON).content(dummyStudentProfileJsonWithInitialSubmitDate())).andDo(print()).andExpect(status().isBadRequest());
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "WRITE_STUDENT_PROFILE")
   public void testCreateRequest_GivenPenReqIdInPayload_ShouldReturnStatusBadRequest() throws Exception {
-    this.mockMvc.perform(post("/").contentType(MediaType.APPLICATION_JSON)
+    this.mockMvc.perform(post("/")
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_STUDENT_PROFILE")))
+            .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON).content(dummyStudentProfileJsonWithInvalidReqID())).andDo(print()).andExpect(status().isBadRequest());
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "WRITE_STUDENT_PROFILE")
   public void testCreateRequest_LowercaseEmailVerifiedFlag_ShouldReturnStatusBadRequest() throws Exception {
-    this.mockMvc.perform(post("/").contentType(MediaType.APPLICATION_JSON)
+    this.mockMvc.perform(post("/")
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_STUDENT_PROFILE")))
+            .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON).content(dummyStudentProfileJsonWithInvalidEmailVerifiedFlag())).andDo(print()).andExpect(status().isBadRequest());
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "WRITE_STUDENT_PROFILE")
   public void testUpdateRequest_GivenInvalidPenReqIDInPayload_ShouldReturnStatusNotFound() throws Exception {
-    this.mockMvc.perform(put("/").contentType(MediaType.APPLICATION_JSON)
+    this.mockMvc.perform(put("/")
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_STUDENT_PROFILE")))
+            .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON).content(dummyStudentProfileJsonWithInvalidReqID())).andDo(print()).andExpect(status().isNotFound());
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "WRITE_STUDENT_PROFILE")
   public void testUpdateRequest_GivenValidPenReqIDInPayload_ShouldReturnStatusOk() throws Exception {
     StudentProfileEntity entity = repository.save(mapper.toModel(getStudentProfileEntityFromJsonString()));
     String penReqId = entity.getStudentRequestID().toString();
-    this.mockMvc.perform(put("/").contentType(MediaType.APPLICATION_JSON)
+    this.mockMvc.perform(put("/")
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_STUDENT_PROFILE")))
+            .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON).content(dummyStudentProfileJsonWithValidReqID(penReqId))).andDo(print()).andExpect(status().isOk());
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_STUDENT_PROFILE_STATUSES")
   public void testReadRequestStatus_Always_ShouldReturnStatusOkAndAllDataFromDB() throws Exception {
     statusCodeTableRepo.save(createPenReqStatus());
-    this.mockMvc.perform(get("/statuses")).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
+    this.mockMvc.perform(get("/statuses")
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE_STATUSES"))))
+            .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
   }
 
 
@@ -172,23 +183,24 @@ public class RequestControllerTest extends BaseReqControllerTest {
 //  }
 
   @Test
-  @WithMockOAuth2Scope(scope = "DELETE_STUDENT_PROFILE")
   public void testDeleteRequest_GivenInvalidId_ShouldReturn404() throws Exception {
-    this.mockMvc.perform(delete("/" + UUID.randomUUID().toString()).contentType(MediaType.APPLICATION_JSON)
+    this.mockMvc.perform(delete("/" + UUID.randomUUID().toString())
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "DELETE_STUDENT_PROFILE")))
+            .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isNotFound());
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "DELETE_STUDENT_PROFILE")
   public void testDeleteRequest_GivenValidId_ShouldReturn204() throws Exception {
     StudentProfileEntity entity = repository.save(mapper.toModel(getStudentProfileEntityFromJsonString()));
     String reqId = entity.getStudentRequestID().toString();
-    this.mockMvc.perform(delete("/" + reqId).contentType(MediaType.APPLICATION_JSON)
+    this.mockMvc.perform(delete("/" + reqId)
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "DELETE_STUDENT_PROFILE")))
+            .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isNoContent());
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "DELETE_STUDENT_PROFILE")
   public void testDeleteRequest_GivenValidIdWithAssociations_ShouldReturn204() throws Exception {
     StudentProfileEntity requestEntity = mapper.toModel(getStudentProfileEntityFromJsonString());
     requestEntity.setStudentProfileComments(createComments(requestEntity));
@@ -201,7 +213,9 @@ public class RequestControllerTest extends BaseReqControllerTest {
             .build();
     this.documentRepository.save(document);
     String reqId = entity.getStudentRequestID().toString();
-    this.mockMvc.perform(delete("/" + reqId).contentType(MediaType.APPLICATION_JSON)
+    this.mockMvc.perform(delete("/" + reqId)
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "DELETE_STUDENT_PROFILE")))
+            .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isNoContent());
   }
 
@@ -216,7 +230,6 @@ public class RequestControllerTest extends BaseReqControllerTest {
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_STUDENT_PROFILE")
   public void testReadPenRequestPaginated_Always_ShouldReturnStatusOk() throws Exception {
     final File file = new File(
             Objects.requireNonNull(getClass().getClassLoader().getResource("mock_student_profiles.json")).getFile()
@@ -226,22 +239,22 @@ public class RequestControllerTest extends BaseReqControllerTest {
     repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
     MvcResult result = mockMvc
             .perform(get("/paginated?pageSize=2")
+                    .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE")))
                     .contentType(APPLICATION_JSON))
             .andReturn();
     this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(2)));
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_STUDENT_PROFILE")
   public void testReadPenRequestPaginated_whenNoDataInDB_ShouldReturnStatusOk() throws Exception {
     MvcResult result = mockMvc
             .perform(get("/paginated")
+                    .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE")))
                     .contentType(APPLICATION_JSON))
             .andReturn();
     this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(0)));
   }
   @Test
-  @WithMockOAuth2Scope(scope = "READ_STUDENT_PROFILE")
   public void testReadPenRequestPaginatedWithSorting_Always_ShouldReturnStatusOk() throws Exception {
     final File file = new File(
             Objects.requireNonNull(getClass().getClassLoader().getResource("mock_student_profiles.json")).getFile()
@@ -254,14 +267,15 @@ public class RequestControllerTest extends BaseReqControllerTest {
     sortMap.put("legalFirstName", "DESC");
     String sort = new ObjectMapper().writeValueAsString(sortMap);
     MvcResult result = mockMvc
-            .perform(get("/paginated").param("pageNumber","1").param("pageSize", "5").param("sort", sort)
+            .perform(get("/paginated")
+                    .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE")))
+                    .param("pageNumber","1").param("pageSize", "5").param("sort", sort)
                     .contentType(APPLICATION_JSON))
             .andReturn();
     this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(5)));
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_STUDENT_PROFILE")
   public void testReadPenRequestPaginated_GivenFirstNameFilter_ShouldReturnStatusOk() throws Exception {
     final File file = new File(
             Objects.requireNonNull(getClass().getClassLoader().getResource("mock_student_profiles.json")).getFile()
@@ -276,14 +290,15 @@ public class RequestControllerTest extends BaseReqControllerTest {
     System.out.println(criteriaJSON);
     repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
     MvcResult result = mockMvc
-            .perform(get("/paginated").param("searchCriteriaList", criteriaJSON)
+            .perform(get("/paginated")
+                    .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE")))
+                    .param("searchCriteriaList", criteriaJSON)
                     .contentType(APPLICATION_JSON))
             .andReturn();
     this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(1)));
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_STUDENT_PROFILE")
   public void testReadPenRequestPaginated_GivenLastNameFilter_ShouldReturnStatusOk() throws Exception {
     final File file = new File(
             Objects.requireNonNull(getClass().getClassLoader().getResource("mock_student_profiles.json")).getFile()
@@ -298,14 +313,15 @@ public class RequestControllerTest extends BaseReqControllerTest {
     System.out.println(criteriaJSON);
     repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
     MvcResult result = mockMvc
-            .perform(get("/paginated").param("searchCriteriaList", criteriaJSON)
+            .perform(get("/paginated")
+                    .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE")))
+                    .param("searchCriteriaList", criteriaJSON)
                     .contentType(APPLICATION_JSON))
             .andReturn();
     this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(1)));
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_STUDENT_PROFILE")
   public void testReadPenRequestPaginated_GivenSubmitDateBetween_ShouldReturnStatusOk() throws Exception {
     final File file = new File(
             Objects.requireNonNull(getClass().getClassLoader().getResource("mock_student_profiles.json")).getFile()
@@ -322,14 +338,15 @@ public class RequestControllerTest extends BaseReqControllerTest {
     System.out.println(criteriaJSON);
     repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
     MvcResult result = mockMvc
-            .perform(get("/paginated").param("searchCriteriaList", criteriaJSON)
+            .perform(get("/paginated")
+                    .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE")))
+                    .param("searchCriteriaList", criteriaJSON)
                     .contentType(APPLICATION_JSON))
             .andReturn();
     this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(2)));
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_STUDENT_PROFILE")
   public void testReadPenRequestPaginated_GivenFirstAndLast_ShouldReturnStatusOk() throws Exception {
     final File file = new File(
             Objects.requireNonNull(getClass().getClassLoader().getResource("mock_student_profiles.json")).getFile()
@@ -350,14 +367,15 @@ public class RequestControllerTest extends BaseReqControllerTest {
     System.out.println(criteriaJSON);
     repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
     MvcResult result = mockMvc
-            .perform(get("/paginated").param("searchCriteriaList", criteriaJSON)
+            .perform(get("/paginated")
+                    .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE")))
+                    .param("searchCriteriaList", criteriaJSON)
                     .contentType(APPLICATION_JSON))
             .andReturn();
     this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(1)));
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_STUDENT_PROFILE")
   public void testReadPenRequestPaginated_LegalLastNameFilterIgnoreCase_ShouldReturnStatusOk() throws Exception {
     final File file = new File(
             Objects.requireNonNull(getClass().getClassLoader().getResource("mock_student_profiles.json")).getFile()
@@ -372,13 +390,14 @@ public class RequestControllerTest extends BaseReqControllerTest {
     System.out.println(criteriaJSON);
     repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
     MvcResult result = mockMvc
-            .perform(get("/paginated").param("searchCriteriaList", criteriaJSON)
+            .perform(get("/paginated")
+                    .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE")))
+                    .param("searchCriteriaList", criteriaJSON)
                     .contentType(APPLICATION_JSON))
             .andReturn();
     this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(1)));
   }
   @Test
-  @WithMockOAuth2Scope(scope = "READ_STUDENT_PROFILE")
   public void testReadPenRequestPaginated_digitalIdFilter_ShouldReturnStatusOk() throws Exception {
     final File file = new File(
         Objects.requireNonNull(getClass().getClassLoader().getResource("mock_student_profiles.json")).getFile()
@@ -393,7 +412,9 @@ public class RequestControllerTest extends BaseReqControllerTest {
     System.out.println(criteriaJSON);
     repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
     MvcResult result = mockMvc
-        .perform(get("/paginated").param("searchCriteriaList", criteriaJSON)
+        .perform(get("/paginated")
+                .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE")))
+                .param("searchCriteriaList", criteriaJSON)
             .contentType(APPLICATION_JSON))
         .andReturn();
     this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(1)));

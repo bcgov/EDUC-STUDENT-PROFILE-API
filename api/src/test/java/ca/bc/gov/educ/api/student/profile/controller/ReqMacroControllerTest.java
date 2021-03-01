@@ -7,7 +7,6 @@ import ca.bc.gov.educ.api.student.profile.repository.StudentProfileMacroTypeCode
 import ca.bc.gov.educ.api.student.profile.service.StudentProfileMacroService;
 import ca.bc.gov.educ.api.student.profile.model.StudentProfileMacroTypeCodeEntity;
 import ca.bc.gov.educ.api.student.profile.struct.StudentProfileMacro;
-import ca.bc.gov.educ.api.student.profile.support.WithMockOAuth2Scope;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import org.junit.After;
@@ -16,8 +15,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -29,6 +30,8 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oidcLogin;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -36,6 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
+@AutoConfigureMockMvc
 @ActiveProfiles("test")
 @SuppressWarnings("java:S2699")
 public class ReqMacroControllerTest extends BaseReqControllerTest {
@@ -47,6 +51,7 @@ public class ReqMacroControllerTest extends BaseReqControllerTest {
   @Autowired
   StudentProfileMacroService service;
 
+  @Autowired
   private MockMvc mockMvc;
 
   @Autowired
@@ -58,8 +63,6 @@ public class ReqMacroControllerTest extends BaseReqControllerTest {
   @Before
   public void setUp() {
     MockitoAnnotations.openMocks(this);
-    mockMvc = MockMvcBuilders.standaloneSetup(controller)
-            .setControllerAdvice(new RestExceptionHandler()).build();
     macroTypeCodeRepository.save(createReqMacroTypeCode());
   }
 
@@ -70,55 +73,60 @@ public class ReqMacroControllerTest extends BaseReqControllerTest {
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_STUDENT_PROFILE_MACRO")
   public void testRetrieveRequestMacros_ShouldReturnStatusOK() throws Exception {
-    this.mockMvc.perform(get("/student-profile-macro")).andDo(print()).andExpect(status().isOk());
+    this.mockMvc.perform(get("/student-profile-macro")
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE_MACRO"))))
+            .andDo(print()).andExpect(status().isOk());
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_STUDENT_PROFILE_MACRO")
-  public void testRetrieveRequestMacros_GivenInvalidMacroID_ShouldReturnStatusNotFound() throws Exception {
-    this.mockMvc.perform(get("/student-profile-macro" + UUID.randomUUID().toString())).andDo(print()).andExpect(status().isNotFound());
+  public void testRetrieveRequestMacros_GivenInvalidMacroID_ShouldReturnStatusBadReqeuest() throws Exception {
+    this.mockMvc.perform(get("/student-profile-macro/" + UUID.randomUUID().toString())
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE_MACRO"))))
+            .andDo(print()).andExpect(status().isBadRequest());
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_STUDENT_PROFILE_MACRO")
   public void testRetrieveRequestMacros_GivenValidMacroID_ShouldReturnStatusOK() throws Exception {
     val entity = mapper.toModel(getRequestMacroEntityFromJsonString());
     entity.setMacroId(null);
     entity.setCreateDate(LocalDateTime.now());
     entity.setUpdateDate(LocalDateTime.now());
     val savedEntity = service.createMacro(entity);
-    this.mockMvc.perform(get("/student-profile-macro/" + savedEntity.getMacroId().toString())).andDo(print()).andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("$.macroId").value(entity.getMacroId().toString()));
+    this.mockMvc.perform(get("/student-profile-macro/" + savedEntity.getMacroId().toString())
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE_MACRO"))))
+            .andDo(print()).andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("$.macroId").value(entity.getMacroId().toString()));
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_STUDENT_PROFILE_MACRO")
   public void testRetrieveRequestMacros_GivenValidMacroTypeCode_ShouldReturnStatusOK() throws Exception {
     val entity = mapper.toModel(getRequestMacroEntityFromJsonString());
     entity.setMacroId(null);
     entity.setCreateDate(LocalDateTime.now());
     entity.setUpdateDate(LocalDateTime.now());
     val savedEntity = service.createMacro(entity);
-    this.mockMvc.perform(get("/student-profile-macro/?macroTypeCode=" + savedEntity.getMacroTypeCode())).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
+    this.mockMvc.perform(get("/student-profile-macro/?macroTypeCode=" + savedEntity.getMacroTypeCode())
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE_MACRO"))))
+            .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "WRITE_STUDENT_PROFILE_MACRO")
   public void testCreateRequestMacros_GivenValidPayload_ShouldReturnStatusCreated() throws Exception {
-    this.mockMvc.perform(post("/student-profile-macro").contentType(MediaType.APPLICATION_JSON)
+    this.mockMvc.perform(post("/student-profile-macro")
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_STUDENT_PROFILE_MACRO")))
+            .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON).content(dummyRequestMacroJson())).andDo(print()).andExpect(status().isCreated());
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "WRITE_STUDENT_PROFILE_MACRO")
   public void testCreateRequestMacros_GivenInValidPayload_ShouldReturnStatusBadRequest() throws Exception {
-    this.mockMvc.perform(post("/student-profile-macro").contentType(MediaType.APPLICATION_JSON)
+    this.mockMvc.perform(post("/student-profile-macro")
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_STUDENT_PROFILE_MACRO")))
+            .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON).content(dummyRequestMacroJsonWithId())).andDo(print()).andExpect(status().isBadRequest());
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "WRITE_STUDENT_PROFILE_MACRO")
   public void testUpdateRequestMacros_GivenValidPayload_ShouldReturnStatusOK() throws Exception {
     val entity = mapper.toModel(getRequestMacroEntityFromJsonString());
     entity.setMacroId(null);
@@ -129,7 +137,9 @@ public class ReqMacroControllerTest extends BaseReqControllerTest {
     savedEntity.setUpdateDate(null);
     savedEntity.setMacroText("updated text");
     String jsonString = new ObjectMapper().writeValueAsString(mapper.toStructure(savedEntity));
-    this.mockMvc.perform(put("/student-profile-macro/" + savedEntity.getMacroId().toString()).contentType(MediaType.APPLICATION_JSON)
+    this.mockMvc.perform(put("/student-profile-macro/" + savedEntity.getMacroId().toString())
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_STUDENT_PROFILE_MACRO")))
+            .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON).content(jsonString)).andDo(print()).andExpect(status().isOk());
   }
 
