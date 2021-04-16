@@ -1,29 +1,21 @@
 package ca.bc.gov.educ.api.student.profile.controller;
 
-import ca.bc.gov.educ.api.student.profile.exception.RestExceptionHandler;
 import ca.bc.gov.educ.api.student.profile.mappers.StudentProfileMacroMapper;
+import ca.bc.gov.educ.api.student.profile.model.StudentProfileMacroTypeCodeEntity;
 import ca.bc.gov.educ.api.student.profile.repository.StudentProfileMacroRepository;
 import ca.bc.gov.educ.api.student.profile.repository.StudentProfileMacroTypeCodeRepository;
 import ca.bc.gov.educ.api.student.profile.service.StudentProfileMacroService;
-import ca.bc.gov.educ.api.student.profile.model.StudentProfileMacroTypeCodeEntity;
 import ca.bc.gov.educ.api.student.profile.struct.StudentProfileMacro;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -31,16 +23,11 @@ import java.util.UUID;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oidcLogin;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
 @SuppressWarnings("java:S2699")
 public class ReqMacroControllerTest extends BaseReqControllerTest {
 
