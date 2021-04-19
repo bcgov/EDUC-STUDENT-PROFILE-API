@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.student.profile.validator;
 
+import ca.bc.gov.educ.api.student.profile.BaseProfileRequestAPITest;
 import ca.bc.gov.educ.api.student.profile.repository.StudentProfileMacroRepository;
 import ca.bc.gov.educ.api.student.profile.repository.StudentProfileMacroTypeCodeRepository;
 import ca.bc.gov.educ.api.student.profile.service.StudentProfileMacroService;
@@ -22,10 +23,7 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@ActiveProfiles("test")
-public class RequestMacroPayloadValidatorTest {
+public class RequestMacroPayloadValidatorTest extends BaseProfileRequestAPITest {
 
   @Autowired
   StudentProfileMacroTypeCodeRepository macroTypeCodeRepository;

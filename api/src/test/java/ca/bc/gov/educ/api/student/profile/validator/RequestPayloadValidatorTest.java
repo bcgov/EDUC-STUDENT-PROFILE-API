@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.student.profile.validator;
 
+import ca.bc.gov.educ.api.student.profile.BaseProfileRequestAPITest;
 import ca.bc.gov.educ.api.student.profile.model.GenderCodeEntity;
 import ca.bc.gov.educ.api.student.profile.props.ApplicationProperties;
 import ca.bc.gov.educ.api.student.profile.repository.*;
@@ -25,10 +26,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@ActiveProfiles("test")
-public class RequestPayloadValidatorTest {
+public class RequestPayloadValidatorTest extends BaseProfileRequestAPITest {
   private boolean isCreateOperation = false;
   @Mock
   StudentProfileRepository repository;

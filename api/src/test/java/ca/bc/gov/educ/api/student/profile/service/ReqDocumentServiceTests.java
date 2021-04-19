@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.student.profile.service;
 
+import ca.bc.gov.educ.api.student.profile.BaseProfileRequestAPITest;
 import ca.bc.gov.educ.api.student.profile.exception.EntityNotFoundException;
 import ca.bc.gov.educ.api.student.profile.model.DocumentEntity;
 import ca.bc.gov.educ.api.student.profile.model.StudentProfileEntity;
@@ -11,11 +12,7 @@ import ca.bc.gov.educ.api.student.profile.support.DocumentTypeCodeBuilder;
 import ca.bc.gov.educ.api.student.profile.support.RequestBuilder;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
 import java.util.UUID;
@@ -25,10 +22,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@ActiveProfiles("test")
-public class ReqDocumentServiceTests {
+public class ReqDocumentServiceTests extends BaseProfileRequestAPITest {
 
   @Autowired
   DocumentService service;

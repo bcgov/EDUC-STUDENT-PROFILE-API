@@ -1,29 +1,23 @@
 package ca.bc.gov.educ.api.student.profile.controller;
 
-import ca.bc.gov.educ.api.student.profile.exception.RestExceptionHandler;
+import ca.bc.gov.educ.api.student.profile.BaseProfileRequestAPITest;
 import ca.bc.gov.educ.api.student.profile.model.DocumentEntity;
 import ca.bc.gov.educ.api.student.profile.model.StudentProfileEntity;
 import ca.bc.gov.educ.api.student.profile.props.ApplicationProperties;
 import ca.bc.gov.educ.api.student.profile.repository.DocumentRepository;
 import ca.bc.gov.educ.api.student.profile.repository.DocumentTypeCodeTableRepository;
 import ca.bc.gov.educ.api.student.profile.repository.StudentProfileRepository;
+import ca.bc.gov.educ.api.student.profile.struct.StudentProfileDocument;
 import ca.bc.gov.educ.api.student.profile.support.DocumentBuilder;
 import ca.bc.gov.educ.api.student.profile.support.DocumentTypeCodeBuilder;
 import ca.bc.gov.educ.api.student.profile.support.RequestBuilder;
-import ca.bc.gov.educ.api.student.profile.struct.StudentProfileDocument;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.nio.file.Files;
 import java.util.UUID;
@@ -37,11 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-public class ReqDocumentControllerTest {
+public class ReqDocumentControllerTest extends BaseProfileRequestAPITest {
   @Autowired
   private MockMvc mvc;
 

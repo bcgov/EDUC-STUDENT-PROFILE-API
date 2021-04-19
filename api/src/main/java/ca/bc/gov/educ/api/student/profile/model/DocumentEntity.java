@@ -66,6 +66,6 @@ public class DocumentEntity {
 
   @Basic(fetch = FetchType.LAZY)
   @Lob
-  @Column(name = "document_data", updatable = false)
+  @Column(name = "document_data")
   byte[] documentData;
 }
