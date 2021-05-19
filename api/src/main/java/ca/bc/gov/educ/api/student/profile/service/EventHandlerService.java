@@ -2,9 +2,11 @@ package ca.bc.gov.educ.api.student.profile.service;
 
 import ca.bc.gov.educ.api.student.profile.constants.EventOutcome;
 import ca.bc.gov.educ.api.student.profile.constants.EventType;
+import ca.bc.gov.educ.api.student.profile.mappers.DocumentMapper;
 import ca.bc.gov.educ.api.student.profile.mappers.StudentProfileCommentsMapper;
 import ca.bc.gov.educ.api.student.profile.mappers.StudentProfileEntityMapper;
 import ca.bc.gov.educ.api.student.profile.model.StudentProfileRequestEvent;
+import ca.bc.gov.educ.api.student.profile.repository.DocumentRepository;
 import ca.bc.gov.educ.api.student.profile.repository.StudentProfileCommentRepository;
 import ca.bc.gov.educ.api.student.profile.repository.StudentProfileRepository;
 import ca.bc.gov.educ.api.student.profile.repository.StudentProfileRequestEventRepository;
@@ -24,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static ca.bc.gov.educ.api.student.profile.constants.EventStatus.MESSAGE_PUBLISHED;
 import static lombok.AccessLevel.PRIVATE;
@@ -44,11 +47,14 @@ public class EventHandlerService {
   @Getter(PRIVATE)
   private final StudentProfileCommentRepository studentProfileCommentRepository;
 
+  @Getter(PRIVATE)
+  private final DocumentRepository documentRepository;
   @Autowired
-  public EventHandlerService(final StudentProfileRepository repository, final StudentProfileRequestEventRepository studentProfileRequestEventRepository, StudentProfileCommentRepository studentProfileCommentRepository) {
+  public EventHandlerService(final StudentProfileRepository repository, final StudentProfileRequestEventRepository studentProfileRequestEventRepository, StudentProfileCommentRepository studentProfileCommentRepository, DocumentRepository documentRepository) {
     this.repository = repository;
     this.studentProfileRequestEventRepository = studentProfileRequestEventRepository;
     this.studentProfileCommentRepository = studentProfileCommentRepository;
+    this.documentRepository = documentRepository;
   }
 
   @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -142,7 +148,18 @@ public class EventHandlerService {
     return eventProcessed(requestEvent);
   }
 
-
+  @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+  public byte[] handleGetProfileRequestDocumentsMetadata(final Event event) throws JsonProcessingException {
+    val documentList = this.getDocumentRepository().findByRequestStudentRequestID(UUID.fromString(event.getEventPayload())); // expect the payload contains the profile request id, which is a valid guid..
+    if (documentList.isEmpty()) {
+      event.setEventPayload("[]");
+      event.setEventOutcome(EventOutcome.PROFILE_REQUEST_DOCUMENTS_NOT_FOUND);
+    } else {
+      event.setEventPayload(JsonUtil.getJsonStringFromObject(documentList.stream().map(DocumentMapper.mapper::toMetadataStructure).collect(Collectors.toList())));// need to convert to structure MANDATORY otherwise jackson will break.
+      event.setEventOutcome(EventOutcome.PROFILE_REQUEST_DOCUMENTS_FOUND);
+    }
+    return eventProcessed(createEvent(event));
+  }
   private StudentProfileRequestEvent createEvent(final Event event) {
     return StudentProfileRequestEvent.builder()
       .createDate(LocalDateTime.now())

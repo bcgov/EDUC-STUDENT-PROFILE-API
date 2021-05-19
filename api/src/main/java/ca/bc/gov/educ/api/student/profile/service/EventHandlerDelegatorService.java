@@ -45,6 +45,13 @@ public class EventHandlerDelegatorService {
           log.info(RESPONDING_BACK_TO_NATS_ON_CHANNEL, event.getReplyTo());
           messagePublisher.dispatchMessage(event.getReplyTo(), response);
           break;
+        case GET_PROFILE_REQUEST_DOCUMENT_METADATA:
+          log.info("received GET_PROFILE_REQUEST_DOCUMENT_METADATA event :: {}", event.getSagaId());
+          log.trace(PAYLOAD_LOG, event.getEventPayload());
+          response = eventHandlerService.handleGetProfileRequestDocumentsMetadata(event);
+          log.info(RESPONDING_BACK_TO_NATS_ON_CHANNEL, event.getReplyTo());
+          messagePublisher.dispatchMessage(event.getReplyTo(), response);
+          break;
         default:
           log.info("silently ignoring other event :: {}", event);
           break;
