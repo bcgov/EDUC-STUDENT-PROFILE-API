@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.student.profile.schedulers;
 
 
+import ca.bc.gov.educ.api.student.profile.constants.StudentProfileStatusCodes;
 import ca.bc.gov.educ.api.student.profile.repository.DocumentRepository;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.util.Arrays;
 
 @Component
 @Slf4j
@@ -38,19 +39,12 @@ public class StudentProfileScheduler {
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void removeBlobContentsFromUploadedDocuments() {
     LockAssert.assertLocked();
-    final LocalDateTime createDateToCompare = this.calculateCreateDateBasedOnRemoveDocumentBlobInDays();
-    val records = this.documentRepository.findAllByCreateDateBefore(createDateToCompare);
+    val records = this.documentRepository.findAllByRequestStudentRequestStatusCodeIn(Arrays.asList(StudentProfileStatusCodes.COMPLETED.toString(), StudentProfileStatusCodes.ABANDONED.toString()));
     if (!records.isEmpty()) {
       for (val document : records) {
-        document.setDocumentData(new byte[0]); // empty the document data.
+        document.setDocumentData(null); // empty the document data.
       }
       this.documentRepository.saveAll(records);
     }
-
-  }
-
-  private LocalDateTime calculateCreateDateBasedOnRemoveDocumentBlobInDays() {
-    final LocalDateTime currentTime = LocalDateTime.now();
-    return currentTime.minusDays(this.getRemoveDocumentBlobContentsAfterDays());
   }
 }

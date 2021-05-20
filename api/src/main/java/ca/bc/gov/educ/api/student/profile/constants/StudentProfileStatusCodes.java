@@ -8,5 +8,7 @@ public enum StudentProfileStatusCodes {
   AUTO,
   MANUAL,
   REJECTED,
-  UNMATCHED
+  UNMATCHED,
+  COMPLETED,
+  ABANDONED
 }
