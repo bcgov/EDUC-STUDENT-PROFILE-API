@@ -2,6 +2,7 @@ package ca.bc.gov.educ.api.student.profile.service;
 
 import ca.bc.gov.educ.api.student.profile.constants.EventOutcome;
 import ca.bc.gov.educ.api.student.profile.constants.EventType;
+import ca.bc.gov.educ.api.student.profile.exception.EntityNotFoundException;
 import ca.bc.gov.educ.api.student.profile.mappers.DocumentMapper;
 import ca.bc.gov.educ.api.student.profile.mappers.StudentProfileCommentsMapper;
 import ca.bc.gov.educ.api.student.profile.mappers.StudentProfileEntityMapper;
@@ -18,7 +19,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -49,12 +49,17 @@ public class EventHandlerService {
 
   @Getter(PRIVATE)
   private final DocumentRepository documentRepository;
+
+  @Getter(PRIVATE)
+  private final StudentProfileService studentProfileService;
+
   @Autowired
-  public EventHandlerService(final StudentProfileRepository repository, final StudentProfileRequestEventRepository studentProfileRequestEventRepository, StudentProfileCommentRepository studentProfileCommentRepository, DocumentRepository documentRepository) {
+  public EventHandlerService(final StudentProfileRepository repository, final StudentProfileRequestEventRepository studentProfileRequestEventRepository, StudentProfileCommentRepository studentProfileCommentRepository, DocumentRepository documentRepository, StudentProfileService studentProfileService) {
     this.repository = repository;
     this.studentProfileRequestEventRepository = studentProfileRequestEventRepository;
     this.studentProfileCommentRepository = studentProfileCommentRepository;
     this.documentRepository = documentRepository;
+    this.studentProfileService = studentProfileService;
   }
 
   @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -124,17 +129,12 @@ public class EventHandlerService {
     if (eventOptional.isEmpty()) {
       log.info(NO_RECORD_SAGA_ID_EVENT_TYPE);
       log.trace(EVENT_PAYLOAD, event);
-      var entity = mapper.toModel(JsonUtil.getJsonObjectFromString(StudentProfile.class, event.getEventPayload()));
-      val entityOptional = getRepository().findById(entity.getStudentRequestID());
-      if (entityOptional.isPresent()) {
-        val attachedEntity = entityOptional.get();
-        entity.setStudentProfileComments(attachedEntity.getStudentProfileComments()); // need to add this , otherwise child entities will be out of reference.
-        BeanUtils.copyProperties(entity, attachedEntity);
-        attachedEntity.setUpdateDate(LocalDateTime.now());
-        getRepository().save(attachedEntity);
-        event.setEventPayload(JsonUtil.getJsonStringFromObject(mapper.toStructure(attachedEntity)));// need to convert to structure MANDATORY otherwise jackson will break.
+      val entity = mapper.toModel(JsonUtil.getJsonObjectFromString(StudentProfile.class, event.getEventPayload()));
+      try {
+        val updatedEntity = getStudentProfileService().updateStudentProfile(entity);
+        event.setEventPayload(JsonUtil.getJsonStringFromObject(mapper.toStructure(updatedEntity)));// need to convert to structure MANDATORY otherwise jackson will break.
         event.setEventOutcome(EventOutcome.STUDENT_PROFILE_UPDATED);
-      } else {
+      } catch (final EntityNotFoundException ex) {
         event.setEventOutcome(EventOutcome.STUDENT_PROFILE_NOT_FOUND);
       }
       requestEvent = createEvent(event);

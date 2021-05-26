@@ -8,7 +8,9 @@ import ca.bc.gov.educ.api.student.profile.repository.*;
 import ca.bc.gov.educ.api.student.profile.utils.TransformUtil;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -31,6 +33,7 @@ import java.util.concurrent.CompletionException;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class StudentProfileService {
 
   @Getter(AccessLevel.PRIVATE)
@@ -73,7 +76,7 @@ public class StudentProfileService {
    * @return the persisted entity.
    */
   public StudentProfileEntity createStudentProfile(StudentProfileEntity studentProfile) {
-    if(studentProfile.getRecordedEmail() != null && studentProfile.getRecordedEmail().equals(studentProfile.getEmail())) {
+    if (studentProfile.getRecordedEmail() != null && studentProfile.getRecordedEmail().equals(studentProfile.getEmail())) {
       studentProfile.setStudentRequestStatusCode("INITREV");
       studentProfile.setInitialSubmitDate(LocalDateTime.now());
     } else {
@@ -122,6 +125,7 @@ public class StudentProfileService {
 
     if (curStudentProfile.isPresent()) {
       StudentProfileEntity newStudentProfile = curStudentProfile.get();
+      this.logUpdates(studentProfile, curStudentProfile.get());
       studentProfile.setStudentProfileComments(newStudentProfile.getStudentProfileComments());
       BeanUtils.copyProperties(studentProfile, newStudentProfile);
       TransformUtil.uppercaseFields(newStudentProfile);
@@ -129,6 +133,14 @@ public class StudentProfileService {
       return newStudentProfile;
     } else {
       throw new EntityNotFoundException(StudentProfileEntity.class, "StudentProfile", studentProfile.getStudentRequestID().toString());
+    }
+  }
+
+  private void logUpdates(final StudentProfileEntity newProfile, final StudentProfileEntity currentStudProfile) {
+    if (log.isDebugEnabled()) {
+      log.debug("Profile Request update, current :: {}, new :: {}", currentStudProfile, newProfile);
+    } else if (!StringUtils.equalsIgnoreCase(currentStudProfile.getStudentRequestStatusCode(), newProfile.getStudentRequestStatusCode())) {
+      log.info("Profile Request status change, current :: {}, new :: {}", currentStudProfile.getStudentRequestStatusCode(), newProfile.getStudentRequestStatusCode());
     }
   }
 
