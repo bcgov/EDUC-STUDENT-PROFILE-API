@@ -132,6 +132,7 @@ public class EventHandlerService {
       val entity = mapper.toModel(JsonUtil.getJsonObjectFromString(StudentProfile.class, event.getEventPayload()));
       try {
         val updatedEntity = getStudentProfileService().updateStudentProfile(entity);
+        updatedEntity.setUpdateDate(LocalDateTime.now());
         event.setEventPayload(JsonUtil.getJsonStringFromObject(mapper.toStructure(updatedEntity)));// need to convert to structure MANDATORY otherwise jackson will break.
         event.setEventOutcome(EventOutcome.STUDENT_PROFILE_UPDATED);
       } catch (final EntityNotFoundException ex) {
