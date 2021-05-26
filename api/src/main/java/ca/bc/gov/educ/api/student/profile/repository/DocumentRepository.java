@@ -10,5 +10,5 @@ import java.util.UUID;
 public interface DocumentRepository extends JpaRepository<DocumentEntity, UUID> {
   List<DocumentEntity> findByRequestStudentRequestID(UUID studentProfileID);
 
-  List<DocumentEntity> findAllByRequestStudentRequestStatusCodeIn(List<String> statusCodes);
+  List<DocumentEntity> findAllByRequestStudentRequestStatusCodeInAndFileSizeGreaterThanAndDocumentDataIsNotNull(List<String> statusCodes, int fileSize);
 }

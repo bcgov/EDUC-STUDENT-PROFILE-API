@@ -40,6 +40,7 @@ public class StudentProfileSchedulerTest extends BaseProfileRequestAPITest {
     DocumentTypeCodeBuilder.setUpDocumentTypeCodes(this.documentTypeCodeRepository);
     StudentProfileEntity studentProfile = new RequestBuilder().withRequestStatusCode("COMPLETED")
         .withoutRequestID().build();
+    studentProfile.setStatusUpdateDate(LocalDateTime.now().minusHours(25));
     DocumentEntity document = new DocumentBuilder()
         .withoutDocumentID()
         //.withoutCreateAndUpdateUser()
@@ -65,6 +66,7 @@ public class StudentProfileSchedulerTest extends BaseProfileRequestAPITest {
     assertThat(results).size().isEqualTo(1);
     assertThat(results.get(0)).isNotNull();
     assertThat(results.get(0).getDocumentTypeCode()).isNotBlank();
+    assertThat(results.get(0).getFileSize()).isZero();
     val doc = this.profileRequestAPITestUtils.getDocumentBlobByDocumentID(results.get(0).getDocumentID());
     assertThat(doc).isNull();
   }
