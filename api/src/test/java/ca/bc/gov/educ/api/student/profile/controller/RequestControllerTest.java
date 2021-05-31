@@ -5,10 +5,7 @@ import ca.bc.gov.educ.api.student.profile.controller.v1.StudentProfileController
 import ca.bc.gov.educ.api.student.profile.filter.FilterOperation;
 import ca.bc.gov.educ.api.student.profile.mappers.v1.StudentProfileEntityMapper;
 import ca.bc.gov.educ.api.student.profile.model.v1.*;
-import ca.bc.gov.educ.api.student.profile.repository.v1.DocumentRepository;
-import ca.bc.gov.educ.api.student.profile.repository.v1.GenderCodeTableRepository;
-import ca.bc.gov.educ.api.student.profile.repository.v1.StudentProfileRepository;
-import ca.bc.gov.educ.api.student.profile.repository.v1.StudentProfileStatusCodeTableRepository;
+import ca.bc.gov.educ.api.student.profile.repository.v1.*;
 import ca.bc.gov.educ.api.student.profile.struct.SearchCriteria;
 import ca.bc.gov.educ.api.student.profile.struct.StudentProfile;
 import ca.bc.gov.educ.api.student.profile.struct.ValueType;
@@ -54,6 +51,9 @@ public class RequestControllerTest extends BaseReqControllerTest {
 
   @Autowired
   StudentProfileRepository repository;
+
+  @Autowired
+  StudentProfileCommentRepository studentProfileCommentRepository;
 
   @Autowired
   DocumentRepository documentRepository;
@@ -205,14 +205,15 @@ public class RequestControllerTest extends BaseReqControllerTest {
   @Test
   public void testDeleteRequest_GivenValidIdWithAssociations_ShouldReturn204() throws Exception {
     StudentProfileEntity requestEntity = mapper.toModel(getStudentProfileEntityFromJsonString());
-    requestEntity.setStudentProfileComments(createComments(requestEntity));
     StudentProfileEntity entity = repository.save(requestEntity);
+    entity.setStudentProfileComments(createComments(entity));
+    repository.save(entity);
     DocumentEntity document = new DocumentBuilder()
-            .withoutDocumentID()
-            //.withoutCreateAndUpdateUser()
-            .withRequest(entity)
-            .withTypeCode("CAPASSPORT")
-            .build();
+      .withoutDocumentID()
+      //.withoutCreateAndUpdateUser()
+      .withRequest(entity)
+      .withTypeCode("CAPASSPORT")
+      .build();
     this.documentRepository.save(document);
     String reqId = entity.getStudentRequestID().toString();
     this.mockMvc.perform(delete(URL.BASE_URL + URL.STUDENT_PROFILE_REQUEST_ID, reqId)
@@ -225,6 +226,7 @@ public class RequestControllerTest extends BaseReqControllerTest {
     Set<StudentProfileCommentsEntity> commentsEntitySet = new HashSet<>();
     StudentProfileCommentsEntity commentsEntity = new StudentProfileCommentsEntity();
     commentsEntity.setStudentProfileEntity(studentProfileEntity);
+    commentsEntity.setStudentRequestID(studentProfileEntity.getStudentRequestID());
     commentsEntity.setCommentContent("hi");
     commentsEntity.setCommentTimestamp(LocalDateTime.now());
     commentsEntitySet.add(commentsEntity);

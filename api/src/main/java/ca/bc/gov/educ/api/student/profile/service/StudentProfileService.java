@@ -46,15 +46,15 @@ public class StudentProfileService {
   private final GenderCodeTableRepository genderCodeTableRepo;
 
   @Getter(AccessLevel.PRIVATE)
-  private final StudentProfileCommentRepository studentProfilCommentRepository;
+  private final StudentProfileCommentRepository studentProfileCommentRepository;
 
   @Getter(AccessLevel.PRIVATE)
   private final DocumentRepository documentRepository;
 
   @Autowired
-  public StudentProfileService(final StudentProfileRepository studentProfileRepository, StudentProfileCommentRepository studentProfilCommentRepository, DocumentRepository documentRepository, final StudentProfileStatusCodeTableRepository studentProfileStatusCodeTableRepo, final GenderCodeTableRepository genderCodeTableRepo) {
+  public StudentProfileService(final StudentProfileRepository studentProfileRepository, StudentProfileCommentRepository studentProfileCommentRepository, DocumentRepository documentRepository, final StudentProfileStatusCodeTableRepository studentProfileStatusCodeTableRepo, final GenderCodeTableRepository genderCodeTableRepo) {
     this.studentProfileRepository = studentProfileRepository;
-    this.studentProfilCommentRepository = studentProfilCommentRepository;
+    this.studentProfileCommentRepository = studentProfileCommentRepository;
     this.documentRepository = documentRepository;
     this.studentProfileStatusCodeTableRepo = studentProfileStatusCodeTableRepo;
     this.genderCodeTableRepo = genderCodeTableRepo;
@@ -150,7 +150,7 @@ public class StudentProfileService {
       getDocumentRepository().deleteAll(documents);
     }
     if (entity.getStudentProfileComments() != null && !entity.getStudentProfileComments().isEmpty()) {
-      getStudentProfilCommentRepository().deleteAll(entity.getStudentProfileComments());
+      getStudentProfileCommentRepository().deleteAll(entity.getStudentProfileComments());
     }
   }
 
