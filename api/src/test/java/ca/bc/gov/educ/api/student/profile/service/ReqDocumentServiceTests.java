@@ -2,11 +2,11 @@ package ca.bc.gov.educ.api.student.profile.service;
 
 import ca.bc.gov.educ.api.student.profile.BaseProfileRequestAPITest;
 import ca.bc.gov.educ.api.student.profile.exception.EntityNotFoundException;
-import ca.bc.gov.educ.api.student.profile.model.DocumentEntity;
-import ca.bc.gov.educ.api.student.profile.model.StudentProfileEntity;
-import ca.bc.gov.educ.api.student.profile.repository.DocumentRepository;
-import ca.bc.gov.educ.api.student.profile.repository.DocumentTypeCodeTableRepository;
-import ca.bc.gov.educ.api.student.profile.repository.StudentProfileRepository;
+import ca.bc.gov.educ.api.student.profile.model.v1.DocumentEntity;
+import ca.bc.gov.educ.api.student.profile.model.v1.StudentProfileEntity;
+import ca.bc.gov.educ.api.student.profile.repository.v1.DocumentRepository;
+import ca.bc.gov.educ.api.student.profile.repository.v1.DocumentTypeCodeTableRepository;
+import ca.bc.gov.educ.api.student.profile.repository.v1.StudentProfileRepository;
 import ca.bc.gov.educ.api.student.profile.support.DocumentBuilder;
 import ca.bc.gov.educ.api.student.profile.support.DocumentTypeCodeBuilder;
 import ca.bc.gov.educ.api.student.profile.support.RequestBuilder;

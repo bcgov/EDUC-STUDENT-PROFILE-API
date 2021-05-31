@@ -1,22 +1,18 @@
 package ca.bc.gov.educ.api.student.profile.validator;
 
 import ca.bc.gov.educ.api.student.profile.BaseProfileRequestAPITest;
-import ca.bc.gov.educ.api.student.profile.repository.StudentProfileMacroRepository;
-import ca.bc.gov.educ.api.student.profile.repository.StudentProfileMacroTypeCodeRepository;
+import ca.bc.gov.educ.api.student.profile.model.v1.StudentProfileMacroTypeCodeEntity;
+import ca.bc.gov.educ.api.student.profile.repository.v1.StudentProfileMacroRepository;
+import ca.bc.gov.educ.api.student.profile.repository.v1.StudentProfileMacroTypeCodeRepository;
 import ca.bc.gov.educ.api.student.profile.service.StudentProfileMacroService;
-import ca.bc.gov.educ.api.student.profile.model.StudentProfileMacroTypeCodeEntity;
 import ca.bc.gov.educ.api.student.profile.struct.StudentProfileMacro;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

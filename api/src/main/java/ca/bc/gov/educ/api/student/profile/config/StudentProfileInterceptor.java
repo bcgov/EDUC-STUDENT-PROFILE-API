@@ -3,14 +3,14 @@ package ca.bc.gov.educ.api.student.profile.config;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import org.springframework.web.servlet.AsyncHandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @Component
 @Slf4j
-public class StudentProfileInterceptor extends HandlerInterceptorAdapter {
+public class StudentProfileInterceptor implements AsyncHandlerInterceptor {
 
 
   /**

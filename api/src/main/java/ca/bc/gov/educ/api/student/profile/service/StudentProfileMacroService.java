@@ -1,10 +1,10 @@
 package ca.bc.gov.educ.api.student.profile.service;
 
 import ca.bc.gov.educ.api.student.profile.exception.EntityNotFoundException;
-import ca.bc.gov.educ.api.student.profile.model.StudentProfileMacroEntity;
-import ca.bc.gov.educ.api.student.profile.model.StudentProfileMacroTypeCodeEntity;
-import ca.bc.gov.educ.api.student.profile.repository.StudentProfileMacroRepository;
-import ca.bc.gov.educ.api.student.profile.repository.StudentProfileMacroTypeCodeRepository;
+import ca.bc.gov.educ.api.student.profile.model.v1.StudentProfileMacroEntity;
+import ca.bc.gov.educ.api.student.profile.model.v1.StudentProfileMacroTypeCodeEntity;
+import ca.bc.gov.educ.api.student.profile.repository.v1.StudentProfileMacroRepository;
+import ca.bc.gov.educ.api.student.profile.repository.v1.StudentProfileMacroTypeCodeRepository;
 import lombok.Getter;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;

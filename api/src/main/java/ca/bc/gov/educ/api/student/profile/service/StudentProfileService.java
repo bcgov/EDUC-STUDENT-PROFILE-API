@@ -1,10 +1,10 @@
 package ca.bc.gov.educ.api.student.profile.service;
 
 import ca.bc.gov.educ.api.student.profile.exception.EntityNotFoundException;
-import ca.bc.gov.educ.api.student.profile.model.GenderCodeEntity;
-import ca.bc.gov.educ.api.student.profile.model.StudentProfileEntity;
-import ca.bc.gov.educ.api.student.profile.model.StudentProfileStatusCodeEntity;
-import ca.bc.gov.educ.api.student.profile.repository.*;
+import ca.bc.gov.educ.api.student.profile.model.v1.GenderCodeEntity;
+import ca.bc.gov.educ.api.student.profile.model.v1.StudentProfileEntity;
+import ca.bc.gov.educ.api.student.profile.model.v1.StudentProfileStatusCodeEntity;
+import ca.bc.gov.educ.api.student.profile.repository.v1.*;
 import ca.bc.gov.educ.api.student.profile.utils.TransformUtil;
 import lombok.AccessLevel;
 import lombok.Getter;

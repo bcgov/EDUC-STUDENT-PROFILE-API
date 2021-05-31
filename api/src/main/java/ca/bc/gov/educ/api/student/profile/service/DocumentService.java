@@ -1,13 +1,13 @@
 package ca.bc.gov.educ.api.student.profile.service;
 
 import ca.bc.gov.educ.api.student.profile.exception.EntityNotFoundException;
-import ca.bc.gov.educ.api.student.profile.model.DocumentEntity;
-import ca.bc.gov.educ.api.student.profile.model.DocumentTypeCodeEntity;
-import ca.bc.gov.educ.api.student.profile.model.StudentProfileEntity;
+import ca.bc.gov.educ.api.student.profile.model.v1.DocumentEntity;
+import ca.bc.gov.educ.api.student.profile.model.v1.DocumentTypeCodeEntity;
+import ca.bc.gov.educ.api.student.profile.model.v1.StudentProfileEntity;
 import ca.bc.gov.educ.api.student.profile.props.ApplicationProperties;
-import ca.bc.gov.educ.api.student.profile.repository.DocumentRepository;
-import ca.bc.gov.educ.api.student.profile.repository.DocumentTypeCodeTableRepository;
-import ca.bc.gov.educ.api.student.profile.repository.StudentProfileRepository;
+import ca.bc.gov.educ.api.student.profile.repository.v1.DocumentRepository;
+import ca.bc.gov.educ.api.student.profile.repository.v1.DocumentTypeCodeTableRepository;
+import ca.bc.gov.educ.api.student.profile.repository.v1.StudentProfileRepository;
 import ca.bc.gov.educ.api.student.profile.struct.StudentProfileDocRequirement;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;

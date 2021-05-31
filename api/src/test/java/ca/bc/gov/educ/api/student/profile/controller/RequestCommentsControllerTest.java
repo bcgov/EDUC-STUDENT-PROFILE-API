@@ -1,9 +1,11 @@
 package ca.bc.gov.educ.api.student.profile.controller;
 
-import ca.bc.gov.educ.api.student.profile.mappers.StudentProfileEntityMapper;
-import ca.bc.gov.educ.api.student.profile.model.StudentProfileEntity;
-import ca.bc.gov.educ.api.student.profile.repository.StudentProfileCommentRepository;
-import ca.bc.gov.educ.api.student.profile.repository.StudentProfileRepository;
+import ca.bc.gov.educ.api.student.profile.constants.v1.URL;
+import ca.bc.gov.educ.api.student.profile.controller.v1.StudentProfileCommentController;
+import ca.bc.gov.educ.api.student.profile.mappers.v1.StudentProfileEntityMapper;
+import ca.bc.gov.educ.api.student.profile.model.v1.StudentProfileEntity;
+import ca.bc.gov.educ.api.student.profile.repository.v1.StudentProfileCommentRepository;
+import ca.bc.gov.educ.api.student.profile.repository.v1.StudentProfileRepository;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -50,8 +52,8 @@ public class RequestCommentsControllerTest extends BaseReqControllerTest {
 
   @Test
   public void testRetrieveRequestComments_GivenInvalidPenReqID_ShouldReturnStatusNotFound() throws Exception {
-    this.mockMvc.perform(get("/" + UUID.randomUUID().toString() + "/comments")
-            .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE"))))
+    this.mockMvc.perform(get(URL.BASE_URL + URL.STUDENT_PROFILE_REQUEST_ID_COMMENTS, UUID.randomUUID())
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE"))))
             .andDo(print()).andExpect(status().isNotFound());
   }
 
@@ -59,8 +61,8 @@ public class RequestCommentsControllerTest extends BaseReqControllerTest {
   public void testRetrieveRequestComments_GivenValidPenReqID_ShouldReturnStatusOk() throws Exception {
     StudentProfileEntity entity = requestRepository.save(mapper.toModel(getStudentProfileEntityFromJsonString()));
     String penReqId = entity.getStudentRequestID().toString();
-    this.mockMvc.perform(get("/" + penReqId + "/comments")
-            .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE"))))
+    this.mockMvc.perform(get(URL.BASE_URL + URL.STUDENT_PROFILE_REQUEST_ID_COMMENTS, penReqId)
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE"))))
             .andDo(print()).andExpect(status().isOk());
   }
 
@@ -68,19 +70,19 @@ public class RequestCommentsControllerTest extends BaseReqControllerTest {
   public void testCreateRequestComments_GivenValidPayload_ShouldReturnStatusCreated() throws Exception {
     StudentProfileEntity entity = requestRepository.save(mapper.toModel(getStudentProfileEntityFromJsonString()));
     String penReqId = entity.getStudentRequestID().toString();
-    this.mockMvc.perform(post("/" + penReqId + "/comments")
-            .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_STUDENT_PROFILE")))
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON).content(dummyRequestCommentsJsonWithValidPenReqID(penReqId))).andDo(print()).andExpect(status().isCreated());
+    this.mockMvc.perform(post(URL.BASE_URL + URL.STUDENT_PROFILE_REQUEST_ID_COMMENTS, penReqId)
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_STUDENT_PROFILE")))
+      .contentType(MediaType.APPLICATION_JSON)
+      .accept(MediaType.APPLICATION_JSON).content(dummyRequestCommentsJsonWithValidPenReqID(penReqId))).andDo(print()).andExpect(status().isCreated());
   }
 
   @Test
   public void testCreateRequestComments_GivenInvalidPenReqId_ShouldReturnStatusNotFound() throws Exception {
     String penReqId = UUID.randomUUID().toString();
-    this.mockMvc.perform(post("/" + penReqId + "/comments")
-            .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_STUDENT_PROFILE")))
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON).content(dummyRequestCommentsJsonWithValidPenReqID(penReqId))).andDo(print()).andExpect(status().isNotFound());
+    this.mockMvc.perform(post(URL.BASE_URL + URL.STUDENT_PROFILE_REQUEST_ID_COMMENTS, penReqId)
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_STUDENT_PROFILE")))
+      .contentType(MediaType.APPLICATION_JSON)
+      .accept(MediaType.APPLICATION_JSON).content(dummyRequestCommentsJsonWithValidPenReqID(penReqId))).andDo(print()).andExpect(status().isNotFound());
   }
 
   private String dummyRequestCommentsJsonWithValidPenReqID(String reqId) {

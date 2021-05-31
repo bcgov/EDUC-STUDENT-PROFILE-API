@@ -2,10 +2,10 @@ package ca.bc.gov.educ.api.student.profile.validator;
 
 import ca.bc.gov.educ.api.student.profile.exception.InvalidParameterException;
 import ca.bc.gov.educ.api.student.profile.exception.InvalidValueException;
-import ca.bc.gov.educ.api.student.profile.model.DocumentEntity;
-import ca.bc.gov.educ.api.student.profile.model.DocumentTypeCodeEntity;
+import ca.bc.gov.educ.api.student.profile.model.v1.DocumentEntity;
+import ca.bc.gov.educ.api.student.profile.model.v1.DocumentTypeCodeEntity;
 import ca.bc.gov.educ.api.student.profile.props.ApplicationProperties;
-import ca.bc.gov.educ.api.student.profile.repository.DocumentTypeCodeTableRepository;
+import ca.bc.gov.educ.api.student.profile.repository.v1.DocumentTypeCodeTableRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;

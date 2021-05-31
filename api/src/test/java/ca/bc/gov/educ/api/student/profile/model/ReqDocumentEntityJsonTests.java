@@ -1,9 +1,11 @@
 package ca.bc.gov.educ.api.student.profile.model;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
+import ca.bc.gov.educ.api.student.profile.mappers.v1.DocumentMapper;
+import ca.bc.gov.educ.api.student.profile.mappers.v1.DocumentMapperImpl;
+import ca.bc.gov.educ.api.student.profile.model.v1.DocumentEntity;
 import ca.bc.gov.educ.api.student.profile.struct.StudentProfileDocMetadata;
 import ca.bc.gov.educ.api.student.profile.struct.StudentProfileDocument;
+import ca.bc.gov.educ.api.student.profile.support.DocumentBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,9 +16,7 @@ import org.springframework.boot.test.json.JsonContent;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import ca.bc.gov.educ.api.student.profile.mappers.DocumentMapper;
-import ca.bc.gov.educ.api.student.profile.mappers.DocumentMapperImpl;
-import ca.bc.gov.educ.api.student.profile.support.DocumentBuilder;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 @RunWith(SpringRunner.class)
@@ -39,30 +39,30 @@ public class ReqDocumentEntityJsonTests {
         this.document = new DocumentBuilder().build();
     }
 
-    @Test
-    public void documentSerializeTest() throws Exception { 
-        JsonContent<StudentProfileDocument> json = this.jsonTester.write(mapper.toStructure(this.document));
+  @Test
+  public void documentSerializeTest() throws Exception {
+    JsonContent<StudentProfileDocument> json = this.jsonTester.write(mapper.toStructure(this.document));
 
-        assertThat(json).hasJsonPathStringValue("@.documentID");
-        assertThat(json).extractingJsonPathStringValue("@.documentTypeCode")
-            .isEqualToIgnoringCase("BCSCPHOTO");
-        assertThat(json).extractingJsonPathStringValue("@.documentData")
-            .isEqualToIgnoringCase("TXkgY2FyZCE=");
-        
-        assertThat(json).doesNotHaveJsonPathValue("@.request");
-    }
+    assertThat(json).hasJsonPathStringValue("@.documentID");
+    assertThat(json).extractingJsonPathStringValue("@.documentTypeCode")
+      .isEqualToIgnoringCase("BCSCPHOTO");
+    assertThat(json).extractingJsonPathStringValue("@.documentData")
+      .isEqualToIgnoringCase("TXkgY2FyZCE=");
 
-    @Test
-    public void documentMetadataSerializeTest() throws Exception { 
-        JsonContent<StudentProfileDocMetadata> json = this.documentMetadataTester.write(mapper.toMetadataStructure(this.document));
+    assertThat(json).doesNotHaveJsonPathValue("@.request");
+  }
 
-        assertThat(json).hasJsonPathStringValue("@.documentID");
-        assertThat(json).extractingJsonPathStringValue("@.documentTypeCode")
-            .isEqualToIgnoringCase("BCSCPHOTO");
-        assertThat(json).doesNotHaveJsonPathValue("@.documentData");
-        
-        assertThat(json).doesNotHaveJsonPathValue("@.request");
-    }
+  @Test
+  public void documentMetadataSerializeTest() throws Exception {
+    JsonContent<StudentProfileDocMetadata> json = this.documentMetadataTester.write(mapper.toMetadataStructure(this.document));
+
+    assertThat(json).hasJsonPathStringValue("@.documentID");
+    assertThat(json).extractingJsonPathStringValue("@.documentTypeCode")
+      .isEqualToIgnoringCase("BCSCPHOTO");
+    assertThat(json).doesNotHaveJsonPathValue("@.documentData");
+
+    assertThat(json).doesNotHaveJsonPathValue("@.request");
+  }
 
     @Test
     public void documentDeserializeTest() throws Exception {

@@ -1,21 +1,17 @@
 package ca.bc.gov.educ.api.student.profile.validator;
 
 import ca.bc.gov.educ.api.student.profile.BaseProfileRequestAPITest;
-import ca.bc.gov.educ.api.student.profile.model.GenderCodeEntity;
+import ca.bc.gov.educ.api.student.profile.model.v1.GenderCodeEntity;
 import ca.bc.gov.educ.api.student.profile.props.ApplicationProperties;
-import ca.bc.gov.educ.api.student.profile.repository.*;
+import ca.bc.gov.educ.api.student.profile.repository.v1.*;
 import ca.bc.gov.educ.api.student.profile.service.StudentProfileService;
 import ca.bc.gov.educ.api.student.profile.struct.StudentProfile;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.validation.FieldError;
 
 import java.time.LocalDateTime;

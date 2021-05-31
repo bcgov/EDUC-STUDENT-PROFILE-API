@@ -1,8 +1,8 @@
 package ca.bc.gov.educ.api.student.profile.model;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-
+import ca.bc.gov.educ.api.student.profile.model.v1.StudentProfileEntity;
+import ca.bc.gov.educ.api.student.profile.repository.v1.StudentProfileRepository;
+import ca.bc.gov.educ.api.student.profile.support.RequestBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,8 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import ca.bc.gov.educ.api.student.profile.repository.StudentProfileRepository;
-import ca.bc.gov.educ.api.student.profile.support.RequestBuilder;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -35,5 +34,5 @@ public class RequestJpaTests {
 
         assertThat(this.repository.findById(savedRequest.getStudentRequestID()).isPresent()).isTrue();
     }
-   
+
 }

@@ -1,7 +1,7 @@
 package ca.bc.gov.educ.api.student.profile.validator;
 
 
-import ca.bc.gov.educ.api.student.profile.model.GenderCodeEntity;
+import ca.bc.gov.educ.api.student.profile.model.v1.GenderCodeEntity;
 import ca.bc.gov.educ.api.student.profile.props.ApplicationProperties;
 import ca.bc.gov.educ.api.student.profile.service.StudentProfileService;
 import ca.bc.gov.educ.api.student.profile.struct.StudentProfile;

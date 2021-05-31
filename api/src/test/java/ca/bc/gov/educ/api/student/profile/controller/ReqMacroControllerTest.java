@@ -1,9 +1,11 @@
 package ca.bc.gov.educ.api.student.profile.controller;
 
-import ca.bc.gov.educ.api.student.profile.mappers.StudentProfileMacroMapper;
-import ca.bc.gov.educ.api.student.profile.model.StudentProfileMacroTypeCodeEntity;
-import ca.bc.gov.educ.api.student.profile.repository.StudentProfileMacroRepository;
-import ca.bc.gov.educ.api.student.profile.repository.StudentProfileMacroTypeCodeRepository;
+import ca.bc.gov.educ.api.student.profile.constants.v1.URL;
+import ca.bc.gov.educ.api.student.profile.controller.v1.StudentProfileMacroController;
+import ca.bc.gov.educ.api.student.profile.mappers.v1.StudentProfileMacroMapper;
+import ca.bc.gov.educ.api.student.profile.model.v1.StudentProfileMacroTypeCodeEntity;
+import ca.bc.gov.educ.api.student.profile.repository.v1.StudentProfileMacroRepository;
+import ca.bc.gov.educ.api.student.profile.repository.v1.StudentProfileMacroTypeCodeRepository;
 import ca.bc.gov.educ.api.student.profile.service.StudentProfileMacroService;
 import ca.bc.gov.educ.api.student.profile.struct.StudentProfileMacro;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -61,15 +63,15 @@ public class ReqMacroControllerTest extends BaseReqControllerTest {
 
   @Test
   public void testRetrieveRequestMacros_ShouldReturnStatusOK() throws Exception {
-    this.mockMvc.perform(get("/student-profile-macro")
-            .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE_MACRO"))))
+    this.mockMvc.perform(get(URL.BASE_URL + URL.STUDENT_PROFILE_REQUEST_MACRO)
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE_MACRO"))))
             .andDo(print()).andExpect(status().isOk());
   }
 
   @Test
   public void testRetrieveRequestMacros_GivenInvalidMacroID_ShouldReturnStatusBadReqeuest() throws Exception {
-    this.mockMvc.perform(get("/student-profile-macro/" + UUID.randomUUID().toString())
-            .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE_MACRO"))))
+    this.mockMvc.perform(get(URL.BASE_URL + URL.STUDENT_PROFILE_REQUEST_MACRO + URL.MACRO_ID, UUID.randomUUID().toString())
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE_MACRO"))))
             .andDo(print()).andExpect(status().isBadRequest());
   }
 
@@ -80,8 +82,8 @@ public class ReqMacroControllerTest extends BaseReqControllerTest {
     entity.setCreateDate(LocalDateTime.now());
     entity.setUpdateDate(LocalDateTime.now());
     val savedEntity = service.createMacro(entity);
-    this.mockMvc.perform(get("/student-profile-macro/" + savedEntity.getMacroId().toString())
-            .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE_MACRO"))))
+    this.mockMvc.perform(get(URL.BASE_URL + URL.STUDENT_PROFILE_REQUEST_MACRO + URL.MACRO_ID, savedEntity.getMacroId().toString())
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE_MACRO"))))
             .andDo(print()).andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("$.macroId").value(entity.getMacroId().toString()));
   }
 
@@ -92,25 +94,25 @@ public class ReqMacroControllerTest extends BaseReqControllerTest {
     entity.setCreateDate(LocalDateTime.now());
     entity.setUpdateDate(LocalDateTime.now());
     val savedEntity = service.createMacro(entity);
-    this.mockMvc.perform(get("/student-profile-macro/?macroTypeCode=" + savedEntity.getMacroTypeCode())
-            .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE_MACRO"))))
+    this.mockMvc.perform(get(URL.BASE_URL + URL.STUDENT_PROFILE_REQUEST_MACRO).queryParam("macroTypeCode", savedEntity.getMacroTypeCode())
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE_MACRO"))))
             .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
   }
 
   @Test
   public void testCreateRequestMacros_GivenValidPayload_ShouldReturnStatusCreated() throws Exception {
-    this.mockMvc.perform(post("/student-profile-macro")
-            .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_STUDENT_PROFILE_MACRO")))
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON).content(dummyRequestMacroJson())).andDo(print()).andExpect(status().isCreated());
+    this.mockMvc.perform(post(URL.BASE_URL + URL.STUDENT_PROFILE_REQUEST_MACRO)
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_STUDENT_PROFILE_MACRO")))
+      .contentType(MediaType.APPLICATION_JSON)
+      .accept(MediaType.APPLICATION_JSON).content(dummyRequestMacroJson())).andDo(print()).andExpect(status().isCreated());
   }
 
   @Test
   public void testCreateRequestMacros_GivenInValidPayload_ShouldReturnStatusBadRequest() throws Exception {
-    this.mockMvc.perform(post("/student-profile-macro")
-            .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_STUDENT_PROFILE_MACRO")))
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON).content(dummyRequestMacroJsonWithId())).andDo(print()).andExpect(status().isBadRequest());
+    this.mockMvc.perform(post(URL.BASE_URL + URL.STUDENT_PROFILE_REQUEST_MACRO)
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_STUDENT_PROFILE_MACRO")))
+      .contentType(MediaType.APPLICATION_JSON)
+      .accept(MediaType.APPLICATION_JSON).content(dummyRequestMacroJsonWithId())).andDo(print()).andExpect(status().isBadRequest());
   }
 
   @Test
@@ -124,10 +126,10 @@ public class ReqMacroControllerTest extends BaseReqControllerTest {
     savedEntity.setUpdateDate(null);
     savedEntity.setMacroText("updated text");
     String jsonString = new ObjectMapper().writeValueAsString(mapper.toStructure(savedEntity));
-    this.mockMvc.perform(put("/student-profile-macro/" + savedEntity.getMacroId().toString())
-            .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_STUDENT_PROFILE_MACRO")))
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON).content(jsonString)).andDo(print()).andExpect(status().isOk());
+    this.mockMvc.perform(put(URL.BASE_URL + URL.STUDENT_PROFILE_REQUEST_MACRO + URL.MACRO_ID, savedEntity.getMacroId().toString())
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_STUDENT_PROFILE_MACRO")))
+      .contentType(MediaType.APPLICATION_JSON)
+      .accept(MediaType.APPLICATION_JSON).content(jsonString)).andDo(print()).andExpect(status().isOk());
   }
 
   private StudentProfileMacroTypeCodeEntity createReqMacroTypeCode() {

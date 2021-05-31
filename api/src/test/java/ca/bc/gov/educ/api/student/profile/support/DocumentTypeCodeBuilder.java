@@ -1,11 +1,11 @@
 package ca.bc.gov.educ.api.student.profile.support;
 
+import ca.bc.gov.educ.api.student.profile.model.v1.DocumentTypeCodeEntity;
+import ca.bc.gov.educ.api.student.profile.repository.v1.DocumentTypeCodeTableRepository;
+
 import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-
-import ca.bc.gov.educ.api.student.profile.model.DocumentTypeCodeEntity;
-import ca.bc.gov.educ.api.student.profile.repository.DocumentTypeCodeTableRepository;
 
 public class DocumentTypeCodeBuilder {
 

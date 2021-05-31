@@ -1,11 +1,11 @@
 package ca.bc.gov.educ.api.student.profile.support;
 
+import ca.bc.gov.educ.api.student.profile.model.v1.DocumentEntity;
+import ca.bc.gov.educ.api.student.profile.model.v1.StudentProfileEntity;
+
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
-
-import ca.bc.gov.educ.api.student.profile.model.DocumentEntity;
-import ca.bc.gov.educ.api.student.profile.model.StudentProfileEntity;
 
 public class DocumentBuilder {
     UUID documentID = UUID.randomUUID();
@@ -99,9 +99,9 @@ public class DocumentBuilder {
         doc.setUpdateUser(this.updateUser);
         doc.setUpdateDate(LocalDateTime.now());
         doc.setRequest(this.request);
-        
-        return doc;
+
+      return doc;
     }
 
-    
+
 }

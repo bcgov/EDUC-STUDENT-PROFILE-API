@@ -2,7 +2,7 @@ package ca.bc.gov.educ.api.student.profile.schedulers;
 
 
 import ca.bc.gov.educ.api.student.profile.constants.StudentProfileStatusCodes;
-import ca.bc.gov.educ.api.student.profile.repository.DocumentRepository;
+import ca.bc.gov.educ.api.student.profile.repository.v1.DocumentRepository;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import net.javacrumbs.shedlock.core.LockAssert;

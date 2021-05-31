@@ -1,12 +1,14 @@
 package ca.bc.gov.educ.api.student.profile.controller;
 
+import ca.bc.gov.educ.api.student.profile.constants.v1.URL;
+import ca.bc.gov.educ.api.student.profile.controller.v1.StudentProfileController;
 import ca.bc.gov.educ.api.student.profile.filter.FilterOperation;
-import ca.bc.gov.educ.api.student.profile.mappers.StudentProfileEntityMapper;
-import ca.bc.gov.educ.api.student.profile.model.*;
-import ca.bc.gov.educ.api.student.profile.repository.DocumentRepository;
-import ca.bc.gov.educ.api.student.profile.repository.GenderCodeTableRepository;
-import ca.bc.gov.educ.api.student.profile.repository.StudentProfileRepository;
-import ca.bc.gov.educ.api.student.profile.repository.StudentProfileStatusCodeTableRepository;
+import ca.bc.gov.educ.api.student.profile.mappers.v1.StudentProfileEntityMapper;
+import ca.bc.gov.educ.api.student.profile.model.v1.*;
+import ca.bc.gov.educ.api.student.profile.repository.v1.DocumentRepository;
+import ca.bc.gov.educ.api.student.profile.repository.v1.GenderCodeTableRepository;
+import ca.bc.gov.educ.api.student.profile.repository.v1.StudentProfileRepository;
+import ca.bc.gov.educ.api.student.profile.repository.v1.StudentProfileStatusCodeTableRepository;
 import ca.bc.gov.educ.api.student.profile.struct.SearchCriteria;
 import ca.bc.gov.educ.api.student.profile.struct.StudentProfile;
 import ca.bc.gov.educ.api.student.profile.struct.ValueType;
@@ -62,7 +64,7 @@ public class RequestControllerTest extends BaseReqControllerTest {
   @Before
   public void setUp() {
     MockitoAnnotations.openMocks(this);
-    genderRepo.save(createGenderCodeData());
+    profileRequestAPITestUtils.saveGenderCode(createGenderCodeData());
   }
 
   @After
@@ -81,16 +83,16 @@ public class RequestControllerTest extends BaseReqControllerTest {
 
   @Test
   public void testRetrieveRequest_GivenRandomID_ShouldThrowEntityNotFoundException() throws Exception {
-    this.mockMvc.perform(get("/" + UUID.randomUUID())
-            .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE"))))
+    this.mockMvc.perform(get(URL.BASE_URL + URL.STUDENT_PROFILE_REQUEST_ID, UUID.randomUUID())
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE"))))
             .andDo(print()).andExpect(status().isNotFound());
   }
 
   @Test
   public void testRetrieveRequest_GivenValidID_ShouldReturnOkStatus() throws Exception {
     StudentProfileEntity entity = repository.save(mapper.toModel(getStudentProfileEntityFromJsonString()));
-    this.mockMvc.perform(get("/" + entity.getStudentRequestID())
-            .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE"))))
+    this.mockMvc.perform(get(URL.BASE_URL + URL.STUDENT_PROFILE_REQUEST_ID, entity.getStudentRequestID())
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE"))))
             .andDo(print()).andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("$.studentRequestID").value(entity.getStudentRequestID().toString()));
   }
 
@@ -103,66 +105,67 @@ public class RequestControllerTest extends BaseReqControllerTest {
 
   @Test
   public void testRetrieveRequest_GivenRandomDigitalIdAndStatusCode_ShouldReturnOkStatus() throws Exception {
-    this.mockMvc.perform(get("/?digitalID=" + UUID.randomUUID() + "&status=" + "INT")
-            .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE"))))
-            .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(0)));
+    this.mockMvc.perform(get(URL.BASE_URL).queryParam("digitalID", String.valueOf(UUID.randomUUID()))
+      .queryParam("status", "INT")
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE"))))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(0)));
   }
 
   @Test
   public void testCreateRequest_GivenValidPayload_ShouldReturnStatusCreated() throws Exception {
-    this.mockMvc.perform(post("/")
-            .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_STUDENT_PROFILE")))
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON).content(dummyStudentProfileJson())).andDo(print()).andExpect(status().isCreated());
+    this.mockMvc.perform(post(URL.BASE_URL)
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_STUDENT_PROFILE")))
+      .contentType(MediaType.APPLICATION_JSON)
+      .accept(MediaType.APPLICATION_JSON).content(dummyStudentProfileJson())).andDo(print()).andExpect(status().isCreated());
   }
 
   @Test
   public void testCreateRequest_GivenInitialSubmitDateInPayload_ShouldReturnStatusBadRequest() throws Exception {
-    this.mockMvc.perform(post("/")
-            .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_STUDENT_PROFILE")))
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON).content(dummyStudentProfileJsonWithInitialSubmitDate())).andDo(print()).andExpect(status().isBadRequest());
+    this.mockMvc.perform(post(URL.BASE_URL)
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_STUDENT_PROFILE")))
+      .contentType(MediaType.APPLICATION_JSON)
+      .accept(MediaType.APPLICATION_JSON).content(dummyStudentProfileJsonWithInitialSubmitDate())).andDo(print()).andExpect(status().isBadRequest());
   }
 
   @Test
   public void testCreateRequest_GivenPenReqIdInPayload_ShouldReturnStatusBadRequest() throws Exception {
-    this.mockMvc.perform(post("/")
-            .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_STUDENT_PROFILE")))
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON).content(dummyStudentProfileJsonWithInvalidReqID())).andDo(print()).andExpect(status().isBadRequest());
+    this.mockMvc.perform(post(URL.BASE_URL)
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_STUDENT_PROFILE")))
+      .contentType(MediaType.APPLICATION_JSON)
+      .accept(MediaType.APPLICATION_JSON).content(dummyStudentProfileJsonWithInvalidReqID())).andDo(print()).andExpect(status().isBadRequest());
   }
 
   @Test
   public void testCreateRequest_LowercaseEmailVerifiedFlag_ShouldReturnStatusBadRequest() throws Exception {
-    this.mockMvc.perform(post("/")
-            .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_STUDENT_PROFILE")))
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON).content(dummyStudentProfileJsonWithInvalidEmailVerifiedFlag())).andDo(print()).andExpect(status().isBadRequest());
+    this.mockMvc.perform(post(URL.BASE_URL)
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_STUDENT_PROFILE")))
+      .contentType(MediaType.APPLICATION_JSON)
+      .accept(MediaType.APPLICATION_JSON).content(dummyStudentProfileJsonWithInvalidEmailVerifiedFlag())).andDo(print()).andExpect(status().isBadRequest());
   }
 
   @Test
   public void testUpdateRequest_GivenInvalidPenReqIDInPayload_ShouldReturnStatusNotFound() throws Exception {
-    this.mockMvc.perform(put("/")
-            .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_STUDENT_PROFILE")))
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON).content(dummyStudentProfileJsonWithInvalidReqID())).andDo(print()).andExpect(status().isNotFound());
+    this.mockMvc.perform(put(URL.BASE_URL)
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_STUDENT_PROFILE")))
+      .contentType(MediaType.APPLICATION_JSON)
+      .accept(MediaType.APPLICATION_JSON).content(dummyStudentProfileJsonWithInvalidReqID())).andDo(print()).andExpect(status().isNotFound());
   }
 
   @Test
   public void testUpdateRequest_GivenValidPenReqIDInPayload_ShouldReturnStatusOk() throws Exception {
     StudentProfileEntity entity = repository.save(mapper.toModel(getStudentProfileEntityFromJsonString()));
     String penReqId = entity.getStudentRequestID().toString();
-    this.mockMvc.perform(put("/")
-            .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_STUDENT_PROFILE")))
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON).content(dummyStudentProfileJsonWithValidReqID(penReqId))).andDo(print()).andExpect(status().isOk());
+    this.mockMvc.perform(put(URL.BASE_URL)
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_STUDENT_PROFILE")))
+      .contentType(MediaType.APPLICATION_JSON)
+      .accept(MediaType.APPLICATION_JSON).content(dummyStudentProfileJsonWithValidReqID(penReqId))).andDo(print()).andExpect(status().isOk());
   }
 
   @Test
   public void testReadRequestStatus_Always_ShouldReturnStatusOkAndAllDataFromDB() throws Exception {
     statusCodeTableRepo.save(createPenReqStatus());
-    this.mockMvc.perform(get("/statuses")
-            .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE_STATUSES"))))
+    this.mockMvc.perform(get(URL.BASE_URL + URL.STATUSES)
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE_STATUSES"))))
             .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
   }
 
@@ -175,20 +178,20 @@ public class RequestControllerTest extends BaseReqControllerTest {
 
   @Test
   public void testDeleteRequest_GivenInvalidId_ShouldReturn404() throws Exception {
-    this.mockMvc.perform(delete("/" + UUID.randomUUID().toString())
-            .with(jwt().jwt((jwt) -> jwt.claim("scope", "DELETE_STUDENT_PROFILE")))
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isNotFound());
+    this.mockMvc.perform(delete(URL.BASE_URL + URL.STUDENT_PROFILE_REQUEST_ID, UUID.randomUUID().toString())
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "DELETE_STUDENT_PROFILE")))
+      .contentType(MediaType.APPLICATION_JSON)
+      .accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isNotFound());
   }
 
   @Test
   public void testDeleteRequest_GivenValidId_ShouldReturn204() throws Exception {
     StudentProfileEntity entity = repository.save(mapper.toModel(getStudentProfileEntityFromJsonString()));
     String reqId = entity.getStudentRequestID().toString();
-    this.mockMvc.perform(delete("/" + reqId)
-            .with(jwt().jwt((jwt) -> jwt.claim("scope", "DELETE_STUDENT_PROFILE")))
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isNoContent());
+    this.mockMvc.perform(delete(URL.BASE_URL + URL.STUDENT_PROFILE_REQUEST_ID, reqId)
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "DELETE_STUDENT_PROFILE")))
+      .contentType(MediaType.APPLICATION_JSON)
+      .accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isNoContent());
   }
 
   @Test
@@ -204,10 +207,10 @@ public class RequestControllerTest extends BaseReqControllerTest {
             .build();
     this.documentRepository.save(document);
     String reqId = entity.getStudentRequestID().toString();
-    this.mockMvc.perform(delete("/" + reqId)
-            .with(jwt().jwt((jwt) -> jwt.claim("scope", "DELETE_STUDENT_PROFILE")))
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isNoContent());
+    this.mockMvc.perform(delete(URL.BASE_URL + URL.STUDENT_PROFILE_REQUEST_ID, reqId)
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "DELETE_STUDENT_PROFILE")))
+      .contentType(MediaType.APPLICATION_JSON)
+      .accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isNoContent());
   }
 
   private Set<StudentProfileCommentsEntity> createComments(StudentProfileEntity studentProfileEntity) {
@@ -229,9 +232,9 @@ public class RequestControllerTest extends BaseReqControllerTest {
     });
     repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
     MvcResult result = mockMvc
-            .perform(get("/paginated?pageSize=2")
-                    .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE")))
-                    .contentType(APPLICATION_JSON))
+      .perform(get(URL.BASE_URL + URL.PAGINATED).queryParam("pageSize", String.valueOf(2))
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE")))
+        .contentType(APPLICATION_JSON))
             .andReturn();
     this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(2)));
   }
@@ -239,9 +242,9 @@ public class RequestControllerTest extends BaseReqControllerTest {
   @Test
   public void testReadPenRequestPaginated_whenNoDataInDB_ShouldReturnStatusOk() throws Exception {
     MvcResult result = mockMvc
-            .perform(get("/paginated")
-                    .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE")))
-                    .contentType(APPLICATION_JSON))
+      .perform(get(URL.BASE_URL + URL.PAGINATED)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE")))
+        .contentType(APPLICATION_JSON))
             .andReturn();
     this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(0)));
   }
@@ -258,10 +261,10 @@ public class RequestControllerTest extends BaseReqControllerTest {
     sortMap.put("legalFirstName", "DESC");
     String sort = new ObjectMapper().writeValueAsString(sortMap);
     MvcResult result = mockMvc
-            .perform(get("/paginated")
-                    .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE")))
-                    .param("pageNumber","1").param("pageSize", "5").param("sort", sort)
-                    .contentType(APPLICATION_JSON))
+      .perform(get(URL.BASE_URL + URL.PAGINATED)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE")))
+        .param("pageNumber", "1").param("pageSize", "5").param("sort", sort)
+        .contentType(APPLICATION_JSON))
             .andReturn();
     this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(5)));
   }
@@ -281,10 +284,10 @@ public class RequestControllerTest extends BaseReqControllerTest {
     System.out.println(criteriaJSON);
     repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
     MvcResult result = mockMvc
-            .perform(get("/paginated")
-                    .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE")))
-                    .param("searchCriteriaList", criteriaJSON)
-                    .contentType(APPLICATION_JSON))
+      .perform(get(URL.BASE_URL + URL.PAGINATED)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE")))
+        .param("searchCriteriaList", criteriaJSON)
+        .contentType(APPLICATION_JSON))
             .andReturn();
     this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(1)));
   }
@@ -304,10 +307,10 @@ public class RequestControllerTest extends BaseReqControllerTest {
     System.out.println(criteriaJSON);
     repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
     MvcResult result = mockMvc
-            .perform(get("/paginated")
-                    .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE")))
-                    .param("searchCriteriaList", criteriaJSON)
-                    .contentType(APPLICATION_JSON))
+      .perform(get(URL.BASE_URL + URL.PAGINATED)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE")))
+        .param("searchCriteriaList", criteriaJSON)
+        .contentType(APPLICATION_JSON))
             .andReturn();
     this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(1)));
   }
@@ -329,10 +332,10 @@ public class RequestControllerTest extends BaseReqControllerTest {
     System.out.println(criteriaJSON);
     repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
     MvcResult result = mockMvc
-            .perform(get("/paginated")
-                    .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE")))
-                    .param("searchCriteriaList", criteriaJSON)
-                    .contentType(APPLICATION_JSON))
+      .perform(get(URL.BASE_URL + URL.PAGINATED)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE")))
+        .param("searchCriteriaList", criteriaJSON)
+        .contentType(APPLICATION_JSON))
             .andReturn();
     this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(2)));
   }
@@ -358,10 +361,10 @@ public class RequestControllerTest extends BaseReqControllerTest {
     System.out.println(criteriaJSON);
     repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
     MvcResult result = mockMvc
-            .perform(get("/paginated")
-                    .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE")))
-                    .param("searchCriteriaList", criteriaJSON)
-                    .contentType(APPLICATION_JSON))
+      .perform(get(URL.BASE_URL + URL.PAGINATED)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE")))
+        .param("searchCriteriaList", criteriaJSON)
+        .contentType(APPLICATION_JSON))
             .andReturn();
     this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(1)));
   }
@@ -381,10 +384,10 @@ public class RequestControllerTest extends BaseReqControllerTest {
     System.out.println(criteriaJSON);
     repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
     MvcResult result = mockMvc
-            .perform(get("/paginated")
-                    .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE")))
-                    .param("searchCriteriaList", criteriaJSON)
-                    .contentType(APPLICATION_JSON))
+      .perform(get(URL.BASE_URL + URL.PAGINATED)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE")))
+        .param("searchCriteriaList", criteriaJSON)
+        .contentType(APPLICATION_JSON))
             .andReturn();
     this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(1)));
   }
@@ -403,10 +406,10 @@ public class RequestControllerTest extends BaseReqControllerTest {
     System.out.println(criteriaJSON);
     repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
     MvcResult result = mockMvc
-        .perform(get("/paginated")
-                .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE")))
-                .param("searchCriteriaList", criteriaJSON)
-            .contentType(APPLICATION_JSON))
+      .perform(get(URL.BASE_URL + URL.PAGINATED)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE")))
+        .param("searchCriteriaList", criteriaJSON)
+        .contentType(APPLICATION_JSON))
         .andReturn();
     this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(1)));
   }
