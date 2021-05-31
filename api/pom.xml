@@ -12,6 +12,7 @@
     <sonar.language>java</sonar.language>
     <sonar.exclusions>src/main/resources/**,
       src/main/java/ca/bc/gov/educ/api/student/profile/mappers/**,
+      src/main/java/ca/bc/gov/educ/api/student/profile/constants/**,
       src/main/java/ca/bc/gov/educ/api/student/profile/exception/**,
       src/main/java/ca/bc/gov/educ/api/student/profile/model/**,
       src/main/java/ca/bc/gov/educ/api/student/profile/struct/**,

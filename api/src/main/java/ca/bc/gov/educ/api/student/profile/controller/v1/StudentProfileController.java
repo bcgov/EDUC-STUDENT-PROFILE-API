@@ -14,11 +14,11 @@ import ca.bc.gov.educ.api.student.profile.mappers.v1.StudentProfileStatusCodeMap
 import ca.bc.gov.educ.api.student.profile.model.v1.StudentProfileEntity;
 import ca.bc.gov.educ.api.student.profile.service.StudentProfileService;
 import ca.bc.gov.educ.api.student.profile.struct.*;
+import ca.bc.gov.educ.api.student.profile.utils.JsonUtil;
 import ca.bc.gov.educ.api.student.profile.utils.UUIDUtil;
 import ca.bc.gov.educ.api.student.profile.validator.StudentProfilePayloadValidator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -104,12 +104,6 @@ public class StudentProfileController extends BaseController implements StudentP
     }
   }
 
-  @Override
-  @Transactional
-  public ResponseEntity<Void> deleteAll() {
-    getService().deleteAll();
-    return ResponseEntity.noContent().build();
-  }
 
   @Override
   @Transactional
@@ -121,26 +115,25 @@ public class StudentProfileController extends BaseController implements StudentP
   @Override
   @Transactional(propagation = Propagation.SUPPORTS)
   public CompletableFuture<Page<StudentProfile>> findAll(Integer pageNumber, Integer pageSize, String sortCriteriaJson, String searchCriteriaListJson) {
-    final ObjectMapper objectMapper = new ObjectMapper();
     final List<Sort.Order> sorts = new ArrayList<>();
-    Specification<StudentProfileEntity> studentProfilSpecs = null;
+    Specification<StudentProfileEntity> studentProfileEntitySpecification = null;
     try {
-      getSortCriteria(sortCriteriaJson, objectMapper, sorts);
+      getSortCriteria(sortCriteriaJson, sorts);
       if (StringUtils.isNotBlank(searchCriteriaListJson)) {
-        List<SearchCriteria> criteriaList = objectMapper.readValue(searchCriteriaListJson, new TypeReference<List<SearchCriteria>>() {
+        List<SearchCriteria> criteriaList = JsonUtil.mapper.readValue(searchCriteriaListJson, new TypeReference<List<SearchCriteria>>() {
         });
-        studentProfilSpecs = getStudentProfileEntitySpecification(criteriaList);
+        studentProfileEntitySpecification = getStudentProfileEntitySpecification(criteriaList);
       }
     } catch (JsonProcessingException e) {
       throw new StudentProfileRuntimeException(e.getMessage());
     }
-    return getService().findAll(studentProfilSpecs, pageNumber, pageSize, sorts).thenApplyAsync(studentProfilEntities -> studentProfilEntities.map(mapper::toStructure));
+    return getService().findAll(studentProfileEntitySpecification, pageNumber, pageSize, sorts).thenApplyAsync(studentProfilEntities -> studentProfilEntities.map(mapper::toStructure));
   }
 
 
-  private void getSortCriteria(String sortCriteriaJson, ObjectMapper objectMapper, List<Sort.Order> sorts) throws JsonProcessingException {
+  private void getSortCriteria(String sortCriteriaJson, List<Sort.Order> sorts) throws JsonProcessingException {
     if (StringUtils.isNotBlank(sortCriteriaJson)) {
-      Map<String, String> sortMap = objectMapper.readValue(sortCriteriaJson, new TypeReference<Map<String, String>>() {
+      Map<String, String> sortMap = JsonUtil.mapper.readValue(sortCriteriaJson, new TypeReference<Map<String, String>>() {
       });
       sortMap.forEach((k, v) -> {
         if ("ASC".equalsIgnoreCase(v)) {
@@ -155,14 +148,13 @@ public class StudentProfileController extends BaseController implements StudentP
   private Specification<StudentProfileEntity> getStudentProfileEntitySpecification(List<SearchCriteria> criteriaList) {
     Specification<StudentProfileEntity> penRequestSpecs = null;
     if (!criteriaList.isEmpty()) {
-      int i = 0;
+      var i = 0;
       for (SearchCriteria criteria : criteriaList) {
         if (criteria.getKey() != null && criteria.getOperation() != null && criteria.getValueType() != null) {
           Specification<StudentProfileEntity> typeSpecification = getTypeSpecification(criteria.getKey(), criteria.getOperation(), criteria.getValue(), criteria.getValueType());
           if (i == 0) {
             penRequestSpecs = Specification.where(typeSpecification);
           } else {
-            assert penRequestSpecs != null;
             penRequestSpecs = penRequestSpecs.and(typeSpecification);
           }
           i++;

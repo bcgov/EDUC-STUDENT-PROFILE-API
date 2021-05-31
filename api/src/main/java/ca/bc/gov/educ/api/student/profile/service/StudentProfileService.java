@@ -144,15 +144,6 @@ public class StudentProfileService {
     }
   }
 
-  @Transactional(propagation = Propagation.MANDATORY)
-  public void deleteAll() {
-    List<StudentProfileEntity> requests = getStudentProfileRepository().findAll();
-    for (val entity : requests) {
-      deleteAssociatedDocumentsAndComments(entity);
-    }
-    getStudentProfileRepository().deleteAll();
-  }
-
   private void deleteAssociatedDocumentsAndComments(StudentProfileEntity entity) {
     val documents = getDocumentRepository().findByRequestStudentRequestID(entity.getStudentRequestID());
     if (documents != null && !documents.isEmpty()) {

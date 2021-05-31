@@ -76,7 +76,7 @@ public class RequestControllerTest extends BaseReqControllerTest {
 
   private GenderCodeEntity createGenderCodeData() {
     return GenderCodeEntity.builder().genderCode("M").description("Male")
-            .effectiveDate(LocalDateTime.now()).expiryDate(LocalDateTime.MAX).displayOrder(1).label("label").createDate(LocalDateTime.now())
+      .effectiveDate(LocalDateTime.now().minusYears(10)).expiryDate(LocalDateTime.MAX).displayOrder(1).label("label").createDate(LocalDateTime.now())
             .updateDate(LocalDateTime.now()).createUser("TEST").updateUser("TEST").build();
   }
 
@@ -117,6 +117,14 @@ public class RequestControllerTest extends BaseReqControllerTest {
       .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_STUDENT_PROFILE")))
       .contentType(MediaType.APPLICATION_JSON)
       .accept(MediaType.APPLICATION_JSON).content(dummyStudentProfileJson())).andDo(print()).andExpect(status().isCreated());
+  }
+
+  @Test
+  public void testCreateRequest_GivenValidPayload2_ShouldReturnStatusCreated() throws Exception {
+    this.mockMvc.perform(post(URL.BASE_URL)
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_STUDENT_PROFILE")))
+      .contentType(MediaType.APPLICATION_JSON)
+      .accept(MediaType.APPLICATION_JSON).content(dummyStudentProfileJsonWithRecordedEmail())).andDo(print()).andExpect(status().isCreated());
   }
 
   @Test

@@ -7,6 +7,7 @@ import ca.bc.gov.educ.api.student.profile.service.StudentProfileService;
 import ca.bc.gov.educ.api.student.profile.struct.StudentProfile;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.FieldError;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
+@Slf4j
 public class StudentProfilePayloadValidator {
 
   public static final String GENDER_CODE = "genderCode";
@@ -47,7 +49,7 @@ public class StudentProfilePayloadValidator {
   protected void validateGenderCode(StudentProfile request, List<FieldError> apiValidationErrors) {
     if (request.getGenderCode() != null) {
       Optional<GenderCodeEntity> genderCodeEntity = requestService.findGenderCode(request.getGenderCode());
-      if (!genderCodeEntity.isPresent()) {
+      if (genderCodeEntity.isEmpty()) {
         apiValidationErrors.add(createFieldError(GENDER_CODE, request.getGenderCode(), "Invalid Gender Code."));
       } else if (genderCodeEntity.get().getEffectiveDate() != null && genderCodeEntity.get().getEffectiveDate().isAfter(LocalDateTime.now())) {
         apiValidationErrors.add(createFieldError(GENDER_CODE, request.getGenderCode(), "Gender Code provided is not yet effective."));
