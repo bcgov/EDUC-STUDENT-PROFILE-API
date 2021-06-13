@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.student.profile.messaging;
 
+import ca.bc.gov.educ.api.student.profile.helpers.LogHelper;
 import ca.bc.gov.educ.api.student.profile.service.EventHandlerDelegatorService;
 import ca.bc.gov.educ.api.student.profile.struct.Event;
 import ca.bc.gov.educ.api.student.profile.utils.JsonUtil;
@@ -46,6 +47,7 @@ public class MessageSubscriber {
         log.info("Message received is :: {} ", message);
         try {
           var eventString = new String(message.getData());
+          LogHelper.logMessagingEventDetails(eventString);
           var event = JsonUtil.getJsonObjectFromString(Event.class, eventString);
           eventHandlerDelegatorService.handleEvent(event);
           log.debug("Event is :: {}", event);

@@ -20,7 +20,8 @@
       src/main/java/ca/bc/gov/educ/api/student/profile/endpoint/**,
       src/main/java/ca/bc/gov/educ/api/student/profile/service/EventHandlerDelegatorService.java,
       src/main/java/ca/bc/gov/educ/api/student/profile/service/EventHandlerService.java,
-      src/main/java/ca/bc/gov/educ/api/student/profile/props/**
+      src/main/java/ca/bc/gov/educ/api/student/profile/props/**,
+      src/main/java/ca/bc/gov/educ/api/student/profile/helpers/LogHelper.java,
     </sonar.exclusions>
     <java.version>11</java.version>
 

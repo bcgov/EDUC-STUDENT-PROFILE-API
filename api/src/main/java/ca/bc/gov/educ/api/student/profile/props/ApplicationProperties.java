@@ -12,7 +12,7 @@ public class ApplicationProperties {
   public static final String CLIENT_ID = "STUDENT-PROFILE-API";
   public static final String YES = "Y";
   public static final String TRUE = "TRUE";
-
+  public static final String CORRELATION_ID = "correlationID";
   @Value("${file.maxsize}")
   private int maxFileSize;
   @Value("${file.extensions}")
