@@ -15,6 +15,8 @@ public class ApplicationProperties {
   public static final String CORRELATION_ID = "correlationID";
   @Value("${file.maxsize}")
   private int maxFileSize;
+  @Value("${file.maxEncodedSize}")
+  private int maxEncodedFileSize;
   @Value("${file.extensions}")
   private List<String> fileExtensions;
 
