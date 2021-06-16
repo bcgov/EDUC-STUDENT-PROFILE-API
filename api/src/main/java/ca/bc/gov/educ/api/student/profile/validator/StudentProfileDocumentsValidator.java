@@ -48,9 +48,9 @@ public class StudentProfileDocumentsValidator {
       throw new InvalidValueException("fileExtension", document.getFileExtension());
     }
 
-    if (document.getFileSize() > properties.getMaxFileSize()) {
+    if (document.getFileSize() > properties.getMaxEncodedFileSize()) {
       throw new InvalidValueException("fileSize", document.getFileSize().toString(), "Max fileSize",
-              String.valueOf(properties.getMaxFileSize()));
+        String.valueOf(properties.getMaxFileSize()));
     }
 
     if (isCreateOperation && document.getFileSize() != document.getDocumentData().length) {
