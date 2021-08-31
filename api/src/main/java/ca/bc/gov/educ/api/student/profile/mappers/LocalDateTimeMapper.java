@@ -9,6 +9,7 @@ public class LocalDateTimeMapper {
     if (dateTime == null) {
       return null;
     }
+    dateTime = dateTime.withNano(0);
     return DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(dateTime);
   }
 
@@ -16,6 +17,6 @@ public class LocalDateTimeMapper {
     if (dateTime == null) {
       return null;
     }
-    return LocalDateTime.parse(dateTime);
+    return LocalDateTime.parse(dateTime).withNano(0);
   }
 }
