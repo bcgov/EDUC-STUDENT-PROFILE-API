@@ -6,6 +6,7 @@ import ca.bc.gov.educ.api.student.profile.mappers.UUIDMapper;
 import ca.bc.gov.educ.api.student.profile.model.v1.DocumentEntity;
 import ca.bc.gov.educ.api.student.profile.struct.StudentProfileDocMetadata;
 import ca.bc.gov.educ.api.student.profile.struct.StudentProfileDocument;
+import ca.bc.gov.educ.api.student.profile.struct.StudentProfileDocumentMetadata;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -22,4 +23,8 @@ public interface DocumentMapper {
   DocumentEntity toModel(StudentProfileDocument struct);
 
   StudentProfileDocMetadata toMetadataStructure(DocumentEntity entity);
+
+  @Mapping(target = "studentRequestID", source = "request.studentRequestID")
+  @Mapping(target = "digitalID", source = "request.digitalID")
+  StudentProfileDocumentMetadata toMetaData(DocumentEntity entity);
 }

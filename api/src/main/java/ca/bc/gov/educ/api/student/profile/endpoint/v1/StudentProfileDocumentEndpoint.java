@@ -1,16 +1,14 @@
 package ca.bc.gov.educ.api.student.profile.endpoint.v1;
 
 import ca.bc.gov.educ.api.student.profile.constants.v1.URL;
-import ca.bc.gov.educ.api.student.profile.struct.StudentProfileDocMetadata;
-import ca.bc.gov.educ.api.student.profile.struct.StudentProfileDocRequirement;
-import ca.bc.gov.educ.api.student.profile.struct.StudentProfileDocTypeCode;
-import ca.bc.gov.educ.api.student.profile.struct.StudentProfileDocument;
+import ca.bc.gov.educ.api.student.profile.struct.*;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.CREATED;
@@ -53,4 +51,9 @@ public interface StudentProfileDocumentEndpoint {
   @GetMapping(URL.DOCUMENT_TYPES)
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
   Iterable<StudentProfileDocTypeCode> getDocumentTypeCodes();
+
+  @GetMapping(URL.ALL_DOCUMENTS)
+  @PreAuthorize("hasAuthority('SCOPE_READ_DOCUMENT_STUDENT_PROFILE')")
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
+  List<StudentProfileDocumentMetadata> readAllDocumentsMetadata();
 }

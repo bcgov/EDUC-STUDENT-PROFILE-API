@@ -98,6 +98,10 @@ public class DocumentService {
     return documentRepository.findByRequestStudentRequestID(studentProfileId);
   }
 
+  public List<DocumentEntity> retrieveAllDocumentsMetadata() {
+    return documentRepository.findAll();
+  }
+
   /**
    * Creates a DocumentEntity
    *

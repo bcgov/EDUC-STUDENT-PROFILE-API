@@ -5,10 +5,7 @@ import ca.bc.gov.educ.api.student.profile.endpoint.v1.StudentProfileDocumentEndp
 import ca.bc.gov.educ.api.student.profile.mappers.v1.DocumentMapper;
 import ca.bc.gov.educ.api.student.profile.mappers.v1.DocumentTypeCodeMapper;
 import ca.bc.gov.educ.api.student.profile.service.DocumentService;
-import ca.bc.gov.educ.api.student.profile.struct.StudentProfileDocMetadata;
-import ca.bc.gov.educ.api.student.profile.struct.StudentProfileDocRequirement;
-import ca.bc.gov.educ.api.student.profile.struct.StudentProfileDocTypeCode;
-import ca.bc.gov.educ.api.student.profile.struct.StudentProfileDocument;
+import ca.bc.gov.educ.api.student.profile.struct.*;
 import ca.bc.gov.educ.api.student.profile.validator.StudentProfileDocumentsValidator;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -75,6 +72,12 @@ public class StudentProfileDocumentController extends BaseController implements 
   public List<StudentProfileDocTypeCode> getDocumentTypeCodes() {
     return getDocumentService().getDocumentTypeCodeList().stream()
       .map(documentTypeCodeMapper::toStructure).collect(Collectors.toList());
+  }
+
+  @Override
+  public List<StudentProfileDocumentMetadata> readAllDocumentsMetadata() {
+    return getDocumentService().retrieveAllDocumentsMetadata()
+      .stream().map(mapper::toMetaData).collect(Collectors.toList());
   }
 
 }
