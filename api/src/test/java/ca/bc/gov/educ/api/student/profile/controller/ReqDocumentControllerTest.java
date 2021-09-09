@@ -240,25 +240,41 @@ public class ReqDocumentControllerTest extends BaseProfileRequestAPITest {
   @Test
   public void readAllDocumentMetadataTest() throws Exception {
     this.mvc.perform(get(URL.BASE_URL + URL.STUDENT_PROFILE_REQUEST_ID_DOCUMENTS, this.reqID.toString())
-      .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_DOCUMENT_STUDENT_PROFILE")))
-      .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.length()", is(1)))
-            .andExpect(jsonPath("$.[0].documentID", is(this.documentID.toString())))
-            .andExpect(jsonPath("$.[0].documentTypeCode", is("CAPASSPORT")))
-            .andExpect(jsonPath("$.[0].documentData").doesNotExist());
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_DOCUMENT_STUDENT_PROFILE")))
+        .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andDo(print())
+      .andExpect(jsonPath("$.length()", is(1)))
+      .andExpect(jsonPath("$.[0].documentID", is(this.documentID.toString())))
+      .andExpect(jsonPath("$.[0].documentTypeCode", is("CAPASSPORT")))
+      .andExpect(jsonPath("$.[0].documentData").doesNotExist());
+  }
+
+
+  @Test
+  public void readAllDocumentsMetadataWithoutProfileRequestIDTest() throws Exception {
+    this.mvc.perform(get(URL.BASE_URL + URL.ALL_DOCUMENTS)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_DOCUMENT_STUDENT_PROFILE")))
+        .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andDo(print())
+      .andExpect(jsonPath("$.length()", is(1)))
+      .andExpect(jsonPath("$.[0].documentID", is(this.documentID.toString())))
+      .andExpect(jsonPath("$.[0].studentRequestID", is(notNullValue())))
+      .andExpect(jsonPath("$.[0].digitalID", is(notNullValue())))
+      .andExpect(jsonPath("$.[0].documentTypeCode", is("CAPASSPORT")))
+      .andExpect(jsonPath("$.[0].documentData").doesNotExist());
   }
 
   @Test
   public void getDocumentRequirementsTest() throws Exception {
     this.mvc.perform(get(URL.BASE_URL + URL.FILE_REQUIREMENTS)
-      .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_DOCUMENT_REQUIREMENTS_STUDENT_PROFILE")))
-      .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.maxSize", is(props.getMaxFileSize())))
-            .andExpect(jsonPath("$.extensions.length()", is(props.getFileExtensions().size())))
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_DOCUMENT_REQUIREMENTS_STUDENT_PROFILE")))
+        .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andDo(print())
+      .andExpect(jsonPath("$.maxSize", is(props.getMaxFileSize())))
+      .andExpect(jsonPath("$.extensions.length()", is(props.getFileExtensions().size())))
             .andExpect(jsonPath("$.extensions[0]", is(props.getFileExtensions().get(0))));
   }
 
