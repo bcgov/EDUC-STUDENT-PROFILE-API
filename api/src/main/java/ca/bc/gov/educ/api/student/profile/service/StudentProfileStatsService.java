@@ -38,7 +38,7 @@ public class StudentProfileStatsService {
       case COMPLETIONS_LAST_WEEK:
         return this.getPenRequestsCompletedLastWeek();
       case AVERAGE_COMPLETION_TIME:
-        return this.getAverageGMPCompletionTime();
+        return this.getAverageUMPCompletionTime();
       case COMPLETIONS_LAST_12_MONTH:
         return this.getPenRequestsCompletedLastYear();
       case PERCENT_UMP_REJECTED_TO_LAST_MONTH:
@@ -126,10 +126,10 @@ public class StudentProfileStatsService {
     LocalDate currentDate = LocalDate.now();
     LocalDate fromDate = currentDate.minusMonths(13);
     LocalDate toDate = currentDate.minusMonths(1);
-    val gmpStats = this.studentProfileRepository.findStatusAndStatusUpdateDatesBetweenForStatuses(fromDate, toDate, Collections.singletonList("COMPLETED"));
+    val umpStats = this.studentProfileRepository.findStatusAndStatusUpdateDatesBetweenForStatuses(fromDate, toDate, Collections.singletonList("COMPLETED"));
     Map<String, Integer> penReqCompletionsInLast12Months = new HashMap<>();
-    for (val gmpStat : gmpStats) {
-      val month = gmpStat.getStatusUpdateDate().getMonth().toString();
+    for (val umpStat : umpStats) {
+      val month = umpStat.getStatusUpdateDate().getMonth().toString();
       if (penReqCompletionsInLast12Months.containsKey(month)) {
         val currentCount = penReqCompletionsInLast12Months.get(month);
         penReqCompletionsInLast12Months.put(month, currentCount + 1);
@@ -163,19 +163,19 @@ public class StudentProfileStatsService {
     return DayOfWeek.valueOf(day1).getValue() - DayOfWeek.valueOf(day2).getValue();
   }
 
-  private StudentProfileStats getAverageGMPCompletionTime() {
-    val gmpStat = this.studentProfileRepository.findCompletionProcessAverageTime();
-    return StudentProfileStats.builder().averageTimeToCompleteRequest(gmpStat.getAverageCompletionTime()).build();
+  private StudentProfileStats getAverageUMPCompletionTime() {
+    val umpStat = this.studentProfileRepository.findCompletionProcessAverageTime();
+    return StudentProfileStats.builder().averageTimeToCompleteRequest(umpStat.getAverageCompletionTime()).build();
   }
 
   private StudentProfileStats getPenRequestsCompletedLastWeek() {
     LocalDate currentDate = LocalDate.now();
     LocalDate fromDate = currentDate.minusDays(8);
     LocalDate toDate = currentDate.minusDays(1);
-    val gmpStats = this.studentProfileRepository.findStatusAndStatusUpdateDatesBetweenForStatuses(fromDate, toDate, Collections.singletonList("COMPLETED"));
+    val umpStats = this.studentProfileRepository.findStatusAndStatusUpdateDatesBetweenForStatuses(fromDate, toDate, Collections.singletonList("COMPLETED"));
     Map<String, Integer> penReqCompletionsInLastWeek = new HashMap<>();
-    for (val gmpStat : gmpStats) {
-      val day = gmpStat.getStatusUpdateDate().getDayOfWeek().toString();
+    for (val umpStat : umpStats) {
+      val day = umpStat.getStatusUpdateDate().getDayOfWeek().toString();
       if (penReqCompletionsInLastWeek.containsKey(day)) {
         val currentCount = penReqCompletionsInLastWeek.get(day);
         penReqCompletionsInLastWeek.put(day, currentCount + 1);
@@ -194,7 +194,7 @@ public class StudentProfileStatsService {
   }
 
   @Scheduled(cron = "0 0 0 * * *") // midnight
-  @CacheEvict(value = "gmpStats", allEntries = true)
+  @CacheEvict(value = "umpStats", allEntries = true)
   public void clearCache() {
     // Empty method, spring boot does the magic.
   }
