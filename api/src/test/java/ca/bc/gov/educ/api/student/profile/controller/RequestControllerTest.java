@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.student.profile.controller;
 
+import ca.bc.gov.educ.api.student.profile.constants.StudentProfileStatusCodes;
 import ca.bc.gov.educ.api.student.profile.constants.v1.URL;
 import ca.bc.gov.educ.api.student.profile.controller.v1.StudentProfileController;
 import ca.bc.gov.educ.api.student.profile.filter.FilterOperation;
@@ -28,6 +29,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.closeTo;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -423,6 +426,235 @@ public class RequestControllerTest extends BaseReqControllerTest {
         .andReturn();
     this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(1)));
   }
+
+  @Test
+  public void testGetStats_COMPLETIONS_LAST_WEEK_ShouldReturnStatusOk() throws Exception {
+    final File file = new File(
+      Objects.requireNonNull(getClass().getClassLoader().getResource("mock_student_profiles.json")).getFile()
+    );
+    List<StudentProfile> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
+    });
+    entities.get(0).setStudentRequestStatusCode(StudentProfileStatusCodes.COMPLETED.toString());
+    var updateDate = LocalDateTime.now().minusDays(2);
+    var dayOfWeekName = updateDate.getDayOfWeek().name();
+    entities.get(0).setStatusUpdateDate(updateDate.toString());
+    repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
+
+    this.mockMvc.perform(get(URL.BASE_URL + URL.STATS)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE_STATS")))
+        .param("statsType", "COMPLETIONS_LAST_WEEK")
+        .contentType(APPLICATION_JSON))
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.completionsInLastWeek." + dayOfWeekName, is(1)));
+  }
+
+  @Test
+  public void testGetStats_COMPLETIONS_LAST_12_MONTH_ShouldReturnStatusOk() throws Exception {
+    final File file = new File(
+      Objects.requireNonNull(getClass().getClassLoader().getResource("mock_student_profiles.json")).getFile()
+    );
+    List<StudentProfile> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
+    });
+    entities.get(0).setStudentRequestStatusCode(StudentProfileStatusCodes.COMPLETED.toString());
+    var updateDate = LocalDateTime.now().minusMonths(1).minusDays(1);
+    var month = updateDate.getMonth().toString();
+    entities.get(0).setStatusUpdateDate(updateDate.toString());
+    repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
+
+    this.mockMvc.perform(get(URL.BASE_URL + URL.STATS)
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE_STATS")))
+      .param("statsType", "COMPLETIONS_LAST_12_MONTH")
+      .contentType(APPLICATION_JSON))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.completionsInLastTwelveMonth." + month, is(1)));
+  }
+
+  @Test
+  public void testGetStats_PERCENT_UMP_REJECTED_TO_LAST_MONTH_ShouldReturnStatusOk() throws Exception {
+    final File file = new File(
+      Objects.requireNonNull(getClass().getClassLoader().getResource("mock_student_profiles.json")).getFile()
+    );
+    List<StudentProfile> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
+    });
+    entities.get(0).setStudentRequestStatusCode(StudentProfileStatusCodes.REJECTED.toString());
+    entities.get(0).setStatusUpdateDate(LocalDateTime.now().minusMonths(1).toString());
+    entities.get(1).setStudentRequestStatusCode(StudentProfileStatusCodes.REJECTED.toString());
+    entities.get(1).setStatusUpdateDate(LocalDateTime.now().toString());
+    entities.get(2).setStudentRequestStatusCode(StudentProfileStatusCodes.REJECTED.toString());
+    entities.get(2).setStatusUpdateDate(LocalDateTime.now().toString());
+    repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
+
+    this.mockMvc.perform(get(URL.BASE_URL + URL.STATS)
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE_STATS")))
+      .param("statsType", "PERCENT_UMP_REJECTED_TO_LAST_MONTH")
+      .contentType(APPLICATION_JSON))
+      .andDo(print()).andExpect(status().isOk())
+      .andExpect(jsonPath("$.percentRejectedUmpToLastMonth", closeTo(100, 0.001)))
+      .andExpect(jsonPath("$.umpRejectedInCurrentMonth", is(2)));
+  }
+
+  @Test
+  public void testGetStats_PERCENT_UMP_ABANDONED_TO_LAST_MONTH_ShouldReturnStatusOk() throws Exception {
+    final File file = new File(
+      Objects.requireNonNull(getClass().getClassLoader().getResource("mock_student_profiles.json")).getFile()
+    );
+    List<StudentProfile> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
+    });
+    entities.get(0).setStudentRequestStatusCode(StudentProfileStatusCodes.ABANDONED.toString());
+    entities.get(0).setStatusUpdateDate(LocalDateTime.now().minusMonths(1).toString());
+    entities.get(1).setStudentRequestStatusCode(StudentProfileStatusCodes.ABANDONED.toString());
+    entities.get(1).setStatusUpdateDate(LocalDateTime.now().toString());
+    entities.get(2).setStudentRequestStatusCode(StudentProfileStatusCodes.ABANDONED.toString());
+    entities.get(2).setStatusUpdateDate(LocalDateTime.now().toString());
+    repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
+
+    this.mockMvc.perform(get(URL.BASE_URL + URL.STATS)
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE_STATS")))
+      .param("statsType", "PERCENT_UMP_ABANDONED_TO_LAST_MONTH")
+      .contentType(APPLICATION_JSON))
+      .andDo(print()).andExpect(status().isOk())
+      .andExpect(jsonPath("$.percentAbandonedUmpToLastMonth", closeTo(100, 0.001)))
+      .andExpect(jsonPath("$.umpAbandonedInCurrentMonth", is(2)));
+  }
+
+  @Test
+  public void testGetStats_PERCENT_UMP_COMPLETION_TO_LAST_MONTH_ShouldReturnStatusOk() throws Exception {
+    final File file = new File(
+      Objects.requireNonNull(getClass().getClassLoader().getResource("mock_student_profiles.json")).getFile()
+    );
+    List<StudentProfile> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
+    });
+    entities.get(0).setStudentRequestStatusCode(StudentProfileStatusCodes.COMPLETED.toString());
+    entities.get(0).setStatusUpdateDate(LocalDateTime.now().minusMonths(1).toString());
+    entities.get(1).setStudentRequestStatusCode(StudentProfileStatusCodes.COMPLETED.toString());
+    entities.get(1).setStatusUpdateDate(LocalDateTime.now().toString());
+    entities.get(2).setStudentRequestStatusCode(StudentProfileStatusCodes.COMPLETED.toString());
+    entities.get(2).setStatusUpdateDate(LocalDateTime.now().toString());
+    repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
+
+    this.mockMvc.perform(get(URL.BASE_URL + URL.STATS)
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE_STATS")))
+      .param("statsType", "PERCENT_UMP_COMPLETION_TO_LAST_MONTH")
+      .contentType(APPLICATION_JSON))
+      .andDo(print()).andExpect(status().isOk())
+      .andExpect(jsonPath("$.percentCompletedUmpToLastMonth", closeTo(100, 0.001)))
+      .andExpect(jsonPath("$.umpCompletedInCurrentMonth", is(2)));
+  }
+
+  @Test
+  public void testGetStats_PERCENT_UMP_COMPLETED_WITH_DOCUMENTS_TO_LAST_MONTH_ShouldReturnStatusOk() throws Exception {
+    final File file = new File(
+      Objects.requireNonNull(getClass().getClassLoader().getResource("mock_student_profiles.json")).getFile()
+    );
+    List<StudentProfile> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
+    });
+    entities.get(0).setStudentRequestStatusCode(StudentProfileStatusCodes.COMPLETED.toString());
+    entities.get(0).setStatusUpdateDate(LocalDateTime.now().toString());
+    var studentProfiles = repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
+
+    DocumentEntity document = new DocumentBuilder()
+      .withoutDocumentID()
+      //.withoutCreateAndUpdateUser()
+      .withRequest(studentProfiles.get(0))
+      .withTypeCode("CAPASSPORT")
+      .build();
+    this.documentRepository.save(document);
+
+    this.mockMvc.perform(get(URL.BASE_URL + URL.STATS)
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE_STATS")))
+      .param("statsType", "PERCENT_UMP_COMPLETED_WITH_DOCUMENTS_TO_LAST_MONTH")
+      .contentType(APPLICATION_JSON))
+      .andDo(print()).andExpect(status().isOk())
+      .andExpect(jsonPath("$.percentUmpCompletedWithDocumentsToLastMonth", closeTo(1, 0.001)))
+      .andExpect(jsonPath("$.umpCompletedWithDocsInCurrentMonth", is(1)));
+  }
+
+  @Test
+  public void testGetStats_ALL_STATUSES_LAST_12_MONTH_ShouldReturnStatusOk() throws Exception {
+    final File file = new File(
+      Objects.requireNonNull(getClass().getClassLoader().getResource("mock_student_profiles.json")).getFile()
+    );
+    List<StudentProfile> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
+    });
+    entities.get(0).setStudentRequestStatusCode(StudentProfileStatusCodes.COMPLETED.toString());
+    entities.get(0).setStatusUpdateDate(LocalDateTime.now().minusMonths(11).toString());
+    entities.get(1).setStudentRequestStatusCode(StudentProfileStatusCodes.COMPLETED.toString());
+    entities.get(1).setStatusUpdateDate(LocalDateTime.now().minusMonths(2).toString());
+    entities.get(2).setStudentRequestStatusCode(StudentProfileStatusCodes.RETURNED.toString());
+    entities.get(2).setStatusUpdateDate(LocalDateTime.now().minusMonths(3).toString());
+    repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
+
+    this.mockMvc.perform(get(URL.BASE_URL + URL.STATS)
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE_STATS")))
+      .param("statsType", "ALL_STATUSES_LAST_12_MONTH")
+      .contentType(APPLICATION_JSON))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.allStatsLastTwelveMonth.COMPLETED", is(2)));
+  }
+
+  @Test
+  public void testGetStats_ALL_STATUSES_LAST_6_MONTH_ShouldReturnStatusOk() throws Exception {
+    final File file = new File(
+      Objects.requireNonNull(getClass().getClassLoader().getResource("mock_student_profiles.json")).getFile()
+    );
+    List<StudentProfile> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
+    });
+    entities.get(0).setStudentRequestStatusCode(StudentProfileStatusCodes.COMPLETED.toString());
+    entities.get(0).setStatusUpdateDate(LocalDateTime.now().minusMonths(11).toString());
+    entities.get(1).setStudentRequestStatusCode(StudentProfileStatusCodes.COMPLETED.toString());
+    entities.get(1).setStatusUpdateDate(LocalDateTime.now().minusMonths(2).toString());
+    entities.get(2).setStudentRequestStatusCode(StudentProfileStatusCodes.RETURNED.toString());
+    entities.get(2).setStatusUpdateDate(LocalDateTime.now().minusMonths(3).toString());
+    repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
+
+    this.mockMvc.perform(get(URL.BASE_URL + URL.STATS)
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE_STATS")))
+      .param("statsType", "ALL_STATUSES_LAST_6_MONTH")
+      .contentType(APPLICATION_JSON))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.allStatsLastSixMonth.COMPLETED", is(1)));
+  }
+
+  @Test
+  public void testGetStats_ALL_STATUSES_LAST_1_MONTH_ShouldReturnStatusOk() throws Exception {
+    final File file = new File(
+      Objects.requireNonNull(getClass().getClassLoader().getResource("mock_student_profiles.json")).getFile()
+    );
+    List<StudentProfile> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
+    });
+    entities.get(0).setStudentRequestStatusCode(StudentProfileStatusCodes.COMPLETED.toString());
+    entities.get(0).setStatusUpdateDate(LocalDateTime.now().minusMonths(1).toString());
+    entities.get(1).setStudentRequestStatusCode(StudentProfileStatusCodes.COMPLETED.toString());
+    entities.get(1).setStatusUpdateDate(LocalDateTime.now().minusMonths(1).toString());
+    entities.get(2).setStudentRequestStatusCode(StudentProfileStatusCodes.RETURNED.toString());
+    entities.get(2).setStatusUpdateDate(LocalDateTime.now().minusMonths(1).toString());
+    repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
+
+    this.mockMvc.perform(get(URL.BASE_URL + URL.STATS)
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE_STATS")))
+      .param("statsType", "ALL_STATUSES_LAST_1_MONTH")
+      .contentType(APPLICATION_JSON))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.allStatsLastOneMonth.COMPLETED", is(2)));
+  }
+
+  @Test
+  public void testGetStats_ALL_STATUSES_LAST_1_WEEK_ShouldReturnStatusOk() throws Exception {
+    final File file = new File(
+      Objects.requireNonNull(getClass().getClassLoader().getResource("mock_student_profiles.json")).getFile()
+    );
+    List<StudentProfile> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
+    });
+    entities.get(0).setStudentRequestStatusCode(StudentProfileStatusCodes.COMPLETED.toString());
+    entities.get(0).setStatusUpdateDate(LocalDateTime.now().minusWeeks(1).toString());
+    entities.get(1).setStudentRequestStatusCode(StudentProfileStatusCodes.COMPLETED.toString());
+    entities.get(1).setStatusUpdateDate(LocalDateTime.now().minusWeeks(1).toString());
+    entities.get(2).setStudentRequestStatusCode(StudentProfileStatusCodes.RETURNED.toString());
+    entities.get(2).setStatusUpdateDate(LocalDateTime.now().minusWeeks(1).toString());
+    repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
+
+    this.mockMvc.perform(get(URL.BASE_URL + URL.STATS)
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE_STATS")))
+      .param("statsType", "ALL_STATUSES_LAST_1_WEEK")
+      .contentType(APPLICATION_JSON))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.allStatsLastOneWeek.COMPLETED", is(2)));
+  }
+
   private StudentProfileStatusCodeEntity createPenReqStatus() {
     StudentProfileStatusCodeEntity entity = new StudentProfileStatusCodeEntity();
     entity.setStudentRequestStatusCode("INITREV");

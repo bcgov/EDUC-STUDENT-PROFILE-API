@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.student.profile.controller.v1;
 
+import ca.bc.gov.educ.api.student.profile.constants.StatsType;
 import ca.bc.gov.educ.api.student.profile.controller.BaseController;
 import ca.bc.gov.educ.api.student.profile.endpoint.v1.StudentProfileEndpoint;
 import ca.bc.gov.educ.api.student.profile.exception.InvalidParameterException;
@@ -13,6 +14,7 @@ import ca.bc.gov.educ.api.student.profile.mappers.v1.StudentProfileGenderCodeMap
 import ca.bc.gov.educ.api.student.profile.mappers.v1.StudentProfileStatusCodeMapper;
 import ca.bc.gov.educ.api.student.profile.model.v1.StudentProfileEntity;
 import ca.bc.gov.educ.api.student.profile.service.StudentProfileService;
+import ca.bc.gov.educ.api.student.profile.service.StudentProfileStatsService;
 import ca.bc.gov.educ.api.student.profile.struct.*;
 import ca.bc.gov.educ.api.student.profile.utils.JsonUtil;
 import ca.bc.gov.educ.api.student.profile.utils.UUIDUtil;
@@ -29,6 +31,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
@@ -55,12 +58,14 @@ public class StudentProfileController extends BaseController implements StudentP
   private static final StudentProfileStatusCodeMapper statusCodeMapper = StudentProfileStatusCodeMapper.mapper;
   private static final StudentProfileGenderCodeMapper genderCodeMapper = StudentProfileGenderCodeMapper.mapper;
   private final StudentProfileFilterSpecs studentProfileFilterSpecs;
+  private final StudentProfileStatsService studentProfileStatsService;
 
   @Autowired
-  StudentProfileController(final StudentProfileService studentProfile, final StudentProfilePayloadValidator payloadValidator, StudentProfileFilterSpecs studentProfileFilterSpecs) {
+  StudentProfileController(final StudentProfileService studentProfile, final StudentProfilePayloadValidator payloadValidator, final StudentProfileFilterSpecs studentProfileFilterSpecs, final StudentProfileStatsService studentProfileStatsService) {
     this.service = studentProfile;
     this.payloadValidator = payloadValidator;
     this.studentProfileFilterSpecs = studentProfileFilterSpecs;
+    this.studentProfileStatsService = studentProfileStatsService;
   }
 
   public StudentProfile retrieveStudentProfile(String studentProfileRequestId) {
@@ -128,6 +133,11 @@ public class StudentProfileController extends BaseController implements StudentP
       throw new StudentProfileRuntimeException(e.getMessage());
     }
     return getService().findAll(studentProfileEntitySpecification, pageNumber, pageSize, sorts).thenApplyAsync(studentProfilEntities -> studentProfilEntities.map(mapper::toStructure));
+  }
+
+  @Override
+  public ResponseEntity<StudentProfileStats> getStats(@NonNull final StatsType statsType) {
+    return ResponseEntity.ok(this.studentProfileStatsService.getStats(statsType));
   }
 
 
