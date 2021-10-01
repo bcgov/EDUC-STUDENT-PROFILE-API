@@ -5,10 +5,7 @@ public enum StudentProfileStatusCodes {
   INITREV,
   RETURNED,
   SUBSREV,
-  AUTO,
-  MANUAL,
   REJECTED,
-  UNMATCHED,
   COMPLETED,
   ABANDONED
 }

@@ -1,8 +1,10 @@
 package ca.bc.gov.educ.api.student.profile.endpoint.v1;
 
+import ca.bc.gov.educ.api.student.profile.constants.StatsType;
 import ca.bc.gov.educ.api.student.profile.constants.v1.URL;
 import ca.bc.gov.educ.api.student.profile.struct.GenderCode;
 import ca.bc.gov.educ.api.student.profile.struct.StudentProfile;
+import ca.bc.gov.educ.api.student.profile.struct.StudentProfileStats;
 import ca.bc.gov.educ.api.student.profile.struct.StudentProfileStatusCode;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
@@ -76,4 +78,9 @@ public interface StudentProfileEndpoint {
                                               @RequestParam(name = "sort", defaultValue = "") String sortCriteriaJson,
                                               @RequestParam(name = "searchCriteriaList", required = false) String searchCriteriaListJson);
 
+  @GetMapping(URL.STATS)
+  @PreAuthorize("hasAuthority('SCOPE_READ_STUDENT_PROFILE_STATS')")
+  @Transactional(readOnly = true)
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"), @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR.")})
+  ResponseEntity<StudentProfileStats> getStats(@RequestParam(name = "statsType") StatsType statsType);
 }

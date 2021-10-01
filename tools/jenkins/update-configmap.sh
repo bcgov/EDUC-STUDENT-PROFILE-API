@@ -103,6 +103,12 @@ curl -sX POST "https://$SOAM_KC/auth/admin/realms/$SOAM_KC_REALM_ID/client-scope
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TKN" \
   -d "{\"description\": \"SOAM write pen request macro scope\",\"id\": \"WRITE_STUDENT_PROFILE_MACRO\",\"name\": \"WRITE_STUDENT_PROFILE_MACRO\",\"protocol\": \"openid-connect\",\"attributes\" : {\"include.in.token.scope\" : \"true\",\"display.on.consent.screen\" : \"false\"}}"
+echo
+echo Writing scope READ_STUDENT_PROFILE_STATS
+curl -sX POST "https://$SOAM_KC/auth/admin/realms/$SOAM_KC_REALM_ID/client-scopes" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TKN" \
+  -d "{\"description\": \"Scope to query stats for reporting\",\"id\": \"READ_STUDENT_PROFILE_STATS\",\"name\": \"READ_STUDENT_PROFILE_STATS\",\"protocol\": \"openid-connect\",\"attributes\" : {\"include.in.token.scope\" : \"true\",\"display.on.consent.screen\" : \"false\"}}"
 
 ###########################################################
 #Setup for config-map
