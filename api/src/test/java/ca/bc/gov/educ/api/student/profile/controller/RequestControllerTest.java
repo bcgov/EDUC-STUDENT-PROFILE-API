@@ -435,16 +435,22 @@ public class RequestControllerTest extends BaseReqControllerTest {
     List<StudentProfile> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
     });
     entities.get(0).setStudentRequestStatusCode(StudentProfileStatusCodes.COMPLETED.toString());
-    var updateDate = LocalDateTime.now().minusDays(2);
-    var dayOfWeekName = updateDate.getDayOfWeek().name();
+    var updateDate = LocalDateTime.now().minusDays(6);
+    var dayName1 = updateDate.getDayOfWeek().name();
     entities.get(0).setStatusUpdateDate(updateDate.toString());
+    entities.get(1).setStudentRequestStatusCode(StudentProfileStatusCodes.COMPLETED.toString());
+    updateDate = LocalDateTime.now();
+    var dayName2 = updateDate.getDayOfWeek().name();
+    entities.get(1).setStatusUpdateDate(updateDate.toString());
     repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
 
     this.mockMvc.perform(get(URL.BASE_URL + URL.STATS)
         .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE_STATS")))
         .param("statsType", "COMPLETIONS_LAST_WEEK")
         .contentType(APPLICATION_JSON))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.completionsInLastWeek." + dayOfWeekName, is(1)));
+        .andDo(print()).andExpect(status().isOk())
+        .andExpect(jsonPath("$.completionsInLastWeek." + dayName1, is(1)))
+        .andExpect(jsonPath("$.completionsInLastWeek." + dayName2, is(1)));
   }
 
   @Test
@@ -455,16 +461,22 @@ public class RequestControllerTest extends BaseReqControllerTest {
     List<StudentProfile> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
     });
     entities.get(0).setStudentRequestStatusCode(StudentProfileStatusCodes.COMPLETED.toString());
-    var updateDate = LocalDateTime.now().minusMonths(1).minusDays(1);
-    var month = updateDate.getMonth().toString();
+    var updateDate = LocalDateTime.now();
+    var month1 = updateDate.getMonth().toString();
     entities.get(0).setStatusUpdateDate(updateDate.toString());
+    entities.get(1).setStudentRequestStatusCode(StudentProfileStatusCodes.COMPLETED.toString());
+    updateDate = LocalDateTime.now().withDayOfMonth(1).minusMonths(11);
+    var month2 = updateDate.getMonth().toString();
+    entities.get(1).setStatusUpdateDate(updateDate.toString());
     repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
 
     this.mockMvc.perform(get(URL.BASE_URL + URL.STATS)
       .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE_STATS")))
       .param("statsType", "COMPLETIONS_LAST_12_MONTH")
       .contentType(APPLICATION_JSON))
-      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.completionsInLastTwelveMonth." + month, is(1)));
+      .andDo(print()).andExpect(status().isOk())
+      .andExpect(jsonPath("$.completionsInLastTwelveMonth." + month1, is(1)))
+      .andExpect(jsonPath("$.completionsInLastTwelveMonth." + month2, is(1)));
   }
 
   @Test
@@ -577,7 +589,7 @@ public class RequestControllerTest extends BaseReqControllerTest {
     entities.get(0).setStudentRequestStatusCode(StudentProfileStatusCodes.COMPLETED.toString());
     entities.get(0).setStatusUpdateDate(LocalDateTime.now().minusMonths(11).toString());
     entities.get(1).setStudentRequestStatusCode(StudentProfileStatusCodes.COMPLETED.toString());
-    entities.get(1).setStatusUpdateDate(LocalDateTime.now().minusMonths(2).toString());
+    entities.get(1).setStatusUpdateDate(LocalDateTime.now().toString());
     entities.get(2).setStudentRequestStatusCode(StudentProfileStatusCodes.RETURNED.toString());
     entities.get(2).setStatusUpdateDate(LocalDateTime.now().minusMonths(3).toString());
     repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
@@ -586,7 +598,9 @@ public class RequestControllerTest extends BaseReqControllerTest {
       .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE_STATS")))
       .param("statsType", "ALL_STATUSES_LAST_12_MONTH")
       .contentType(APPLICATION_JSON))
-      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.allStatsLastTwelveMonth.COMPLETED", is(2)));
+      .andDo(print()).andExpect(status().isOk())
+      .andExpect(jsonPath("$.allStatsLastTwelveMonth.COMPLETED", is(2)))
+      .andExpect(jsonPath("$.allStatsLastTwelveMonth.RETURNED", is(1)));
   }
 
   @Test
@@ -597,9 +611,9 @@ public class RequestControllerTest extends BaseReqControllerTest {
     List<StudentProfile> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
     });
     entities.get(0).setStudentRequestStatusCode(StudentProfileStatusCodes.COMPLETED.toString());
-    entities.get(0).setStatusUpdateDate(LocalDateTime.now().minusMonths(11).toString());
+    entities.get(0).setStatusUpdateDate(LocalDateTime.now().minusMonths(5).toString());
     entities.get(1).setStudentRequestStatusCode(StudentProfileStatusCodes.COMPLETED.toString());
-    entities.get(1).setStatusUpdateDate(LocalDateTime.now().minusMonths(2).toString());
+    entities.get(1).setStatusUpdateDate(LocalDateTime.now().toString());
     entities.get(2).setStudentRequestStatusCode(StudentProfileStatusCodes.RETURNED.toString());
     entities.get(2).setStatusUpdateDate(LocalDateTime.now().minusMonths(3).toString());
     repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
@@ -608,7 +622,9 @@ public class RequestControllerTest extends BaseReqControllerTest {
       .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE_STATS")))
       .param("statsType", "ALL_STATUSES_LAST_6_MONTH")
       .contentType(APPLICATION_JSON))
-      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.allStatsLastSixMonth.COMPLETED", is(1)));
+      .andDo(print()).andExpect(status().isOk())
+      .andExpect(jsonPath("$.allStatsLastSixMonth.COMPLETED", is(2)))
+      .andExpect(jsonPath("$.allStatsLastSixMonth.RETURNED", is(1)));
   }
 
   @Test
@@ -619,9 +635,9 @@ public class RequestControllerTest extends BaseReqControllerTest {
     List<StudentProfile> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
     });
     entities.get(0).setStudentRequestStatusCode(StudentProfileStatusCodes.COMPLETED.toString());
-    entities.get(0).setStatusUpdateDate(LocalDateTime.now().minusMonths(1).toString());
+    entities.get(0).setStatusUpdateDate(LocalDateTime.now().minusDays(1).minusMonths(1).toString());
     entities.get(1).setStudentRequestStatusCode(StudentProfileStatusCodes.COMPLETED.toString());
-    entities.get(1).setStatusUpdateDate(LocalDateTime.now().minusMonths(1).toString());
+    entities.get(1).setStatusUpdateDate(LocalDateTime.now().toString());
     entities.get(2).setStudentRequestStatusCode(StudentProfileStatusCodes.RETURNED.toString());
     entities.get(2).setStatusUpdateDate(LocalDateTime.now().minusMonths(1).toString());
     repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
@@ -630,7 +646,9 @@ public class RequestControllerTest extends BaseReqControllerTest {
       .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE_STATS")))
       .param("statsType", "ALL_STATUSES_LAST_1_MONTH")
       .contentType(APPLICATION_JSON))
-      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.allStatsLastOneMonth.COMPLETED", is(2)));
+      .andDo(print()).andExpect(status().isOk())
+      .andExpect(jsonPath("$.allStatsLastOneMonth.COMPLETED", is(2)))
+      .andExpect(jsonPath("$.allStatsLastOneMonth.RETURNED", is(1)));
   }
 
   @Test
@@ -641,18 +659,20 @@ public class RequestControllerTest extends BaseReqControllerTest {
     List<StudentProfile> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
     });
     entities.get(0).setStudentRequestStatusCode(StudentProfileStatusCodes.COMPLETED.toString());
-    entities.get(0).setStatusUpdateDate(LocalDateTime.now().minusWeeks(1).toString());
+    entities.get(0).setStatusUpdateDate(LocalDateTime.now().minusDays(6).toString());
     entities.get(1).setStudentRequestStatusCode(StudentProfileStatusCodes.COMPLETED.toString());
-    entities.get(1).setStatusUpdateDate(LocalDateTime.now().minusWeeks(1).toString());
+    entities.get(1).setStatusUpdateDate(LocalDateTime.now().toString());
     entities.get(2).setStudentRequestStatusCode(StudentProfileStatusCodes.RETURNED.toString());
-    entities.get(2).setStatusUpdateDate(LocalDateTime.now().minusWeeks(1).toString());
+    entities.get(2).setStatusUpdateDate(LocalDateTime.now().minusDays(2).toString());
     repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
 
     this.mockMvc.perform(get(URL.BASE_URL + URL.STATS)
       .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE_STATS")))
       .param("statsType", "ALL_STATUSES_LAST_1_WEEK")
       .contentType(APPLICATION_JSON))
-      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.allStatsLastOneWeek.COMPLETED", is(2)));
+      .andDo(print()).andExpect(status().isOk())
+      .andExpect(jsonPath("$.allStatsLastOneWeek.COMPLETED", is(2)))
+      .andExpect(jsonPath("$.allStatsLastOneWeek.RETURNED", is(1)));
   }
 
   private StudentProfileStatusCodeEntity createPenReqStatus() {
