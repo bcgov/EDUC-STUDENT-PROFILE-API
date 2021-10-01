@@ -7,9 +7,6 @@ import ca.bc.gov.educ.api.student.profile.repository.v1.StudentProfileRepository
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
@@ -28,19 +25,17 @@ public class StudentProfileStatsService {
     this.studentProfileRepository = studentProfileRepository;
   }
 
-  @Cacheable(value = "umpStats")
   public StudentProfileStats getStats(final StatsType statsType) {
     Pair<Long, Double> currentMonthResultAndPercentile;
-    val baseDateTime = LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
-    val baseWeekStart = LocalDateTime.now().with(DayOfWeek.MONDAY).withHour(0).withMinute(0).withSecond(0).withNano(0);
-    val baseWeekEnd = LocalDateTime.now().with(DayOfWeek.MONDAY).withHour(23).withMinute(59).withSecond(59).withNano(0);
+    var currentDateTime = LocalDateTime.now();
+    val baseDateTime = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
     switch (statsType) {
       case COMPLETIONS_LAST_WEEK:
-        return this.getPenRequestsCompletedLastWeek();
+        return this.getRequestsCompletedLastWeek();
       case AVERAGE_COMPLETION_TIME:
         return this.getAverageUMPCompletionTime();
       case COMPLETIONS_LAST_12_MONTH:
-        return this.getPenRequestsCompletedLastYear();
+        return this.getRequestsCompletedLastYear();
       case PERCENT_UMP_REJECTED_TO_LAST_MONTH:
         currentMonthResultAndPercentile = this.getMonthlyPercentUMPBasedOnStatus(StudentProfileStatusCodes.REJECTED.toString());
         return StudentProfileStats.builder().umpRejectedInCurrentMonth(currentMonthResultAndPercentile.getLeft()).percentRejectedUmpToLastMonth(currentMonthResultAndPercentile.getRight()).build();
@@ -54,13 +49,13 @@ public class StudentProfileStatsService {
         currentMonthResultAndPercentile = this.getMonthlyPercentUMPBasedOnStatus(StudentProfileStatusCodes.COMPLETED.toString());
         return StudentProfileStats.builder().umpCompletedInCurrentMonth(currentMonthResultAndPercentile.getLeft()).percentCompletedUmpToLastMonth(currentMonthResultAndPercentile.getRight()).build();
       case ALL_STATUSES_LAST_12_MONTH:
-        return StudentProfileStats.builder().allStatsLastTwelveMonth(this.getAllStatusesBetweenDates(baseDateTime.minusMonths(12), baseDateTime.minusDays(1))).build();
+        return StudentProfileStats.builder().allStatsLastTwelveMonth(this.getAllStatusesBetweenDates(baseDateTime.withDayOfMonth(1).minusMonths(11), currentDateTime)).build();
       case ALL_STATUSES_LAST_6_MONTH:
-        return StudentProfileStats.builder().allStatsLastSixMonth(this.getAllStatusesBetweenDates(baseDateTime.minusMonths(6), baseDateTime.minusDays(1))).build();
+        return StudentProfileStats.builder().allStatsLastSixMonth(this.getAllStatusesBetweenDates(baseDateTime.withDayOfMonth(1).minusMonths(5), currentDateTime)).build();
       case ALL_STATUSES_LAST_1_MONTH:
-        return StudentProfileStats.builder().allStatsLastOneMonth(this.getAllStatusesBetweenDates(baseDateTime.minusMonths(1), baseDateTime.minusDays(1))).build();
+        return StudentProfileStats.builder().allStatsLastOneMonth(this.getAllStatusesBetweenDates(baseDateTime.minusDays(1).minusMonths(1), currentDateTime)).build();
       case ALL_STATUSES_LAST_1_WEEK:
-        return StudentProfileStats.builder().allStatsLastOneWeek(this.getAllStatusesBetweenDates(baseWeekStart.minusWeeks(1), baseWeekEnd.minusWeeks(1).plusDays(6))).build();
+        return StudentProfileStats.builder().allStatsLastOneWeek(this.getAllStatusesBetweenDates(baseDateTime.minusDays(6), currentDateTime)).build();
       default:
         break;
     }
@@ -122,11 +117,10 @@ public class StudentProfileStatsService {
     return allStatusMap;
   }
 
-  private StudentProfileStats getPenRequestsCompletedLastYear() {
-    LocalDate currentDate = LocalDate.now();
-    LocalDate fromDate = currentDate.minusMonths(13);
-    LocalDate toDate = currentDate.minusMonths(1);
-    val umpStats = this.studentProfileRepository.findStatusAndStatusUpdateDatesBetweenForStatuses(fromDate, toDate, Collections.singletonList("COMPLETED"));
+  private StudentProfileStats getRequestsCompletedLastYear() {
+    LocalDateTime currentDate = LocalDateTime.now();
+    LocalDateTime fromDate = currentDate.withHour(0).withMinute(0).withSecond(0).withNano(0).withDayOfMonth(1).minusMonths(11);
+    val umpStats = this.studentProfileRepository.findStatusAndStatusUpdateDatesBetweenForStatuses(fromDate, currentDate, Collections.singletonList("COMPLETED"));
     Map<String, Integer> penReqCompletionsInLast12Months = new HashMap<>();
     for (val umpStat : umpStats) {
       val month = umpStat.getStatusUpdateDate().getMonth().toString();
@@ -168,11 +162,10 @@ public class StudentProfileStatsService {
     return StudentProfileStats.builder().averageTimeToCompleteRequest(umpStat.getAverageCompletionTime()).build();
   }
 
-  private StudentProfileStats getPenRequestsCompletedLastWeek() {
-    LocalDate currentDate = LocalDate.now();
-    LocalDate fromDate = currentDate.minusDays(8);
-    LocalDate toDate = currentDate.minusDays(1);
-    val umpStats = this.studentProfileRepository.findStatusAndStatusUpdateDatesBetweenForStatuses(fromDate, toDate, Collections.singletonList("COMPLETED"));
+  private StudentProfileStats getRequestsCompletedLastWeek() {
+    LocalDateTime currentDate = LocalDateTime.now();
+    LocalDateTime fromDate = currentDate.withHour(0).withMinute(0).withSecond(0).withNano(0).minusDays(6);
+    val umpStats = this.studentProfileRepository.findStatusAndStatusUpdateDatesBetweenForStatuses(fromDate, currentDate, Collections.singletonList("COMPLETED"));
     Map<String, Integer> penReqCompletionsInLastWeek = new HashMap<>();
     for (val umpStat : umpStats) {
       val day = umpStat.getStatusUpdateDate().getDayOfWeek().toString();
@@ -192,12 +185,4 @@ public class StudentProfileStatsService {
     Map<String, Integer> sortedMap = createSortedMap(penReqCompletionsInLastWeek, sortedKeys);
     return StudentProfileStats.builder().completionsInLastWeek(sortedMap).build();
   }
-
-  @Scheduled(cron = "0 0 0 * * *") // midnight
-  @CacheEvict(value = "umpStats", allEntries = true)
-  public void clearCache() {
-    // Empty method, spring boot does the magic.
-  }
-
-
 }

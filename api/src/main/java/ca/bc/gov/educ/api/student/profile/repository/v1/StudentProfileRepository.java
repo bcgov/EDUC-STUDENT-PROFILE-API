@@ -15,7 +15,7 @@ import java.util.UUID;
 @Repository
 public interface StudentProfileRepository extends JpaRepository<StudentProfileEntity, UUID>, StudentProfileRepositoryCustom, JpaSpecificationExecutor<StudentProfileEntity> {
   @Query(value = "select student_profile_request_status_code as status, status_update_date as statusupdatedate from student_profile_request where  student_profile_request.status_update_date between :fromDate and :toDate and student_profile_request_status_code in :statuses order by status_update_date", nativeQuery = true)
-  List<UmpStats> findStatusAndStatusUpdateDatesBetweenForStatuses(LocalDate fromDate, LocalDate toDate, List<String> statuses);
+  List<UmpStats> findStatusAndStatusUpdateDatesBetweenForStatuses(LocalDateTime fromDate, LocalDateTime toDate, List<String> statuses);
 
   @Query(value = "select avg(STATUS_UPDATE_DATE-INITIAL_SUBMIT_DATE) as averageCompletionTime from student_profile_request WHERE STUDENT_PROFILE_REQUEST_STATUS_CODE = 'COMPLETED'", nativeQuery = true)
   UmpStats findCompletionProcessAverageTime();
