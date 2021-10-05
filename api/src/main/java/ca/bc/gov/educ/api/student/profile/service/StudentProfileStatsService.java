@@ -108,7 +108,7 @@ public class StudentProfileStatsService {
     for (int i = 11; i >= 0; i--) {
       LocalDateTime startDate = currentDate.minusMonths(i).withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
       LocalDateTime endDate = currentDate.minusMonths(i).withDayOfMonth(currentDate.minusMonths(i).toLocalDate().lengthOfMonth()).withHour(23).withMinute(59).withSecond(59).withNano(999999999);
-      val umpNumbers = this.studentProfileRepository.countByStudentRequestStatusCodeInAndStatusUpdateDateBetween(Arrays.asList("MANUAL", "AUTO"), startDate, endDate);
+      val umpNumbers = this.studentProfileRepository.countByStudentRequestStatusCodeInAndStatusUpdateDateBetween(Arrays.asList("COMPLETED"), startDate, endDate);
       requestsCompletionsInLast12Months.put(startDate.getMonth().toString(), umpNumbers);
     }
     return StudentProfileStats.builder().completionsInLastTwelveMonth(requestsCompletionsInLast12Months).build();
@@ -125,7 +125,7 @@ public class StudentProfileStatsService {
     for (int i = 6; i >= 0; i--) {
       LocalDateTime startDate = currentDate.minusDays(i).withHour(0).withMinute(0).withSecond(0).withNano(0);
       LocalDateTime endDate = currentDate.minusDays(i).withHour(23).withMinute(59).withSecond(59).withNano(999999999);
-      val umpNumbers = this.studentProfileRepository.countByStudentRequestStatusCodeInAndStatusUpdateDateBetween(Arrays.asList("MANUAL", "AUTO"), startDate, endDate);
+      val umpNumbers = this.studentProfileRepository.countByStudentRequestStatusCodeInAndStatusUpdateDateBetween(Arrays.asList("COMPLETED"), startDate, endDate);
       requestsCompletionsInLastWeek.put(startDate.getDayOfWeek().toString(), umpNumbers);
     }
     return StudentProfileStats.builder().completionsInLastWeek(requestsCompletionsInLastWeek).build();
