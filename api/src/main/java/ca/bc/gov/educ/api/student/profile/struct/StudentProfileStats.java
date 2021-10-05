@@ -21,14 +21,14 @@ public class StudentProfileStats {
    * JAN 20
    * FEB 30 ......
    */
-  Map<String, Integer> completionsInLastTwelveMonth;
+  Map<String, Long> completionsInLastTwelveMonth;
   /**
    * contains number of completed UMP requests in last week from current day.
    * ex:- if current day is Wednesday -> it will show from Last Wednesday to Tuesday.
    * WED 20
    * THURS 30 ......
    */
-  Map<String, Integer> completionsInLastWeek;
+  Map<String, Long> completionsInLastWeek;
 
   /**
    * Numbers for different statuses in last 12 month.

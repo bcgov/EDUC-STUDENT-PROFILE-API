@@ -9,12 +9,8 @@ import lombok.val;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 
-import java.time.DayOfWeek;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Month;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -35,7 +31,7 @@ public class StudentProfileStatsService {
       case AVERAGE_COMPLETION_TIME:
         return this.getAverageUMPCompletionTime();
       case COMPLETIONS_LAST_12_MONTH:
-        return this.getRequestsCompletedLastYear();
+        return this.getRequestsCompletedLastTwelveMonths();
       case PERCENT_UMP_REJECTED_TO_LAST_MONTH:
         currentMonthResultAndPercentile = this.getMonthlyPercentUMPBasedOnStatus(StudentProfileStatusCodes.REJECTED.toString());
         return StudentProfileStats.builder().umpRejectedInCurrentMonth(currentMonthResultAndPercentile.getLeft()).percentRejectedUmpToLastMonth(currentMonthResultAndPercentile.getRight()).build();
@@ -63,33 +59,22 @@ public class StudentProfileStatsService {
   }
 
   private Pair<Long, Double> getMonthlyPercentUMPBasedOnStatus(final String... statusCode) {
-    val dayOfMonth = LocalDateTime.now().getDayOfMonth();
-
-    val startDatePreviousMonth = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0).withDayOfMonth(1).minusMonths(1);
-    val endDatePreviousMonthLength = LocalDateTime.now().withHour(23).withMinute(59).withSecond(59).withNano(0).minusMonths(1).getMonth().length(LocalDate.now().minusMonths(1).isLeapYear());
-    val endDatePreviousMonth = LocalDateTime.now().withHour(23).withMinute(59).withSecond(59).withNano(0).withDayOfMonth(Math.min(dayOfMonth, endDatePreviousMonthLength)).minusMonths(1);
-    val startDateCurrentMonth = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0).withDayOfMonth(1);
-    val endDateCurrentMonth = LocalDateTime.now().withHour(23).withMinute(59).withSecond(59).withNano(0).withDayOfMonth(dayOfMonth);
-
+    val startDatePreviousMonth = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0).minusDays(59);
+    val endDatePreviousMonth = LocalDateTime.now().withHour(23).withMinute(59).withSecond(59).withNano(999999999).minusDays(30);
+    val startDateCurrentMonth = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0).minusDays(29);
+    val endDateCurrentMonth = LocalDateTime.now();
     val previousMonthResult = this.studentProfileRepository.countByStudentRequestStatusCodeInAndStatusUpdateDateBetween(List.of(statusCode), startDatePreviousMonth, endDatePreviousMonth);
-
     val currentMonthResult = this.studentProfileRepository.countByStudentRequestStatusCodeInAndStatusUpdateDateBetween(List.of(statusCode), startDateCurrentMonth, endDateCurrentMonth);
     return Pair.of(currentMonthResult, findPercentage(previousMonthResult, currentMonthResult));
   }
 
   private Pair<Long, Double> getMonthlyPercentUMPWithDocsBasedOnStatus(final String... statusCode) {
-    val dayOfMonth = LocalDateTime.now().getDayOfMonth();
-
-    val startDatePreviousMonth = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0).withDayOfMonth(1).minusMonths(1);
-    val endDatePreviousMonthLength = LocalDateTime.now().withHour(23).withMinute(59).withSecond(59).withNano(0).minusMonths(1).getMonth().length(LocalDate.now().minusMonths(1).isLeapYear());
-    val endDatePreviousMonth = LocalDateTime.now().withHour(23).withMinute(59).withSecond(59).withNano(0).withDayOfMonth(Math.min(dayOfMonth, endDatePreviousMonthLength)).minusMonths(1);
-    val startDateCurrentMonth = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0).withDayOfMonth(1);
-    val endDateCurrentMonth = LocalDateTime.now().withHour(23).withMinute(59).withSecond(59).withNano(0).withDayOfMonth(dayOfMonth);
+    val startDatePreviousMonth = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0).minusDays(59);
+    val endDatePreviousMonth = LocalDateTime.now().withHour(23).withMinute(59).withSecond(59).withNano(999999999).minusDays(30);
+    val startDateCurrentMonth = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0).minusDays(29);
+    val endDateCurrentMonth = LocalDateTime.now();
     val previousMonthResult = this.studentProfileRepository.findNumberOfStudentRequestsWithDocumentsStatusCodeInAndStatusUpdateDateBetween(List.of(statusCode), startDatePreviousMonth, endDatePreviousMonth);
-
-
     val currentMonthResult = this.studentProfileRepository.findNumberOfStudentRequestsWithDocumentsStatusCodeInAndStatusUpdateDateBetween(List.of(statusCode), startDateCurrentMonth, endDateCurrentMonth);
-
     return Pair.of(currentMonthResult, findPercentage(previousMonthResult, currentMonthResult));
   }
 
@@ -117,44 +102,16 @@ public class StudentProfileStatsService {
     return allStatusMap;
   }
 
-  private StudentProfileStats getRequestsCompletedLastYear() {
+  private StudentProfileStats getRequestsCompletedLastTwelveMonths() {
     LocalDateTime currentDate = LocalDateTime.now();
-    LocalDateTime fromDate = currentDate.withHour(0).withMinute(0).withSecond(0).withNano(0).withDayOfMonth(1).minusMonths(11);
-    val umpStats = this.studentProfileRepository.findStatusAndStatusUpdateDatesBetweenForStatuses(fromDate, currentDate, Collections.singletonList("COMPLETED"));
-    Map<String, Integer> penReqCompletionsInLast12Months = new HashMap<>();
-    for (val umpStat : umpStats) {
-      val month = umpStat.getStatusUpdateDate().getMonth().toString();
-      if (penReqCompletionsInLast12Months.containsKey(month)) {
-        val currentCount = penReqCompletionsInLast12Months.get(month);
-        penReqCompletionsInLast12Months.put(month, currentCount + 1);
-      } else {
-        penReqCompletionsInLast12Months.put(month, 1);
-      }
+    Map<String, Long> requestsCompletionsInLast12Months = new LinkedHashMap<>();
+    for (int i = 11; i >= 0; i--) {
+      LocalDateTime startDate = currentDate.minusMonths(i).withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+      LocalDateTime endDate = currentDate.minusMonths(i).withDayOfMonth(currentDate.minusMonths(i).toLocalDate().lengthOfMonth()).withHour(23).withMinute(59).withSecond(59).withNano(999999999);
+      val umpNumbers = this.studentProfileRepository.countByStudentRequestStatusCodeInAndStatusUpdateDateBetween(Arrays.asList("COMPLETED"), startDate, endDate);
+      requestsCompletionsInLast12Months.put(startDate.getMonth().toString(), umpNumbers);
     }
-    Arrays.stream(Month.values()).forEach(el -> {
-      if (!penReqCompletionsInLast12Months.containsKey(el.toString())) {
-        penReqCompletionsInLast12Months.put(el.toString(), 0);
-      }
-    });
-    val sortedKeys = new ArrayList<>(penReqCompletionsInLast12Months.keySet()).stream().sorted(this::monthComparator).collect(Collectors.toList());
-    Map<String, Integer> sortedMap = createSortedMap(penReqCompletionsInLast12Months, sortedKeys);
-    return StudentProfileStats.builder().completionsInLastTwelveMonth(sortedMap).build();
-  }
-
-  private Map<String, Integer> createSortedMap(Map<String, Integer> unsortedMap, List<String> sortedKeys) {
-    Map<String, Integer> sortedMap = new LinkedHashMap<>();
-    for (val key : sortedKeys) {
-      sortedMap.put(key, unsortedMap.get(key));
-    }
-    return sortedMap;
-  }
-
-  private int monthComparator(String month1, String month2) {
-    return Month.valueOf(month1).getValue() - Month.valueOf(month2).getValue();
-  }
-
-  private int dayComparator(String day1, String day2) {
-    return DayOfWeek.valueOf(day1).getValue() - DayOfWeek.valueOf(day2).getValue();
+    return StudentProfileStats.builder().completionsInLastTwelveMonth(requestsCompletionsInLast12Months).build();
   }
 
   private StudentProfileStats getAverageUMPCompletionTime() {
@@ -163,26 +120,14 @@ public class StudentProfileStatsService {
   }
 
   private StudentProfileStats getRequestsCompletedLastWeek() {
+    Map<String, Long> requestsCompletionsInLastWeek = new LinkedHashMap<>();
     LocalDateTime currentDate = LocalDateTime.now();
-    LocalDateTime fromDate = currentDate.withHour(0).withMinute(0).withSecond(0).withNano(0).minusDays(6);
-    val umpStats = this.studentProfileRepository.findStatusAndStatusUpdateDatesBetweenForStatuses(fromDate, currentDate, Collections.singletonList("COMPLETED"));
-    Map<String, Integer> penReqCompletionsInLastWeek = new HashMap<>();
-    for (val umpStat : umpStats) {
-      val day = umpStat.getStatusUpdateDate().getDayOfWeek().toString();
-      if (penReqCompletionsInLastWeek.containsKey(day)) {
-        val currentCount = penReqCompletionsInLastWeek.get(day);
-        penReqCompletionsInLastWeek.put(day, currentCount + 1);
-      } else {
-        penReqCompletionsInLastWeek.put(day, 1);
-      }
+    for (int i = 6; i >= 0; i--) {
+      LocalDateTime startDate = currentDate.minusDays(i).withHour(0).withMinute(0).withSecond(0).withNano(0);
+      LocalDateTime endDate = currentDate.minusDays(i).withHour(23).withMinute(59).withSecond(59).withNano(999999999);
+      val umpNumbers = this.studentProfileRepository.countByStudentRequestStatusCodeInAndStatusUpdateDateBetween(Arrays.asList("COMPLETED"), startDate, endDate);
+      requestsCompletionsInLastWeek.put(startDate.getDayOfWeek().toString(), umpNumbers);
     }
-    Arrays.stream(DayOfWeek.values()).forEach(el -> {
-      if (!penReqCompletionsInLastWeek.containsKey(el.toString())) {
-        penReqCompletionsInLastWeek.put(el.toString(), 0);
-      }
-    });
-    val sortedKeys = new ArrayList<>(penReqCompletionsInLastWeek.keySet()).stream().sorted(this::dayComparator).collect(Collectors.toList());
-    Map<String, Integer> sortedMap = createSortedMap(penReqCompletionsInLastWeek, sortedKeys);
-    return StudentProfileStats.builder().completionsInLastWeek(sortedMap).build();
+    return StudentProfileStats.builder().completionsInLastWeek(requestsCompletionsInLastWeek).build();
   }
 }
