@@ -123,6 +123,17 @@ public class DocumentService {
   }
 
   /**
+   * Creates a DocumentEntity
+   *
+   * @param document DocumentEntity payload to be saved in DB
+   * @return saved DocumentEntity.
+   */
+  public DocumentEntity createDocument(DocumentEntity document) {
+    log.info("creating Document without requestId, document: " + document.toString());
+    return documentRepository.save(document);
+  }
+
+  /**
    * Delete DocumentEntity by id
    *
    * @param documentID delete the document with this id.

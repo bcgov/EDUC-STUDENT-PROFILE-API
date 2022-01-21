@@ -4,10 +4,18 @@ import ca.bc.gov.educ.api.student.profile.BaseProfileRequestAPITest;
 import ca.bc.gov.educ.api.student.profile.struct.StudentProfile;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 public abstract class BaseReqControllerTest extends BaseProfileRequestAPITest {
 
   protected String dummyStudentProfileJson() {
     return "{\"digitalID\":\"b1e0788a-7dab-4b92-af86-c678e411f1e3\",\"legalFirstName\":\"Chester\",\"legalMiddleNames\":\"Grestie\",\"legalLastName\":\"Baulk\",\"dob\":\"1952-10-31\",\"genderCode\":\"M\",\"email\":\"cbaulk0@bluehost.com\",\"emailVerified\":\"N\",\"currentSchool\":\"Xanthoparmelia wyomingica (Gyel.) Hale\",\"recordedPen\":\"127054021\",\"recordedLegalLastName\":\"Wayne\",\"recordedDob\":\"1952-11-01\",\"recordedLegalFirstName\":\"OM\"}";
+  }
+
+  protected String dummyStudentProfileJsonWithDocumentIDs(List<String> documentIDs) {
+    var ids = documentIDs.stream().collect(Collectors.joining("\",\"","[\"","\"]"));
+    return "{\"digitalID\":\"b1e0788a-7dab-4b92-af86-c678e411f1e3\",\"legalFirstName\":\"Chester\",\"legalMiddleNames\":\"Grestie\",\"legalLastName\":\"Baulk\",\"dob\":\"1952-10-31\",\"genderCode\":\"M\",\"email\":\"cbaulk0@bluehost.com\",\"emailVerified\":\"N\",\"currentSchool\":\"Xanthoparmelia wyomingica (Gyel.) Hale\",\"recordedPen\":\"127054021\",\"recordedLegalLastName\":\"Wayne\",\"recordedDob\":\"1952-11-01\",\"recordedLegalFirstName\":\"OM\",\"documentIDs\":" + ids +"}";
   }
 
   protected String dummyStudentProfileJsonWithRecordedEmail() {

@@ -2,10 +2,7 @@ package ca.bc.gov.educ.api.student.profile.endpoint.v1;
 
 import ca.bc.gov.educ.api.student.profile.constants.StatsType;
 import ca.bc.gov.educ.api.student.profile.constants.v1.URL;
-import ca.bc.gov.educ.api.student.profile.struct.GenderCode;
-import ca.bc.gov.educ.api.student.profile.struct.StudentProfile;
-import ca.bc.gov.educ.api.student.profile.struct.StudentProfileStats;
-import ca.bc.gov.educ.api.student.profile.struct.StudentProfileStatusCode;
+import ca.bc.gov.educ.api.student.profile.struct.*;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -46,7 +43,7 @@ public interface StudentProfileEndpoint {
   @ApiResponses(value = {@ApiResponse(responseCode = "201", description = "CREATED"), @ApiResponse(responseCode = "200", description = "OK")})
   @ResponseStatus(CREATED)
   @Transactional
-  StudentProfile createStudentProfile(@Validated @RequestBody StudentProfile penRequest);
+  StudentProfile createStudentProfile(@Validated @RequestBody StudentProfileCreate penRequest);
 
   @PreAuthorize("hasAuthority('SCOPE_WRITE_STUDENT_PROFILE')")
   @PutMapping

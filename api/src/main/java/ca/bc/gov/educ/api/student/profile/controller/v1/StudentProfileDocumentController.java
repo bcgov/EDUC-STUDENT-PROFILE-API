@@ -49,6 +49,14 @@ public class StudentProfileDocumentController extends BaseController implements 
   }
 
   @Override
+  public StudentProfileDocMetadata createDocument(StudentProfileDocument penReqDocument) {
+    setAuditColumns(penReqDocument);
+    val model = mapper.toModel(penReqDocument);
+    getValidator().validateDocumentPayload(model, true);
+    return mapper.toMetadataStructure(getDocumentService().createDocument(model));
+  }
+
+  @Override
   public StudentProfileDocMetadata updateDocument(UUID studentProfileRequestId, UUID documentID, StudentProfileDocument penReqDocument) {
     setAuditColumns(penReqDocument);
     val model = mapper.toModel(penReqDocument);

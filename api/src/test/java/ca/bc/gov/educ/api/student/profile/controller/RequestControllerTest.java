@@ -11,6 +11,7 @@ import ca.bc.gov.educ.api.student.profile.struct.SearchCriteria;
 import ca.bc.gov.educ.api.student.profile.struct.StudentProfile;
 import ca.bc.gov.educ.api.student.profile.struct.ValueType;
 import ca.bc.gov.educ.api.student.profile.support.DocumentBuilder;
+import ca.bc.gov.educ.api.student.profile.support.DocumentTypeCodeBuilder;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.After;
@@ -28,6 +29,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.closeTo;
@@ -64,10 +66,23 @@ public class RequestControllerTest extends BaseReqControllerTest {
   @Autowired
   StudentProfileStatusCodeTableRepository statusCodeTableRepo;
 
+  @Autowired
+  private DocumentTypeCodeTableRepository documentTypeCodeRepository;
+
+  private UUID documentID;
+
   @Before
   public void setUp() {
     MockitoAnnotations.openMocks(this);
     profileRequestAPITestUtils.saveGenderCode(createGenderCodeData());
+    DocumentTypeCodeBuilder.setUpDocumentTypeCodes(documentTypeCodeRepository);
+    DocumentEntity document = new DocumentBuilder()
+      .withoutDocumentID()
+      .withRequest(null)
+      .withTypeCode("CAPASSPORT")
+      .build();
+    document = this.documentRepository.save(document);
+    this.documentID = document.getDocumentID();
   }
 
   @After
@@ -75,6 +90,8 @@ public class RequestControllerTest extends BaseReqControllerTest {
     documentRepository.deleteAll();
     repository.deleteAll();
     genderRepo.deleteAll();
+    documentRepository.deleteAll();
+    documentTypeCodeRepository.deleteAll();
   }
 
   private GenderCodeEntity createGenderCodeData() {
@@ -128,6 +145,16 @@ public class RequestControllerTest extends BaseReqControllerTest {
       .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_STUDENT_PROFILE")))
       .contentType(MediaType.APPLICATION_JSON)
       .accept(MediaType.APPLICATION_JSON).content(dummyStudentProfileJsonWithRecordedEmail())).andDo(print()).andExpect(status().isCreated());
+  }
+
+  @Test
+  public void testCreateRequest_GivenValidPayload3_ShouldReturnStatusCreated() throws Exception {
+    this.mockMvc.perform(post(URL.BASE_URL)
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_STUDENT_PROFILE")))
+      .contentType(MediaType.APPLICATION_JSON)
+      .accept(MediaType.APPLICATION_JSON).content(dummyStudentProfileJsonWithDocumentIDs(List.of(this.documentID.toString())))).andDo(print()).andExpect(status().isCreated());
+    var document =  documentRepository.findById(this.documentID);
+    assertThat(document.get().getRequest()).isNotNull();
   }
 
   @Test

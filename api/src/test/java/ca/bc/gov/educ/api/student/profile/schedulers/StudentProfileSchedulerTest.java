@@ -41,17 +41,10 @@ public class StudentProfileSchedulerTest extends BaseProfileRequestAPITest {
     StudentProfileEntity studentProfile = new RequestBuilder().withRequestStatusCode("COMPLETED")
         .withoutRequestID().build();
     studentProfile.setStatusUpdateDate(LocalDateTime.now().minusHours(25));
-    DocumentEntity document = new DocumentBuilder()
-        .withoutDocumentID()
-        //.withoutCreateAndUpdateUser()
-        .withRequest(studentProfile)
-        .withTypeCode("CAPASSPORT")
-        .withData(Files.readAllBytes(new ClassPathResource(
-            "../model/document-req.json", StudentProfileSchedulerTest.class).getFile().toPath()))
-        .build();
-    document.setCreateDate(LocalDateTime.now().minusDays(5));
     this.studentProfileRepository.save(studentProfile);
-    this.repository.save(document);
+    this.saveDocument(studentProfile, 5);
+    //create orphan records
+    this.saveDocument(null, 1);
   }
 
   @After
@@ -60,8 +53,8 @@ public class StudentProfileSchedulerTest extends BaseProfileRequestAPITest {
   }
 
   @Test
-  public void removeBlobContentsFromUploadedDocuments() {
-    this.scheduler.removeBlobContentsFromUploadedDocuments();
+  public void removeOrphanRecordsAndBlobContentsFromUploadedDocuments() {
+    this.scheduler.removeOrphanRecordsAndBlobContentsFromUploadedDocuments();
     val results = this.repository.findAll();
     assertThat(results).size().isEqualTo(1);
     assertThat(results.get(0)).isNotNull();
@@ -69,5 +62,18 @@ public class StudentProfileSchedulerTest extends BaseProfileRequestAPITest {
     assertThat(results.get(0).getFileSize()).isZero();
     val doc = this.profileRequestAPITestUtils.getDocumentBlobByDocumentID(results.get(0).getDocumentID());
     assertThat(doc).isNull();
+  }
+
+  private void saveDocument(StudentProfileEntity studentProfile, int minusDays) throws IOException {
+    DocumentEntity document = new DocumentBuilder()
+      .withoutDocumentID()
+      //.withoutCreateAndUpdateUser()
+      .withRequest(studentProfile)
+      .withTypeCode("CAPASSPORT")
+      .withData(Files.readAllBytes(new ClassPathResource(
+        "../model/document-req.json", StudentProfileSchedulerTest.class).getFile().toPath()))
+      .build();
+    document.setCreateDate(LocalDateTime.now().minusDays(minusDays));
+    this.repository.save(document);
   }
 }

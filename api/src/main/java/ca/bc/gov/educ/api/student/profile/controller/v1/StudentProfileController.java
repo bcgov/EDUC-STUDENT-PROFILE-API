@@ -77,10 +77,10 @@ public class StudentProfileController extends BaseController implements StudentP
     return getService().findStudentProfiles(UUIDUtil.fromString(digitalID), status, pen).stream().map(mapper::toStructure).collect(Collectors.toList());
   }
 
-  public StudentProfile createStudentProfile(StudentProfile studentProfile) {
+  public StudentProfile createStudentProfile(StudentProfileCreate studentProfile) {
     validatePayload(studentProfile, true);
     setAuditColumns(studentProfile);
-    return mapper.toStructure(getService().createStudentProfile(mapper.toModel(studentProfile)));
+    return mapper.toStructure(getService().createStudentProfile(mapper.toModel(studentProfile), studentProfile.getDocumentIDs()));
   }
 
   public StudentProfile updateStudentProfile(StudentProfile studentProfile) {

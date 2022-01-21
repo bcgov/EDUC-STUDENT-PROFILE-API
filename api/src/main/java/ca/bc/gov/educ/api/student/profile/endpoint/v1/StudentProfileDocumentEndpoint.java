@@ -27,6 +27,12 @@ public interface StudentProfileDocumentEndpoint {
   @ResponseStatus(CREATED)
   StudentProfileDocMetadata createDocument(@PathVariable String studentProfileRequestId, @Validated @RequestBody StudentProfileDocument penReqDocument);
 
+  @PostMapping(URL.ALL_DOCUMENTS)
+  @PreAuthorize("hasAuthority('SCOPE_WRITE_DOCUMENT_STUDENT_PROFILE')")
+  @ApiResponses(value = {@ApiResponse(responseCode = "201", description = "CREATED"), @ApiResponse(responseCode = "200", description = "OK")})
+  @ResponseStatus(CREATED)
+  StudentProfileDocMetadata createDocument(@Validated @RequestBody StudentProfileDocument penReqDocument);
+
   @PutMapping(URL.STUDENT_PROFILE_REQUEST_ID_DOCUMENTS + URL.DOCUMENT_ID)
   @PreAuthorize("hasAuthority('SCOPE_WRITE_DOCUMENT_STUDENT_PROFILE')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
