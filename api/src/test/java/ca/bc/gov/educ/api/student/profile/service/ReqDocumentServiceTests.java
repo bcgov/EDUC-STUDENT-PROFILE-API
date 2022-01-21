@@ -21,7 +21,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 
-
 public class ReqDocumentServiceTests extends BaseProfileRequestAPITest {
 
   @Autowired
@@ -67,6 +66,20 @@ public class ReqDocumentServiceTests extends BaseProfileRequestAPITest {
     assertThat(document).isNotNull();
     assertThat(document.getDocumentID()).isNotNull();
     assertThat(document.getRequest().getStudentRequestID()).isEqualTo(requestID);
+  }
+
+  @Test
+  public void createValidDocumentWithoutStudentProfileIdTest() {
+    DocumentEntity document = new DocumentBuilder()
+      .withoutDocumentID()
+      .withoutCreateAndUpdateUser()
+      .withRequest(null)
+      .build();
+    document = service.createDocument(document);
+
+    assertThat(document).isNotNull();
+    assertThat(document.getDocumentID()).isNotNull();
+    assertThat(document.getRequest()).isNull();
   }
 
   @Test
@@ -129,7 +142,7 @@ public class ReqDocumentServiceTests extends BaseProfileRequestAPITest {
     this.repository.save(document);
 
     List<DocumentEntity> documents = service.retrieveAllDocumentMetadata(this.requestID);
-    assertThat(documents.size()).isEqualTo(2);
+    assertThat(documents).hasSize(2);
   }
 
 

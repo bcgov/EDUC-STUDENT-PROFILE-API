@@ -103,6 +103,22 @@ public class ReqDocumentControllerTest extends BaseProfileRequestAPITest {
   }
 
   @Test
+  public void createDocumentTest_GivenNoStudentProfileRequestId_ShouldReturnCreated() throws Exception {
+    this.mvc.perform(post(URL.BASE_URL + URL.ALL_DOCUMENTS)
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_DOCUMENT_STUDENT_PROFILE")))
+      .contentType(MediaType.APPLICATION_JSON)
+      .content(Files.readAllBytes(new ClassPathResource(
+        "../model/document-req.json", ReqDocumentControllerTest.class).getFile().toPath()))
+      .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isCreated())
+      .andDo(print())
+      .andExpect(jsonPath("$.documentID", not(is(this.documentID.toString()))))
+      .andExpect(jsonPath("$.documentTypeCode", is("BCSCPHOTO")))
+      .andExpect(jsonPath("$.documentData").doesNotExist())
+      .andExpect(jsonPath("$.studentRequestID").doesNotExist());
+  }
+
+  @Test
   public void testCreateDocument_GivenMandatoryFieldsNullValues_ShouldReturnStatusBadRequest() throws Exception {
     this.mvc.perform(post(URL.BASE_URL + URL.STUDENT_PROFILE_REQUEST_ID_DOCUMENTS, this.reqID.toString())
       .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_DOCUMENT_STUDENT_PROFILE")))

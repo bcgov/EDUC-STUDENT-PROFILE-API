@@ -33,9 +33,12 @@ public class StudentProfileScheduler {
   @SchedulerLock(name = "RemoveBlobContentsFromUploadedDocuments",
     lockAtLeastFor = "PT4H", lockAtMostFor = "PT4H") //midnight job so lock for 4 hours
   @Transactional(propagation = Propagation.REQUIRES_NEW)
-  public void removeBlobContentsFromUploadedDocuments() {
+  public void removeOrphanRecordsAndBlobContentsFromUploadedDocuments() {
     val dateTimeToCompare = LocalDateTime.now().minusHours(24);
     LockAssert.assertLocked();
+
+    this.documentRepository.deleteOrphanRecordsByCreateDateLessThanEqual(dateTimeToCompare);
+
     val records = this.documentRepository.findAllByRequestStudentRequestStatusCodeInAndFileSizeGreaterThanAndDocumentDataIsNotNull(Arrays.asList(StudentProfileStatusCodes.COMPLETED.toString(), StudentProfileStatusCodes.ABANDONED.toString()), 0);
     if (!records.isEmpty()) {
       for (val document : records) {

@@ -34,7 +34,7 @@ public class DocumentEntity {
   UUID documentID;
 
   @ManyToOne
-  @JoinColumn(name = "student_profile_request_id", updatable = false, columnDefinition = "BINARY(16)")
+  @JoinColumn(name = "student_profile_request_id", columnDefinition = "BINARY(16)", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
   StudentProfileEntity request;
 
   @Column(name = "student_profile_request_document_type_code")

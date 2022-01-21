@@ -24,10 +24,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.stream.Collectors;
@@ -75,7 +72,8 @@ public class StudentProfileService {
    * @param studentProfile the pen request object to be persisted in the DB.
    * @return the persisted entity.
    */
-  public StudentProfileEntity createStudentProfile(StudentProfileEntity studentProfile) {
+  @Transactional
+  public StudentProfileEntity createStudentProfile(StudentProfileEntity studentProfile, String[] documentIDs) {
     if (studentProfile.getRecordedEmail() != null && studentProfile.getRecordedEmail().equals(studentProfile.getEmail())) {
       studentProfile.setStudentRequestStatusCode("INITREV");
       studentProfile.setInitialSubmitDate(LocalDateTime.now());
@@ -84,7 +82,19 @@ public class StudentProfileService {
     }
     studentProfile.setStatusUpdateDate(LocalDateTime.now());
     TransformUtil.uppercaseFields(studentProfile);
-    return getStudentProfileRepository().save(studentProfile);
+    val studentProfileEntity = getStudentProfileRepository().save(studentProfile);
+
+    if(documentIDs != null && documentIDs.length > 0) {
+      val documents = getDocumentRepository().findAllById(Arrays.stream(documentIDs).map(UUID::fromString).collect(Collectors.toList()));
+      documents.forEach(document -> {
+        document.setRequest(studentProfileEntity);
+        document.setUpdateUser(studentProfile.getCreateUser());
+        document.setUpdateDate(LocalDateTime.now());
+      });
+      getDocumentRepository().saveAll(documents);
+    }
+
+    return studentProfileEntity;
   }
 
 
