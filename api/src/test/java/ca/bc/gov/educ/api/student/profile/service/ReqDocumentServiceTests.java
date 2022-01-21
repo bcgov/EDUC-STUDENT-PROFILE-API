@@ -142,7 +142,7 @@ public class ReqDocumentServiceTests extends BaseProfileRequestAPITest {
     this.repository.save(document);
 
     List<DocumentEntity> documents = service.retrieveAllDocumentMetadata(this.requestID);
-    assertThat(documents.size()).isEqualTo(2);
+    assertThat(documents).hasSize(2);
   }
 
 
