@@ -58,7 +58,7 @@ public class DocumentService {
 
     val document = result.get();
 
-    if (!document.getRequest().getStudentRequestID().equals(studentProfileId)) {
+    if (studentProfileId != null && !document.getRequest().getStudentRequestID().equals(studentProfileId)) {
       throw new EntityNotFoundException(DocumentEntity.class, "studentProfileId", studentProfileId.toString());
     }
 
