@@ -256,7 +256,7 @@ public class ReqDocumentControllerTest extends BaseProfileRequestAPITest {
             .andExpect(jsonPath("$.documentData").doesNotExist());
 
 
-    assertThat(repository.findById(this.documentID).isPresent()).isFalse();
+    assertThat(repository.findById(this.documentID)).isNotPresent();
   }
 
   @Test
