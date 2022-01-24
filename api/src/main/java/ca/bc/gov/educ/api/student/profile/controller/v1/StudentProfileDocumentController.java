@@ -41,6 +41,11 @@ public class StudentProfileDocumentController extends BaseController implements 
   }
 
   @Override
+  public StudentProfileDocument readDocument(String documentID, String includeDocData) {
+    return mapper.toStructure(getDocumentService().retrieveDocument(null, UUID.fromString(documentID), includeDocData));
+  }
+
+  @Override
   public StudentProfileDocMetadata createDocument(String studentProfileRequestId, StudentProfileDocument penReqDocument) {
     setAuditColumns(penReqDocument);
     val model = mapper.toModel(penReqDocument);
@@ -66,6 +71,10 @@ public class StudentProfileDocumentController extends BaseController implements 
 
   public StudentProfileDocMetadata deleteDocument(String studentProfileRequestId, String documentID) {
     return mapper.toMetadataStructure(getDocumentService().deleteDocument(UUID.fromString(studentProfileRequestId), UUID.fromString(documentID)));
+  }
+
+  public StudentProfileDocMetadata deleteDocument(String documentID) {
+    return mapper.toMetadataStructure(getDocumentService().deleteDocument(null, UUID.fromString(documentID)));
   }
 
   public Iterable<StudentProfileDocMetadata> readAllDocumentMetadata(String studentProfileRequestId) {

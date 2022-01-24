@@ -62,16 +62,9 @@ public class ReqDocumentControllerTest extends BaseProfileRequestAPITest {
     DocumentTypeCodeBuilder.setUpDocumentTypeCodes(documentTypeCodeRepository);
     StudentProfileEntity studentProfile = new RequestBuilder()
             .withoutRequestID().build();
-    DocumentEntity document = new DocumentBuilder()
-            .withoutDocumentID()
-            //.withoutCreateAndUpdateUser()
-            .withRequest(studentProfile)
-            .withTypeCode("CAPASSPORT")
-            .build();
     studentProfile = this.studentProfileRepository.save(studentProfile);
-    document = this.repository.save(document);
     this.reqID = studentProfile.getStudentRequestID();
-    this.documentID = document.getDocumentID();
+    this.documentID = createDocument(studentProfile);
   }
 
   @Test
@@ -84,6 +77,19 @@ public class ReqDocumentControllerTest extends BaseProfileRequestAPITest {
             .andExpect(jsonPath("$.documentID", is(this.documentID.toString())))
             .andExpect(jsonPath("$.documentTypeCode", is("CAPASSPORT")))
             .andExpect(jsonPath("$.documentData", is("TXkgY2FyZCE=")));
+  }
+
+  @Test
+  public void readDocumentTest_GivenNoStudentProfileRequestId_ShouldReturnOk() throws Exception {
+    this.documentID = createDocument(null);
+    this.mvc.perform(get(URL.BASE_URL + URL.ALL_DOCUMENTS + URL.DOCUMENT_ID, this.documentID.toString())
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_DOCUMENT_STUDENT_PROFILE")))
+      .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andDo(print())
+      .andExpect(jsonPath("$.documentID", is(this.documentID.toString())))
+      .andExpect(jsonPath("$.documentTypeCode", is("CAPASSPORT")))
+      .andExpect(jsonPath("$.documentData", is("TXkgY2FyZCE=")));
   }
 
   @Test
@@ -254,6 +260,22 @@ public class ReqDocumentControllerTest extends BaseProfileRequestAPITest {
   }
 
   @Test
+  public void deleteDocumentTest_GivenNoStudentProfileRequestId_ShouldReturnOk() throws Exception {
+    this.documentID = createDocument(null);
+    this.mvc.perform(delete(URL.BASE_URL + URL.ALL_DOCUMENTS + URL.DOCUMENT_ID, this.documentID.toString())
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "DELETE_DOCUMENT_STUDENT_PROFILE")))
+      .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andDo(print())
+      .andExpect(jsonPath("$.documentID", is(this.documentID.toString())))
+      .andExpect(jsonPath("$.documentTypeCode", is("CAPASSPORT")))
+      .andExpect(jsonPath("$.documentData").doesNotExist());
+
+
+    assertThat(repository.findById(this.documentID).isPresent()).isFalse();
+  }
+
+  @Test
   public void readAllDocumentMetadataTest() throws Exception {
     this.mvc.perform(get(URL.BASE_URL + URL.STUDENT_PROFILE_REQUEST_ID_DOCUMENTS, this.reqID.toString())
         .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_DOCUMENT_STUDENT_PROFILE")))
@@ -331,6 +353,17 @@ public class ReqDocumentControllerTest extends BaseProfileRequestAPITest {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+  }
+
+  private UUID createDocument(StudentProfileEntity studentProfile) {
+    DocumentEntity document = new DocumentBuilder()
+      .withoutDocumentID()
+      //.withoutCreateAndUpdateUser()
+      .withRequest(studentProfile)
+      .withTypeCode("CAPASSPORT")
+      .build();
+    document = this.repository.save(document);
+    return document.getDocumentID();
   }
 
 

@@ -21,6 +21,11 @@ public interface StudentProfileDocumentEndpoint {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"), @ApiResponse(responseCode = "404", description = "NOT FOUND")})
   StudentProfileDocument readDocument(@PathVariable String studentProfileRequestId, @PathVariable String documentID, @RequestParam(value = "includeDocData", defaultValue = "Y") String includeDocData);
 
+  @GetMapping(URL.ALL_DOCUMENTS + URL.DOCUMENT_ID)
+  @PreAuthorize("hasAuthority('SCOPE_READ_DOCUMENT_STUDENT_PROFILE')")
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"), @ApiResponse(responseCode = "404", description = "NOT FOUND")})
+  StudentProfileDocument readDocument(@PathVariable String documentID, @RequestParam(value = "includeDocData", defaultValue = "Y") String includeDocData);
+
   @PostMapping(URL.STUDENT_PROFILE_REQUEST_ID_DOCUMENTS)
   @PreAuthorize("hasAuthority('SCOPE_WRITE_DOCUMENT_STUDENT_PROFILE')")
   @ApiResponses(value = {@ApiResponse(responseCode = "201", description = "CREATED"), @ApiResponse(responseCode = "200", description = "OK")})
@@ -42,6 +47,11 @@ public interface StudentProfileDocumentEndpoint {
   @PreAuthorize("hasAuthority('SCOPE_DELETE_DOCUMENT_STUDENT_PROFILE')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
   StudentProfileDocMetadata deleteDocument(@PathVariable String studentProfileRequestId, @PathVariable String documentID);
+
+  @DeleteMapping(URL.ALL_DOCUMENTS + URL.DOCUMENT_ID)
+  @PreAuthorize("hasAuthority('SCOPE_DELETE_DOCUMENT_STUDENT_PROFILE')")
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
+  StudentProfileDocMetadata deleteDocument(@PathVariable String documentID);
 
   @GetMapping(URL.STUDENT_PROFILE_REQUEST_ID_DOCUMENTS)
   @PreAuthorize("hasAuthority('SCOPE_READ_DOCUMENT_STUDENT_PROFILE')")
