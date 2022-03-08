@@ -5,12 +5,12 @@ package ca.bc.gov.educ.api.student.profile.constants;
  */
 public enum StatsType {
   /**
-   * query param to return number of completed UMP requests in last 12 months from the current month.
-   * ex:- if current month is JANUARY 2021, it will start from JANUARY 2020.
+   * query param to return number of completed UMP requests in last 13 months from the current month.
+   * ex:- if current month is JANUARY 2021, it will start from DECEMBER 2019.
    * JAN 20
    * FEB 30 ......
    */
-  COMPLETIONS_LAST_12_MONTH,
+  COMPLETIONS_LAST_13_MONTH,
   /**
    * query param to return Numbers for different statuses in last 12 month.
    * COMPLETED, 500

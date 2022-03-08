@@ -499,7 +499,7 @@ public class RequestControllerTest extends BaseReqControllerTest {
 
     this.mockMvc.perform(get(URL.BASE_URL + URL.STATS)
       .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE_STATS")))
-      .param("statsType", "COMPLETIONS_LAST_12_MONTH")
+      .param("statsType", "COMPLETIONS_LAST_13_MONTH")
       .contentType(APPLICATION_JSON))
       .andDo(print()).andExpect(status().isOk())
       .andExpect(jsonPath("$.completionsInLastTwelveMonth." + month1, is(1)))
@@ -514,7 +514,7 @@ public class RequestControllerTest extends BaseReqControllerTest {
     List<StudentProfile> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
     });
     entities.get(0).setStudentRequestStatusCode(StudentProfileStatusCodes.REJECTED.toString());
-    entities.get(0).setStatusUpdateDate(LocalDateTime.now().minusMonths(1).toString());
+    entities.get(0).setStatusUpdateDate(LocalDateTime.now().minusDays(30).toString());
     entities.get(1).setStudentRequestStatusCode(StudentProfileStatusCodes.REJECTED.toString());
     entities.get(1).setStatusUpdateDate(LocalDateTime.now().toString());
     entities.get(2).setStudentRequestStatusCode(StudentProfileStatusCodes.REJECTED.toString());
@@ -538,7 +538,7 @@ public class RequestControllerTest extends BaseReqControllerTest {
     List<StudentProfile> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
     });
     entities.get(0).setStudentRequestStatusCode(StudentProfileStatusCodes.ABANDONED.toString());
-    entities.get(0).setStatusUpdateDate(LocalDateTime.now().minusMonths(1).toString());
+    entities.get(0).setStatusUpdateDate(LocalDateTime.now().minusDays(30).toString());
     entities.get(1).setStudentRequestStatusCode(StudentProfileStatusCodes.ABANDONED.toString());
     entities.get(1).setStatusUpdateDate(LocalDateTime.now().toString());
     entities.get(2).setStudentRequestStatusCode(StudentProfileStatusCodes.ABANDONED.toString());
@@ -562,7 +562,7 @@ public class RequestControllerTest extends BaseReqControllerTest {
     List<StudentProfile> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
     });
     entities.get(0).setStudentRequestStatusCode(StudentProfileStatusCodes.COMPLETED.toString());
-    entities.get(0).setStatusUpdateDate(LocalDateTime.now().minusMonths(1).toString());
+    entities.get(0).setStatusUpdateDate(LocalDateTime.now().minusDays(30).toString());
     entities.get(1).setStudentRequestStatusCode(StudentProfileStatusCodes.COMPLETED.toString());
     entities.get(1).setStatusUpdateDate(LocalDateTime.now().toString());
     entities.get(2).setStudentRequestStatusCode(StudentProfileStatusCodes.COMPLETED.toString());
