@@ -104,14 +104,14 @@ public class StudentProfileStatsService {
 
   private StudentProfileStats getRequestsCompletedLastMonths(int months) {
     LocalDateTime currentDate = LocalDateTime.now();
-    Map<String, Long> requestsCompletionsInLast12Months = new LinkedHashMap<>();
+    Map<String, Long> requestsCompletionsInLastMonths = new LinkedHashMap<>();
     for (int i = months; i >= 0; i--) {
       LocalDateTime startDate = currentDate.minusMonths(i).withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
       LocalDateTime endDate = currentDate.minusMonths(i).withDayOfMonth(currentDate.minusMonths(i).toLocalDate().lengthOfMonth()).withHour(23).withMinute(59).withSecond(59).withNano(999999999);
       val umpNumbers = this.studentProfileRepository.countByStudentRequestStatusCodeInAndStatusUpdateDateBetween(Arrays.asList("COMPLETED"), startDate, endDate);
-      requestsCompletionsInLast12Months.put(startDate.getMonth().toString(), umpNumbers);
+      requestsCompletionsInLastMonths.put(startDate.getMonth().toString(), umpNumbers);
     }
-    return StudentProfileStats.builder().completionsInLastTwelveMonth(requestsCompletionsInLast12Months).build();
+    return StudentProfileStats.builder().completionsInLastTwelveMonth(requestsCompletionsInLastMonths).build();
   }
 
   private StudentProfileStats getAverageUMPCompletionTime() {
