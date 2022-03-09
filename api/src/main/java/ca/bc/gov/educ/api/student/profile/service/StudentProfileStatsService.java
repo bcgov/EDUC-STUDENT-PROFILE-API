@@ -31,7 +31,7 @@ public class StudentProfileStatsService {
       case AVERAGE_COMPLETION_TIME:
         return this.getAverageUMPCompletionTime();
       case COMPLETIONS_LAST_13_MONTH:
-        return this.getRequestsCompletedLastMonths(12);
+        return this.getRequestsCompletedLastMonths();
       case PERCENT_UMP_REJECTED_TO_LAST_MONTH:
         currentMonthResultAndPercentile = this.getMonthlyPercentUMPBasedOnStatus(StudentProfileStatusCodes.REJECTED.toString());
         return StudentProfileStats.builder().umpRejectedInCurrentMonth(currentMonthResultAndPercentile.getLeft()).percentRejectedUmpToLastMonth(currentMonthResultAndPercentile.getRight()).build();
@@ -102,16 +102,17 @@ public class StudentProfileStatsService {
     return allStatusMap;
   }
 
-  private StudentProfileStats getRequestsCompletedLastMonths(int months) {
+  private StudentProfileStats getRequestsCompletedLastMonths() {
     LocalDateTime currentDate = LocalDateTime.now();
     Map<String, Long> requestsCompletionsInLastMonths = new LinkedHashMap<>();
-    for (int i = months; i >= 0; i--) {
+    for (int i = 12; i >= 0; i--) {
       LocalDateTime startDate = currentDate.minusMonths(i).withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
       LocalDateTime endDate = currentDate.minusMonths(i).withDayOfMonth(currentDate.minusMonths(i).toLocalDate().lengthOfMonth()).withHour(23).withMinute(59).withSecond(59).withNano(999999999);
       val umpNumbers = this.studentProfileRepository.countByStudentRequestStatusCodeInAndStatusUpdateDateBetween(Arrays.asList("COMPLETED"), startDate, endDate);
-      requestsCompletionsInLastMonths.put(startDate.getMonth().toString(), umpNumbers);
+      val monthName = (i == 0) ? "CURRENT" : startDate.getMonth().toString();
+      requestsCompletionsInLastMonths.put(monthName, umpNumbers);
     }
-    return StudentProfileStats.builder().completionsInLastTwelveMonth(requestsCompletionsInLastMonths).build();
+    return StudentProfileStats.builder().completionsInLastMonths(requestsCompletionsInLastMonths).build();
   }
 
   private StudentProfileStats getAverageUMPCompletionTime() {

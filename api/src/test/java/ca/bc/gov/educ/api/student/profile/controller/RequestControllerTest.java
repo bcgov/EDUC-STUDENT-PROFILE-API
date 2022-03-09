@@ -481,7 +481,7 @@ public class RequestControllerTest extends BaseReqControllerTest {
   }
 
   @Test
-  public void testGetStats_COMPLETIONS_LAST_12_MONTH_ShouldReturnStatusOk() throws Exception {
+  public void testGetStats_COMPLETIONS_LAST_13_MONTH_ShouldReturnStatusOk() throws Exception {
     final File file = new File(
       Objects.requireNonNull(getClass().getClassLoader().getResource("mock_student_profiles.json")).getFile()
     );
@@ -489,7 +489,6 @@ public class RequestControllerTest extends BaseReqControllerTest {
     });
     entities.get(0).setStudentRequestStatusCode(StudentProfileStatusCodes.COMPLETED.toString());
     var updateDate = LocalDateTime.now();
-    var month1 = updateDate.getMonth().toString();
     entities.get(0).setStatusUpdateDate(updateDate.toString());
     entities.get(1).setStudentRequestStatusCode(StudentProfileStatusCodes.COMPLETED.toString());
     updateDate = LocalDateTime.now().withDayOfMonth(1).minusMonths(11);
@@ -502,8 +501,8 @@ public class RequestControllerTest extends BaseReqControllerTest {
       .param("statsType", "COMPLETIONS_LAST_13_MONTH")
       .contentType(APPLICATION_JSON))
       .andDo(print()).andExpect(status().isOk())
-      .andExpect(jsonPath("$.completionsInLastTwelveMonth." + month1, is(1)))
-      .andExpect(jsonPath("$.completionsInLastTwelveMonth." + month2, is(1)));
+      .andExpect(jsonPath("$.completionsInLastMonths.CURRENT", is(1)))
+      .andExpect(jsonPath("$.completionsInLastMonths." + month2, is(1)));
   }
 
   @Test
