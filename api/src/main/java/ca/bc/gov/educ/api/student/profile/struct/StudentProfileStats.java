@@ -16,12 +16,12 @@ import java.util.Map;
 @Builder
 public class StudentProfileStats {
   /**
-   * contains number of completed UMP requests in last 12 months from the current month.
-   * ex:- if current month is JANUARY 2021, it will start from JANUARY 2020.
+   * contains number of completed UMP requests in last 13 months from the current month.
+   * ex:- if current month is JANUARY 2021, it will start from DECEMBER 2019.
    * JAN 20
    * FEB 30 ......
    */
-  Map<String, Long> completionsInLastTwelveMonth;
+  Map<String, Long> completionsInLastMonths;
   /**
    * contains number of completed UMP requests in last week from current day.
    * ex:- if current day is Wednesday -> it will show from Last Wednesday to Tuesday.
