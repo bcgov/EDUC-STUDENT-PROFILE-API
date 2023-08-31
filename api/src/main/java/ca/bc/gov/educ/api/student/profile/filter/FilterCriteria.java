@@ -2,12 +2,11 @@ package ca.bc.gov.educ.api.student.profile.filter;
 
 import org.apache.commons.lang3.StringUtils;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * Filter Criteria Holder
@@ -101,7 +100,7 @@ public class FilterCriteria<T extends Comparable<T>> {
 
       //For 'in' or 'nin' operation
     } else if (FilterOperation.IN == operation || FilterOperation.NOT_IN == operation) {
-      convertedValues.addAll(originalValues.stream().map(converterFunction).collect(Collectors.toList()));
+      convertedValues.addAll(originalValues.stream().map(converterFunction).toList());
     } else {
       //All other operation
       this.convertedSingleValue = converterFunction.apply(operationValues[0]);

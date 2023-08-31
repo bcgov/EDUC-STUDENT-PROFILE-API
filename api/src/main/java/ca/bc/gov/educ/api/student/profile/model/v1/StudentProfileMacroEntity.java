@@ -3,8 +3,8 @@ package ca.bc.gov.educ.api.student.profile.model.v1;
 import lombok.Data;
 import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.*;
-import javax.validation.constraints.PastOrPresent;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.PastOrPresent;
 import java.time.LocalDateTime;
 import java.util.UUID;
 

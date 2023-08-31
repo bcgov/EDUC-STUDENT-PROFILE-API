@@ -1,16 +1,19 @@
 package ca.bc.gov.educ.api.student.profile.model;
 
+import ca.bc.gov.educ.api.student.profile.StudentProfileApiResourceApplication;
 import ca.bc.gov.educ.api.student.profile.model.v1.DocumentEntity;
 import ca.bc.gov.educ.api.student.profile.model.v1.StudentProfileEntity;
 import ca.bc.gov.educ.api.student.profile.repository.v1.DocumentRepository;
+import ca.bc.gov.educ.api.student.profile.repository.v1.StudentProfileRepository;
 import ca.bc.gov.educ.api.student.profile.support.DocumentBuilder;
 import ca.bc.gov.educ.api.student.profile.support.RequestBuilder;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Optional;
@@ -18,14 +21,15 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
-@DataJpaTest
+@SpringBootTest(classes = {StudentProfileApiResourceApplication.class})
+@ActiveProfiles("test")
 public class ReqDocumentJpaTests {
 
     @Autowired
-    private TestEntityManager entityManager;
+    private DocumentRepository repository;
 
     @Autowired
-    private DocumentRepository repository;
+    private StudentProfileRepository studentProfileRepository;
 
     private DocumentEntity document;
 
@@ -33,17 +37,19 @@ public class ReqDocumentJpaTests {
 
     @Before
     public void setUp() {
-        this.request = new RequestBuilder()
-                                            .withoutRequestID().build();
+        this.request = studentProfileRepository.save(new RequestBuilder().withoutRequestID().build());
+
         this.document = new DocumentBuilder()
                             .withoutDocumentID()
                             .withRequest(this.request).build();
 
-        this.entityManager.persist(this.request);
-        this.entityManager.persist(this.document);
-        this.entityManager.flush();
-        //document = this.repository.save(document);
-        this.entityManager.clear();
+        document = this.repository.save(document);
+    }
+
+    @After
+    public void after() {
+        this.repository.deleteAll();
+        this.studentProfileRepository.deleteAll();
     }
 
     @Test

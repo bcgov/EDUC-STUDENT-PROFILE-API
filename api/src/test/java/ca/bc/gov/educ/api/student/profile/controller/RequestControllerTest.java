@@ -109,19 +109,19 @@ public class RequestControllerTest extends BaseReqControllerTest {
   }
 
   @Test
+  public void testRetrieveRequest_WithoutScope_ShouldReturnStatusForbidden() throws Exception {
+    this.mockMvc.perform(get(URL.BASE_URL + URL.STUDENT_PROFILE_REQUEST_ID, UUID.randomUUID())
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRONG_SCOPE"))))
+        .andDo(print()).andExpect(status().isForbidden());
+  }
+
+  @Test
   public void testRetrieveRequest_GivenValidID_ShouldReturnOkStatus() throws Exception {
     StudentProfileEntity entity = repository.save(mapper.toModel(getStudentProfileEntityFromJsonString()));
     this.mockMvc.perform(get(URL.BASE_URL + URL.STUDENT_PROFILE_REQUEST_ID, entity.getStudentRequestID())
       .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE"))))
             .andDo(print()).andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("$.studentRequestID").value(entity.getStudentRequestID().toString()));
   }
-
-//  @Test
-//  @WithMockOAuth2Scope(scope = "READ_PEN_REQUEST")
-//  public void testFindRequest_GivenOnlyPenInQueryParam_ShouldReturnOkStatusAndEntities() throws Exception {
-//    StudentProfileEntity entity = repository.save(mapper.toModel(getStudentProfileEntityFromJsonString()));
-//    this.mockMvc.perform(get("?pen" + entity.getPen())).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1))).andExpect(MockMvcResultMatchers.jsonPath("$[0].pen").value(entity.getPen()));
-//  }
 
   @Test
   public void testRetrieveRequest_GivenRandomDigitalIdAndStatusCode_ShouldReturnOkStatus() throws Exception {
@@ -206,13 +206,6 @@ public class RequestControllerTest extends BaseReqControllerTest {
       .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_PROFILE_STATUSES"))))
             .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
   }
-
-
-//  @Test
-//  public void testHealth_GivenServerIsRunning_ShouldReturnOK() throws Exception {
-//    this.mockMvc.perform(get("/health")).andDo(print()).andExpect(status().isOk())
-//            .andExpect(content().string(containsString("OK")));
-//  }
 
   @Test
   public void testDeleteRequest_GivenInvalidId_ShouldReturn404() throws Exception {

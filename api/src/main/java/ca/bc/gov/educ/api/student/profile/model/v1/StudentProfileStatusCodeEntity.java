@@ -3,9 +3,9 @@ package ca.bc.gov.educ.api.student.profile.model.v1;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.PastOrPresent;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
 import java.time.LocalDateTime;
 
 @Getter
@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 public class StudentProfileStatusCodeEntity {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "student_profile_request_status_code", unique = true, updatable = false)
   String studentRequestStatusCode;
 
