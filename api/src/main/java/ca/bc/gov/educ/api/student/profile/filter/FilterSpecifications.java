@@ -3,7 +3,7 @@ package ca.bc.gov.educ.api.student.profile.filter;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.util.EnumMap;
 import java.util.function.Function;
 @Service
