@@ -15,7 +15,7 @@ objects:
     spec:
       replicas: ${{MIN_REPLICAS}}
       selector:
-        matchLables:
+        matchLabels:
           app: "${APP_NAME}-${BRANCH}"
       strategy:
         type: RollingUpdate
@@ -132,7 +132,6 @@ objects:
           protocol: TCP
       selector:
         app: "${APP_NAME}-${BRANCH}"
-        deploymentconfig: "${APP_NAME}-${BRANCH}"
   - apiVersion: autoscaling/v2
     kind: HorizontalPodAutoscaler
     metadata:
