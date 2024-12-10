@@ -19,3 +19,9 @@ application-dev.properties
 .project
 .factorypath
 .vscode
+Settings.vim
+
+# Shell Environment
+.envrc
+.direnv
+shell.nix
