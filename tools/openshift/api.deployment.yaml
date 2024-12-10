@@ -4,10 +4,10 @@ kind: Template
 labels:
   template: "${REPO_NAME}-template"
 metadata:
-  name: "${REPO_NAME}-${BRANCH}-dc"
+  name: "${REPO_NAME}-${BRANCH}-deployment"
 objects:
-  - apiVersion: v1
-    kind: DeploymentConfig
+  - apiVersion: apps/v1
+    kind: Deployment
     metadata:
       labels:
         app: "${APP_NAME}-${BRANCH}"
@@ -15,11 +15,13 @@ objects:
     spec:
       replicas: ${{MIN_REPLICAS}}
       selector:
-        app: "${APP_NAME}-${BRANCH}"
-        deploymentConfig: "${APP_NAME}-${BRANCH}"
+        matchLables:
+          app: "${APP_NAME}-${BRANCH}"
       strategy:
-        resources: {}
-        type: Rolling
+        type: RollingUpdate
+        rollingUpdate:
+          maxUnavailable: 25%
+          maxSerge: 25%
       template:
         metadata:
           annotations:
@@ -29,7 +31,6 @@ objects:
             prometheus.io/scrape: 'true'
           labels:
             app: "${APP_NAME}-${BRANCH}"
-            deploymentConfig: "${APP_NAME}-${BRANCH}"
         spec:
           containers:
             - image: image-registry.openshift-image-registry.svc:5000/${NAMESPACE}/${REPO_NAME}-${BRANCH}:${TAG}
@@ -116,8 +117,6 @@ objects:
               configMap:
                 name: "${APP_NAME}-flb-sc-config-map"
       test: false
-      triggers:
-        - type: ConfigChange
   - apiVersion: v1
     kind: Service
     metadata:
@@ -140,8 +139,8 @@ objects:
       name: "${APP_NAME}-${BRANCH}-cpu-autoscaler"
     spec:
       scaleTargetRef:
-        apiVersion: apps.openshift.io/v1
-        kind: DeploymentConfig
+        apiVersion: apps/v1
+        kind: Deployment
         name: "${APP_NAME}-${BRANCH}"
         subresource: scale
       minReplicas: ${{MIN_REPLICAS}}

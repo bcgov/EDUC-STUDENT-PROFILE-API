@@ -5,6 +5,7 @@ DB_JDBC_CONNECT_STRING=$5
 DB_PWD=$6
 DB_USER=$7
 SPLUNK_TOKEN=$8
+BRANCH=$9
 
 TZVALUE="America/Vancouver"
 SOAM_KC_REALM_ID="master"
@@ -150,8 +151,8 @@ PARSER_CONFIG="
     Format      json
 "
 echo
-echo Creating config map "$APP_NAME"-config-map
-oc create -n "$OPENSHIFT_NAMESPACE"-"$envValue" configmap "$APP_NAME"-config-map \
+echo Creating config map "$APP_NAME-config-map"
+oc create -n "$OPENSHIFT_NAMESPACE-$envValue" configmap "$APP_NAME-config-map" \
   --from-literal=TZ=$TZVALUE \
   --from-literal=TOKEN_ISSUER_URL="https://$SOAM_KC/auth/realms/$SOAM_KC_REALM_ID" \
   --from-literal=NATS_URL="$NATS_URL" \
@@ -174,20 +175,20 @@ oc create -n "$OPENSHIFT_NAMESPACE"-"$envValue" configmap "$APP_NAME"-config-map
   --from-literal=NATS_MAX_RECONNECT=60 \
   --from-literal=PURGE_RECORDS_EVENT_AFTER_DAYS=365 \
   --from-literal=SCHEDULED_JOBS_PURGE_OLD_EVENT_RECORDS_CRON="@midnight" \
-  --dry-run -o yaml | oc apply -f -
+  --dry-run=client -o yaml | oc apply -f -
 
 echo
-echo Setting environment variables for "$APP_NAME"-$SOAM_KC_REALM_ID application
-oc -n "$OPENSHIFT_NAMESPACE"-"$envValue" set env \
-  --from=configmap/"$APP_NAME"-config-map dc/"$APP_NAME"-$SOAM_KC_REALM_ID
+echo Setting environment variables for "$APP_NAME-$BRANCH" application
+oc -n "$OPENSHIFT_NAMESPACE-$envValue" set env \
+  --from="configmap/$APP_NAME-config-map" "deployment/$APP_NAME-$BRANCH"
 
-echo Creating config map "$APP_NAME"-flb-sc-config-map
-oc create -n "$OPENSHIFT_NAMESPACE"-"$envValue" configmap \
+echo Creating config map "$APP_NAME-flb-sc-config-map"
+oc create -n "$OPENSHIFT_NAMESPACE-$envValue" configmap \
   "$APP_NAME"-flb-sc-config-map \
   --from-literal=fluent-bit.conf="$FLB_CONFIG" \
   --from-literal=parsers.conf="$PARSER_CONFIG" \
-  --dry-run -o yaml | oc apply -f -
+  --dry-run=client -o yaml | oc apply -f -
 
 echo Removing un-needed config entries
-oc -n "$OPENSHIFT_NAMESPACE"-"$envValue" set env \
-  dc/"$APP_NAME"-$SOAM_KC_REALM_ID KEYCLOAK_PUBLIC_KEY-
+oc -n "$OPENSHIFT_NAMESPACE-$envValue" set env \
+  "deployment/$APP_NAME-$BRANCH" KEYCLOAK_PUBLIC_KEY-
