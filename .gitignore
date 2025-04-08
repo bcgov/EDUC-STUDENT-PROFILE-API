@@ -25,3 +25,5 @@ Settings.vim
 .envrc
 .direnv
 shell.nix
+
+application-local.properties
