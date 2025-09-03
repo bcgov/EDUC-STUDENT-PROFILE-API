@@ -1,7 +1,9 @@
 name: API CI
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:  
+  schedule:
+    - cron: '0 0 1 */6 *'
   push:
     branches:
       - master
