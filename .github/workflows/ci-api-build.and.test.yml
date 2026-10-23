@@ -13,10 +13,14 @@ on:
       - 'Fix/*'
     paths:
       - 'api/**'
+      - 'Dockerfile'
+      - '.github/workflows/*'
   pull_request:
     branches: [ master ]
     paths:
       - 'api/**'
+      - 'Dockerfile'
+      - '.github/workflows/*'
 jobs:
   quality_profile:
 
@@ -33,7 +37,8 @@ jobs:
       - uses: actions/setup-java@v6
         with:
           java-version: 17
-          distribution: oracle
+          distribution: corretto
+          check-latest: true
       - uses: actions/cache@v6
         with:
           path: ~/.m2/repository
