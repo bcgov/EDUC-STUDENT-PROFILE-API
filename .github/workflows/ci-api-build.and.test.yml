@@ -21,8 +21,14 @@ on:
       - 'api/**'
       - 'Dockerfile'
       - '.github/workflows/*'
+permissions:
+  contents: read
+
 jobs:
   quality_profile:
+    permissions:
+      contents: read
+      pull-requests: read
 
     runs-on: ubuntu-22.04
 
